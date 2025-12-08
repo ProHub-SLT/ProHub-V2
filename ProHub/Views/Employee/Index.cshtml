@@ -1,0 +1,443 @@
+﻿@model List<ProHub.Models.Employee>
+@{
+    ViewData["Title"] = "Members";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 10;
+    int totalRecords = ViewBag.TotalRecords ?? 0;
+    string sortColumn = ViewBag.SortColumn ?? "EmpName";
+    string sortOrder = ViewBag.SortOrder ?? "asc";
+    string search = ViewBag.Search ?? "";
+    string groupFilter = ViewBag.GroupFilter;
+    int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+    var startRecord = totalRecords > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    var endRecord = Math.Min(currentPage * pageSize, totalRecords);
+    string currentAction = ViewContext.RouteData.Values["action"].ToString();
+}
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .data-table-wrapper {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: visible;
+    }
+
+    .table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+        .table thead {
+            background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        }
+
+            .table thead th {
+                color: white;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+                padding: 1rem 0.75rem;
+                border: none;
+                white-space: nowrap;
+                background: transparent !important;
+                vertical-align: middle;
+            }
+
+                .table thead th:nth-child(1) {
+                    width: 30%;
+                }
+
+                .table thead th:nth-child(2) {
+                    width: 30%;
+                }
+
+                .table thead th:nth-child(3) {
+                    width: 25%;
+                }
+
+                .table thead th:nth-child(4) {
+                    width: 5%;
+                }
+
+        .table tbody td {
+            padding: 0.875rem 0.75rem;
+            vertical-align: middle;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+        /* First column gray vibe with bold text */
+        .table tbody td:first-child {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+        /* Other columns white background */
+        .table tbody td:not(:first-child) {
+            background-color: white;
+        }
+
+        .table tbody td:last-child {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+        }
+
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+    }
+
+        .sortable:hover {
+            background-color: #1e90ff !important;
+        }
+
+    .sort-icon {
+        margin-left: 0.5rem;
+        transition: color 0.2s ease;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+    .toolbar-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.25rem;
+    }
+
+        .toolbar-wrapper:hover {
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.2s ease;
+        }
+
+    .btn-create-new {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    }
+
+        .btn-create-new:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+            color: #fff;
+        }
+
+        .btn-create-new:active {
+            transform: translateY(0px);
+            box-shadow: 0 1px 3px rgba(40, 167, 69, 0.2);
+        }
+
+        .btn-create-new i {
+            font-size: 0.95rem;
+        }
+
+    .btn-search {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 123, 255, 0.2);
+    }
+
+        .btn-search:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
+            color: white;
+        }
+    /* Filter Tabs Styling - Inline with Title */
+    .page-header-with-tabs {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 0.5rem 1.5rem;
+        background: transparent;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: 1px solid #e9ecef;
+        border-radius: 6px 6px 0 0;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+        top: 1px;
+    }
+
+        .filter-tab:hover {
+            background: #f8f9fa;
+            color: #495057;
+            border-color: #dee2e6;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-color: #007bff;
+            box-shadow: 0 -2px 6px rgba(0, 123, 255, 0.2);
+        }
+
+            .filter-tab.active:hover {
+                background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+                color: white;
+            }
+</style>
+<div class="container-fluid mt-4">
+    <!-- Page Header with Title and Filter Tabs in Same Line -->
+    <div class="page-header-with-tabs">
+        <h1 class="mb-4 text-primary">Members</h1>
+        <div class="filter-tabs">
+            <a asp-action="Index"
+               asp-route-sortColumn="@sortColumn"
+               asp-route-sortOrder="@sortOrder"
+               asp-route-page="1"
+               asp-route-pageSize="@pageSize"
+               asp-route-search="@search"
+               class="filter-tab @(groupFilter == null ? "active" : "")">
+                All Members
+            </a>
+            <a asp-action="DivisionalMembers"
+               asp-route-sortColumn="@sortColumn"
+               asp-route-sortOrder="@sortOrder"
+               asp-route-page="1"
+               asp-route-pageSize="@pageSize"
+               asp-route-search="@search"
+               class="filter-tab @(groupFilter == "Divisional Members" ? "active" : "")">
+                Divisional Members
+            </a>
+            <a asp-action="ViewOnly"
+               asp-route-sortColumn="@sortColumn"
+               asp-route-sortOrder="@sortOrder"
+               asp-route-page="1"
+               asp-route-pageSize="@pageSize"
+               asp-route-search="@search"
+               class="filter-tab @(groupFilter == "View Only Users" ? "active" : "")">
+                View Only Users
+            </a>
+        </div>
+    </div>
+    <!-- Toolbar -->
+    <div class="toolbar-wrapper mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a asp-action="Create" class="btn-create-new">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Create New</span>
+                </a>
+            </div>
+            <div class="col-lg-5 col-md-6">
+                <form method="get" asp-action="@currentAction" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
+                    <i class="bi bi-search text-muted me-2"></i>
+                    <input type="text" name="search" class="form-control border-0 shadow-none"
+                           placeholder="Search members..." value="@search" />
+                    <input type="hidden" name="sortColumn" value="@sortColumn" />
+                    <input type="hidden" name="sortOrder" value="@sortOrder" />
+                    <input type="hidden" name="page" value="1" />
+                    <input type="hidden" name="pageSize" value="@pageSize" />
+                    <button type="submit" class="btn btn-search btn-sm ms-2 px-3">
+                        Search
+                    </button>
+                </form>
+            </div>
+            <div class="col-lg-4 col-md-12 d-flex justify-content-lg-end justify-content-start">
+                <form method="get" asp-action="@currentAction" id="entriesForm"
+                      class="d-flex align-items-center bg-white rounded-3 px-3 py-2 border">
+                    <label class="me-2 text-nowrap text-secondary small fw-semibold">Show</label>
+                    <select name="pageSize" class="form-select form-select-sm border-0 shadow-none fw-semibold"
+                            onchange="this.form.submit()">
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="25" selected="@(pageSize == 25)">25</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
+                    </select>
+                    <span class="ms-2 small text-secondary">entries</span>
+                    <input type="hidden" name="search" value="@search" />
+                    <input type="hidden" name="sortColumn" value="@sortColumn" />
+                    <input type="hidden" name="sortOrder" value="@sortOrder" />
+                    <input type="hidden" name="page" value="1" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Table -->
+    <div class="data-table-wrapper">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="EmpName">
+                            Full Name
+                            <i class="bi sort-icon @(sortColumn == "EmpName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th class="sortable" data-column="EmpEmail">
+                            Email
+                            <i class="bi sort-icon @(sortColumn == "EmpEmail" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th data-column="EmpPhone">
+                            Contact
+
+                        </th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var e in Model)
+                        {
+                            <tr>
+                                <td title="@e.EmpName"><strong>@e.EmpName</strong></td>
+                                <td title="@e.EmpEmail">@e.EmpEmail</td>
+                                <td title="@e.EmpPhone">@e.EmpPhone</td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@e.EmpId" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p class="mb-0">No members found matching your search criteria</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Pagination -->
+    <div class="row mt-3 align-items-center">
+        <div class="col-md-6">
+            <p class="text-muted mb-0">Showing @startRecord to @endRecord of @totalRecords entries</p>
+        </div>
+        <div class="col-md-6">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end mb-0">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="@currentAction"
+                           asp-route-page="@(currentPage - 1)"
+                           asp-route-pageSize="@pageSize"
+                           asp-route-sortColumn="@sortColumn"
+                           asp-route-sortOrder="@sortOrder"
+                           asp-route-search="@search">Previous</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" asp-action="@currentAction"
+                               asp-route-page="@i"
+                               asp-route-pageSize="@pageSize"
+                               asp-route-sortColumn="@sortColumn"
+                               asp-route-sortOrder="@sortOrder"
+                               asp-route-search="@search">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="@currentAction"
+                           asp-route-page="@(currentPage + 1)"
+                           asp-route-pageSize="@pageSize"
+                           asp-route-sortColumn="@sortColumn"
+                           asp-route-sortOrder="@sortOrder"
+                           asp-route-search="@search">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.style.cursor = "pointer";
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-column');
+                const currentUrl = new URL(window.location.href);
+                const currentOrder = currentUrl.searchParams.get("sortOrder") || "asc";
+                const newOrder = (currentOrder === "asc" ? "desc" : "asc");
+                currentUrl.searchParams.set("sortColumn", column);
+                currentUrl.searchParams.set("sortOrder", newOrder);
+                currentUrl.searchParams.set("page", "1");
+                const searchParam = currentUrl.searchParams.get("search") || "";
+                const pageSize = currentUrl.searchParams.get("pageSize") || "10";
+                currentUrl.searchParams.set("search", searchParam);
+                currentUrl.searchParams.set("pageSize", pageSize);
+                window.location.href = currentUrl.toString();
+            });
+        });
+    </script>
+}

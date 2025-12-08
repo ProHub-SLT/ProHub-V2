@@ -1,0 +1,309 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ProHub.bundle.scp.css",
+      "PackagePath": "staticwebassets\\ProHub.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\css\\site.css",
+      "PackagePath": "staticwebassets\\css\\site.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\favicon.ico",
+      "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\images\\SltLogo.png",
+      "PackagePath": "staticwebassets\\images\\SltLogo.png"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\images\\bg.jpg",
+      "PackagePath": "staticwebassets\\images\\bg.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\js\\site.js",
+      "PackagePath": "staticwebassets\\js\\site.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\LICENSE",
+      "PackagePath": "staticwebassets\\lib\\bootstrap"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\LICENSE.md"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.min.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.min.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery\\LICENSE.txt",
+      "PackagePath": "staticwebassets\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery\\dist\\jquery.js",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.js"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\3606b77d-a819-4e84-a100-aa6635887971_9e49daca-7469-4f76-9af1-717a254b139a_InternalSolutions_20251204.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\3606b77d-a819-4e84-a100-aa6635887971_9e49daca-7469-4f76-9af1-717a254b139a_InternalSolutions_20251204.xlsx"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\3aac3a29-fca4-43da-9f29-b7734cd55a14_9e49daca-7469-4f76-9af1-717a254b139a_InternalSolutions_20251204.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\3aac3a29-fca4-43da-9f29-b7734cd55a14_9e49daca-7469-4f76-9af1-717a254b139a_InternalSolutions_20251204.xlsx"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\479777e8-a213-4b9f-b44d-b93a06c74684_InternalSolutions_20251204.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\479777e8-a213-4b9f-b44d-b93a06c74684_InternalSolutions_20251204.xlsx"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\68604d0a-aa9f-4e26-b48a-f27a58de2c72_Backup_Matrix_2025-11-10.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\68604d0a-aa9f-4e26-b48a-f27a58de2c72_Backup_Matrix_2025-11-10.xlsx"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\9e49daca-7469-4f76-9af1-717a254b139a_InternalSolutions_20251204.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\9e49daca-7469-4f76-9af1-717a254b139a_InternalSolutions_20251204.xlsx"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\9e6b7535-3208-4d90-913d-c570fb3b51d2_Backup_Matrix_2025-11-10.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\9e6b7535-3208-4d90-913d-c570fb3b51d2_Backup_Matrix_2025-11-10.xlsx"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\b6439c61-038f-4ea8-8d35-5e8a983aaf8c_Backup_Matrix_2025-11-14.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\b6439c61-038f-4ea8-8d35-5e8a983aaf8c_Backup_Matrix_2025-11-14.xlsx"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\bfafbae3-cc37-437c-8345-c373c1b37249_InternalSolutions_20251204.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\bfafbae3-cc37-437c-8345-c373c1b37249_InternalSolutions_20251204.xlsx"
+    },
+    {
+      "Id": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\wwwroot\\uploads\\documents\\c3f3628e-16a4-41d4-a3ae-be1d8e3f31b1_Backup_Matrix_2025-11-14.xlsx",
+      "PackagePath": "staticwebassets\\uploads\\documents\\c3f3628e-16a4-41d4-a3ae-be1d8e3f31b1_Backup_Matrix_2025-11-14.xlsx"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.ProHub.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.ProHub.props",
+      "PackagePath": "build\\ProHub.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.ProHub.props",
+      "PackagePath": "buildMultiTargeting\\ProHub.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.ProHub.props",
+      "PackagePath": "buildTransitive\\ProHub.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

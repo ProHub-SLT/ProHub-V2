@@ -1,0 +1,182 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+    Layout = null; // No navbar/footer
+    var userRole = ViewBag.UserRole ?? "View Only";
+    var userName = ViewBag.UserName ?? "User";
+}
+
+<!-- Lottie CDN -->
+<script src="https://unpkg.com/@@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    .access-denied-wrapper {
+        display: flex;
+        flex-direction: row;
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    /* Left side Lottie */
+    .access-denied-left {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e6f2ff;
+        padding: 40px;
+    }
+
+    .access-denied-left lottie-player {
+        width: 100%;
+        max-width: 500px;
+        height: auto;
+    }
+
+    /* Right side content */
+    .access-denied-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px 50px;
+        overflow-y: auto;
+    }
+
+    .access-denied-right .title-text {
+        font-size: 48px;
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 20px;
+    }
+
+    .access-denied-right .role-badge {
+        display: inline-block;
+        padding: 8px 24px;
+        border-radius: 50px;
+        background: rgba(13,110,253,0.1);
+        color: #0d6efd;
+        font-weight: 600;
+        font-size: 16px;
+        margin-bottom: 25px;
+    }
+
+    .access-denied-right .message {
+        font-size: 18px;
+        color: #495057;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .access-denied-right .btn-home {
+        background-color: #0d6efd;
+        color: white !important;
+        padding: 12px 28px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        width: fit-content;
+        margin-top: 20px;
+    }
+
+    .access-denied-right .btn-home:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(13,110,253,0.3);
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 992px) {
+        .access-denied-wrapper {
+            flex-direction: column;
+        }
+
+        .access-denied-left, .access-denied-right {
+            flex: unset;
+            width: 100%;
+            padding: 30px;
+        }
+
+        .access-denied-left lottie-player {
+            max-width: 300px;
+        }
+
+        .access-denied-right .title-text {
+            font-size: 36px;
+            text-align: center;
+        }
+
+        .access-denied-right .role-badge {
+            display: block;
+            margin: 0 auto 25px auto;
+        }
+
+        .access-denied-right .message {
+            text-align: center;
+        }
+
+        .access-denied-right .btn-home {
+            display: block;
+            margin: 20px auto 0 auto;
+        }
+    }
+</style>
+
+<div class="access-denied-wrapper">
+
+    <!-- Left side: Lottie animation -->
+    <div class="access-denied-left">
+        <lottie-player 
+            src="https://lottie.host/69b1c179-7f37-4550-8550-5f14ed13fe2b/2bYcuOWqS1.json"
+            background="transparent"
+            speed="1"
+            loop
+            autoplay>
+        </lottie-player>
+    </div>
+
+    <!-- Right side: content -->
+    <div class="access-denied-right">
+        <div class="access-denied-right-content">
+            <div class="title-text">Access Denied</div>
+            <div class="role-badge">@userRole Access</div>
+
+            <p class="message">
+                Hello <strong>@userName</strong>,
+                You do not have permission to perform this action because your current role is <strong>@userRole</strong>.
+            </p>
+
+            @if (userRole == "View Only")
+            {
+                <p class="message">
+                    <strong>View Only</strong> users can browse data only.<br />
+                    You need <strong>Developer</strong> or <strong>Administrator</strong> access to create, edit, or delete records.
+                </p>
+            }
+            else if (userRole == "Developer")
+            {
+                <p class="message">
+                    You can modify only the records you created yourself.<br />
+                    This record belongs to another user.
+                </p>
+            }
+
+            <p class="message">
+                If you believe this is a mistake, please contact your administrator.
+            </p>
+
+            <a href="/Home/" class="btn-home">Return to Dashboard</a>
+        </div>
+    </div>
+
+</div>

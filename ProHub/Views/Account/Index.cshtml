@@ -1,0 +1,638 @@
+﻿@{
+    ViewData["Title"] = "Employee Login";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PROHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 30%, #3498db 70%, #1a2a3a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* === ENHANCED ANIMATED BACKGROUND === */
+        #animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,182,241,0.15) 0%, rgba(57,181,74,0.05) 70%, transparent 100%);
+            filter: blur(15px);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .floating-shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+            background: radial-gradient(circle, rgba(0,182,241,0.2) 0%, rgba(57,181,74,0.1) 70%, transparent 100%);
+        }
+
+        .floating-shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            left: 80%;
+            animation-delay: -5s;
+            background: radial-gradient(circle, rgba(57,181,74,0.2) 0%, rgba(0,182,241,0.1) 70%, transparent 100%);
+        }
+
+        .floating-shape:nth-child(3) {
+            width: 400px;
+            height: 400px;
+            top: 30%;
+            left: 70%;
+            animation-delay: -10s;
+            background: radial-gradient(circle, rgba(0,182,241,0.15) 0%, rgba(57,181,74,0.05) 70%, transparent 100%);
+        }
+
+        .floating-shape:nth-child(4) {
+            width: 250px;
+            height: 250px;
+            top: 70%;
+            left: 10%;
+            animation-delay: -15s;
+            background: radial-gradient(circle, rgba(57,181,74,0.15) 0%, rgba(0,182,241,0.05) 70%, transparent 100%);
+        }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(20px, 30px) rotate(5deg);
+            }
+            50% {
+                transform: translate(-15px, 20px) rotate(-5deg);
+            }
+            75% {
+                transform: translate(10px, -15px) rotate(3deg);
+            }
+        }
+
+        .gradient-mesh {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(57, 181, 74, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(0, 182, 241, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 40% 80%, rgba(57, 181, 74, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 60% 20%, rgba(0, 182, 241, 0.1) 0%, transparent 40%);
+            animation: meshMove 30s infinite alternate ease-in-out;
+        }
+
+        @@keyframes meshMove {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+            100% {
+                transform: scale(1.1) rotate(1deg);
+            }
+        }
+
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* === ALL YOUR ORIGINAL STYLES (unchanged except minor z-index) === */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            max-width: 1300px;
+            width: 100%;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        .left-section {
+            color: white;
+            padding: 40px;
+            animation: slideInLeft 0.8s ease-out;
+        }
+        @@keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 60px;
+            animation: fadeIn 1s ease-out;
+        }
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .logo {
+            width: 140px;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: pulse 3s infinite ease-in-out;
+            margin-right: 25px;
+        }
+        @@keyframes pulse {
+            0%, 100% { box-shadow: 0 15px 50px rgba(0,0,0,0.3), 0 0 0 0 rgba(52,152,219,0.4); }
+            50% { box-shadow: 0 15px 60px rgba(0,0,0,0.4), 0 0 0 20px rgba(52,152,219,0); }
+        }
+        .logo img { width: 75px; height: 75px; }
+        .prohub-brand {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00B6F1 0%, #39B54A 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+            margin-bottom: 5px;
+            letter-spacing: -1px;
+        }
+        .prohub-tagline {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .main-title {
+            font-size: 3.8rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #39B54A, #00B6F1, #39B54A);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient 4s ease infinite;
+            line-height: 1.2;
+        }
+        @@keyframes gradient {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+        .subtitle {
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.7;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        @@keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .decorative-line {
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, #39B54A, #00B6F1);
+            margin: 40px 0;
+            border-radius: 3px;
+            animation: expandLine 1s ease-out 0.5s both;
+        }
+        @@keyframes expandLine {
+            from { width: 0; }
+            to { width: 120px; }
+        }
+
+        /* Login Card - unchanged */
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 30px;
+            padding: 0;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            animation: slideInRight 0.8s ease-out;
+            position: relative;
+            max-width: 550px; /* 🔥 add this */
+            margin: auto;
+        }
+        @@keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(52,152,219,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        .login-header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+            animation: rotate 10s linear infinite;
+        }
+        @@keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .login-header h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .login-header p {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+        .auth-section {
+            padding: 50px 40px;
+            text-align: center;
+            background: url('/images/bg.jpg') no-repeat center center / cover;
+            background-attachment: fixed;
+            position: relative;
+        }
+        .auth-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.3);
+            z-index: 0;
+        }
+        .auth-section > * { position: relative; z-index: 1; }
+        .auth-icon {
+            width: 95px;
+            height: 95px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 35px;
+            box-shadow: 0 15px 40px rgba(52,152,219,0.4);
+            animation: bounce 2s infinite;
+        }
+        @@keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .auth-icon::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #3498db;
+            animation: ripple 2s infinite;
+        }
+        @@keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .auth-icon i { font-size: 2.8rem; color: white; z-index: 1; }
+        .auth-title { font-size: 1.8rem; font-weight: 600; color: #2c3e50; margin-bottom: 15px; }
+        .auth-subtitle { color: #5a6c7d; margin-bottom: 40px; font-size: 1.05rem; }
+        .azure-btn {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 22px 55px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 8px 25px rgba(52,152,219,0.3);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+        .azure-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #39B54A, #00B6F1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+            z-index: 0;
+        }
+        .azure-btn:hover::before {
+            width: 300%;
+            height: 300%;
+        }
+        .azure-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(52,152,219,0.5);
+        }
+        .azure-btn i { 
+            font-size: 1.6rem; 
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        .azure-btn span {
+            position: relative;
+            z-index: 1;
+        }
+        .azure-btn:hover i { transform: rotate(360deg); }
+        .support-link {
+            margin-top: 40px;
+            color: #5a6c7d;
+            font-size: 0.98rem;
+        }
+        .support-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+        }
+        .support-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #3498db;
+            transition: width 0.3s ease;
+        }
+        .support-link a:hover::after { width: 100%; }
+        .support-link a:hover { color: #39B54A; }
+
+        /* Responsive */
+        @@media (max-width: 1024px) {
+            .container { grid-template-columns: 1fr; gap: 50px; }
+            .left-section { text-align: center; }
+            .logo-container { justify-content: center; }
+            .decorative-line { margin: 40px auto; }
+        }
+        @@media (max-width: 768px) {
+            .main-title { font-size: 2.8rem; }
+            .prohub-brand { font-size: 2.5rem; }
+            .login-header { padding: 40px 30px; }
+            .login-header h2 { font-size: 2rem; }
+            .auth-section { padding: 40px 30px; }
+            .azure-btn { padding: 18px 40px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENHANCED ANIMATED BACKGROUND -->
+    <div id="animated-bg">
+        <div class="gradient-mesh"></div>
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+        <div class="particles-container" id="particles-container"></div>
+    </div>
+
+    <div class="container">
+        <div class="left-section">
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="/images/SltLogo.png" alt="PROHUB Logo">
+                </div>
+                <div class="logo-text-section">
+                    <div class="prohub-brand">PROHUB</div>
+                    <div class="prohub-tagline">SLT Digital Platform</div>
+                </div>
+            </div>
+            <h1 class="main-title">Employee Portal</h1>
+            <div class="decorative-line"></div>
+            <p class="subtitle">Comprehensive platform for project management,<br />task tracking, and team collaboration</p>
+        </div>
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Employee Login</h2>
+                <p>Access your dashboard and workspace</p>
+            </div>
+            <div class="auth-section">
+                <div class="auth-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h3 class="auth-title">Microsoft Account Authentication</h3>
+                <p class="auth-subtitle">Use your organization Microsoft account</p>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a href="@Url.Action("Index", "Home")" class="azure-btn">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Go to Dashboard</span>
+                    </a>
+                }
+                else
+                {
+                    <a asp-area="MicrosoftIdentity"
+                       asp-controller="Account"
+                       asp-action="SignIn"
+                       class="azure-btn">
+                        <i class="bi bi-microsoft"></i>
+                        <span>Login with Microsoft</span>
+                    </a>
+                }
+                <div class="support-link">
+                    Having trouble? <a href="/support">Contact IT Support</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Particle System -->
+    <script>
+        // Enhanced particle system with floating geometric shapes
+        const particlesContainer = document.getElementById('particles-container');
+        const canvas = document.createElement('canvas');
+        particlesContainer.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particlesArray = [];
+        const connections = [];
+        const mouse = { x: null, y: null, radius: 150 };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = Math.random() > 0.5 ? 
+                    `rgba(0, 182, 241, ${Math.random() * 0.5 + 0.3})` : 
+                    `rgba(57, 181, 74, ${Math.random() * 0.5 + 0.3})`;
+                this.originalSize = this.size;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                // Bounce off walls
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+                
+                // Mouse interaction
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < mouse.radius) {
+                    this.size = this.originalSize * 2;
+                    const force = (mouse.radius - distance) / mouse.radius;
+                    const angle = Math.atan2(dy, dx);
+                    this.x -= Math.cos(angle) * force * 2;
+                    this.y -= Math.sin(angle) * force * 2;
+                } else {
+                    this.size = this.originalSize;
+                }
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add glow effect
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function init() {
+            particlesArray.length = 0;
+            const numberOfParticles = (canvas.width * canvas.height) / 12000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function connectParticles() {
+            const maxDistance = 120;
+            
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    const dx = particlesArray[a].x - particlesArray[b].x;
+                    const dy = particlesArray[a].y - particlesArray[b].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        const opacity = 1 - distance / maxDistance;
+                        
+                        // Create gradient for connection lines
+                        const gradient = ctx.createLinearGradient(
+                            particlesArray[a].x, particlesArray[a].y,
+                            particlesArray[b].x, particlesArray[b].y
+                        );
+                        
+                        gradient.addColorStop(0, particlesArray[a].color);
+                        gradient.addColorStop(1, particlesArray[b].color);
+                        
+                        ctx.strokeStyle = gradient;
+                        ctx.globalAlpha = opacity * 0.3;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particlesArray.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            connectParticles();
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize and start animation
+        init();
+        animate();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

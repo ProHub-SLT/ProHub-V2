@@ -1,0 +1,158 @@
+﻿@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.OpenIdConnect
+@using Microsoft.Identity.Web
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PROHUB Home</title>
+
+
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: url('/images/bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            background-color: #ffffff;
+            position: relative;
+        }
+
+            /* Blur overlay */
+            body::before {
+                content: "";
+                position: absolute; /* changed from fixed */
+                top: 0;
+                left: 0;
+                width: 100%;
+                min-height: 100%; /* ensures it stretches with content */
+                background: inherit;
+                filter: blur(1px);
+                z-index: -1;
+            }
+        /* Hero Section */
+        .hero-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-top: 80px;
+            overflow: hidden;
+        }
+
+            .hero-section::before {
+                content: '';
+                position: absolute;
+                width: 800px;
+                height: 800px;
+                background: radial-gradient(circle, rgba(102, 126, 234, 0.08) 0%, transparent 70%);
+                top: -200px;
+                right: -200px;
+                animation: float 20s ease-in-out infinite;
+            }
+
+            .hero-section::after {
+                content: '';
+                position: absolute;
+                width: 600px;
+                height: 600px;
+                background: radial-gradient(circle, rgba(118, 75, 162, 0.08) 0%, transparent 70%);
+                bottom: -100px;
+                left: -100px;
+                animation: float 15s ease-in-out infinite reverse;
+            }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(50px, 50px) scale(1.1);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 900px;
+            padding: 0 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-title {
+            font-size: clamp(38px, 7vw, 80px);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 24px);
+            color: #475569;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .hello-user {
+            font-size: 22px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 10px;
+            animation: fadeInUp 1.2s ease;
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .hero-section {
+                padding-top: 100px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="hero-section">
+        <div class="hero-content">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="hello-user text-capitalize">
+                    👋 Hello, @ViewBag.DisplayName
+                </div>
+            }
+
+            <h1 class="hero-title">Your Digital Workspace, Elevated</h1>
+            <p class="hero-subtitle">Streamline collaboration, boost productivity, and transform how your team works with PROHUB's integrated platform.</p>
+        </div>
+    </section>
+</body>
+</html>

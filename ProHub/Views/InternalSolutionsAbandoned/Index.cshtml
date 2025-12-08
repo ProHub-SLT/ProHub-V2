@@ -1,0 +1,470 @@
+﻿@model List<ProHub.Models.InternalPlatform>
+
+@{
+    ViewData["Title"] = "Internal Solutions Abandoned";
+    var pageSize = ViewBag.PageSize ?? 10;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalRecords = ViewBag.TotalRecords ?? Model.Count;
+    var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+    var startRecord = (currentPage - 1) * pageSize + 1;
+    var endRecord = Math.Min(currentPage * pageSize, totalRecords);
+    string sortColumn = ViewBag.SortColumn ?? "PlatformName";
+    string sortOrder = ViewBag.SortOrder ?? "asc";
+    string searchTerm = ViewBag.SearchTerm ?? "";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .data-table-wrapper {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    /* Table container - no horizontal scroll */
+    .table-responsive {
+        overflow-x: visible;
+    }
+
+    /* Table layout */
+    .table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+        .table thead {
+            background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        }
+
+            .table thead th {
+                color: white;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+                padding: 1rem 0.75rem;
+                border: none;
+                white-space: nowrap;
+                background: transparent !important;
+                vertical-align: middle;
+            }
+
+                /* Set specific column widths */
+                .table thead th:nth-child(1) {
+                    width: 20%;
+                }
+
+                .table thead th:nth-child(2) {
+                    width: 18%;
+                }
+
+                .table thead th:nth-child(3) {
+                    width: 12%;
+                }
+
+                .table thead th:nth-child(4) {
+                    width: 12%;
+                }
+
+                .table thead th:nth-child(5) {
+                    width: 32%;
+                }
+
+                .table thead th:nth-child(6) {
+                    width: 6%;
+                }
+
+        .table tbody td {
+            padding: 0.875rem 0.75rem;
+            vertical-align: middle;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        /* First column gray vibe */
+        .table tbody td:first-child {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+
+        /* Other columns green vibe */
+        .table tbody td:not(:first-child) {
+            background-color: #f0fff4;
+        }
+
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+    }
+
+        .sortable:hover {
+            background-color: #1e90ff !important;
+        }
+
+    .sort-icon {
+        margin-left: 0.5rem;
+        transition: color 0.2s ease;
+    }
+
+    .badge-custom {
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .badge-success-custom {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge-warning-custom {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-info-custom {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .badge-secondary-custom {
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+    /* Toolbar Styling */
+    .toolbar-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.25rem;
+    }
+
+        .toolbar-wrapper:hover {
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.2s ease;
+        }
+
+    .view-details-btn {
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #28a745;
+        color: #28a745;
+        background-color: #f8fff9;
+        border-radius: 50%;
+        transition: all 0.25s ease-in-out;
+        text-decoration: none;
+    }
+
+        .view-details-btn:hover {
+            background-color: #28a745;
+            color: #fff;
+            transform: scale(1.08);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .view-details-btn i {
+            font-size: 0.8rem;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .view-details-btn:hover i {
+            transform: scale(1.15);
+        }
+
+    .btn-export-excel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.5rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-export-excel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-export-excel:hover::before {
+            left: 100%;
+        }
+
+        .btn-export-excel i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-export-excel:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+            color: #fff;
+        }
+
+            .btn-export-excel:hover i {
+                transform: scale(1.15) rotate(-5deg);
+            }
+
+        .btn-export-excel:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+    /* Date icon alignment */
+    .table tbody td i.bi-calendar3 {
+        margin-right: 0.35rem;
+        vertical-align: middle;
+    }
+
+    /* Last Comment column - allow wrapping */
+    .table tbody td:nth-child(5) {
+        white-space: normal;
+        word-wrap: break-word;
+        overflow: visible;
+        text-overflow: clip;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4 text-primary">Internal Solutions - Abandoned</h1>
+
+    <!-- Inline Toolbar -->
+    <div class="toolbar-wrapper mb-4">
+        <div class="row g-3 align-items-center">
+            <!-- Search -->
+            <div class="col-lg-5 col-md-6">
+                <form method="get" asp-action="Index" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
+                    <i class="bi bi-search text-muted me-2"></i>
+                    <input type="text" name="search" class="form-control border-0 shadow-none"
+                           placeholder="Search all records..." value="@searchTerm" />
+                    <input type="hidden" name="pageSize" value="@pageSize" />
+                    <button type="submit" class="btn btn-primary btn-sm ms-2 px-3">
+                        Search
+                    </button>
+                </form>
+            </div>
+
+            <!-- Empty Column -->
+            <div class="col-lg-3 col-md-4 col-sm-6">
+            </div>
+
+            <!-- Entries Dropdown -->
+            <div class="col-lg-4 col-md-12 d-flex justify-content-lg-end justify-content-start">
+                <form method="get" asp-action="Index" id="entriesForm"
+                      class="d-flex align-items-center bg-white rounded-3 px-3 py-2 border">
+                    <label class="me-2 text-nowrap text-secondary small fw-semibold">Show</label>
+                    <select name="pageSize" class="form-select form-select-sm border-0 shadow-none fw-semibold"
+                            onchange="this.form.submit()">
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="25" selected="@(pageSize == 25)">25</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
+                    </select>
+                    <span class="ms-2 small text-secondary">entries</span>
+                    <input type="hidden" name="search" value="@searchTerm" />
+                    <input type="hidden" name="page" value="1" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="data-table-wrapper">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="PlatformName">
+                            Platform Name
+                            <i class="bi sort-icon @(sortColumn == "PlatformName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th class="sortable" data-column="DevelopedBy">
+                            Developed By
+                            <i class="bi sort-icon @(sortColumn == "DevelopedBy" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th data-column="SDLCPhase">
+                            SDLC Phase
+                        </th>
+                        <th class="sortable" data-column="StartDate">
+                            Start Date
+                            <i class="bi sort-icon @(sortColumn == "StartDate" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th>
+                            Last Comment
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td title="@item.PlatformName"><strong>@item.PlatformName</strong></td>
+                                <td title="@(item.DevelopedBy?.EmpName ?? "N/A")">@(item.DevelopedBy?.EmpName ?? "N/A")</td>
+                                <td>
+                                    <span class="badge-custom badge-success-custom">
+                                        @(item.SDLCPhase?.Phase ?? "N/A")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (item.StartDate.HasValue)
+                                    {
+                                        <i class="bi bi-calendar3 text-muted"></i>
+                                        @item.StartDate.Value.ToString("yyyy-MM-dd")
+                                    }
+                                </td>
+                                <td title="@(item.ProjectComments?.FirstOrDefault()?.Comment ?? "")">
+                                    @(item.ProjectComments?.FirstOrDefault()?.Comment ?? "")
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                       class="view-details-btn"
+                                       title="View Details">
+                                        <i class="bi bi-eye fs-5"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p class="mb-0">No abandoned solutions found</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Export -->
+    <div class="mt-3 d-flex justify-content-start gap-2">
+        <a href="@Url.Action("ExportAllToExcel")" class="btn-export-excel" title="Export All to Excel">
+            <i class="bi bi-file-earmark-excel"></i>
+            <span>Export All</span>
+        </a>
+    </div>
+
+    <!-- Pagination -->
+    <div class="row mt-3 align-items-center">
+        <div class="col-md-6">
+            <p class="text-muted mb-0">Showing @startRecord to @endRecord of @totalRecords entries</p>
+        </div>
+        <div class="col-md-6">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end mb-0">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="?page=@(currentPage - 1)&pageSize=@pageSize&sortColumn=@sortColumn&sortOrder=@sortOrder&search=@searchTerm">Previous</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="?page=@i&pageSize=@pageSize&sortColumn=@sortColumn&sortOrder=@sortOrder&search=@searchTerm">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="?page=@(currentPage + 1)&pageSize=@pageSize&sortColumn=@sortColumn&sortOrder=@sortOrder&search=@searchTerm">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Server-side sorting
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.style.cursor = "pointer";
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-column');
+                const currentUrl = new URL(window.location.href);
+                const currentOrder = currentUrl.searchParams.get("sortOrder") || "asc";
+                const newOrder = (currentOrder === "asc" ? "desc" : "asc");
+                currentUrl.searchParams.set("sortColumn", column);
+                currentUrl.searchParams.set("sortOrder", newOrder);
+                currentUrl.searchParams.set("page", "1");
+                const searchParam = currentUrl.searchParams.get("search") || "";
+                const pageSize = currentUrl.searchParams.get("pageSize") || "10";
+                currentUrl.searchParams.set("search", searchParam);
+                currentUrl.searchParams.set("pageSize", pageSize);
+                window.location.href = currentUrl.toString();
+            });
+        });
+    </script>
+}

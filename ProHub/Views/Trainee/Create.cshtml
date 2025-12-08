@@ -1,0 +1,567 @@
+﻿@model ProHub.Models.Trainees
+@{
+    ViewData["Title"] = "Create Trainee";
+}
+
+
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+        .form-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .form-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+    .form-body {
+        padding: 2.5rem;
+    }
+
+    .form-group-modern {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-label-modern {
+        display: block;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+        box-sizing: border-box; /* Important for mobile width calculation */
+    }
+
+        .form-control-modern:focus {
+            outline: none;
+            border-color: #28A745;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+    .form-label-modern .required {
+        color: #dc3545;
+        margin-left: 0.25rem;
+    }
+
+    select.form-control-modern {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232d3748' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .input-icon-wrapper .form-control-modern {
+            padding-left: 2.75rem;
+        }
+
+    .form-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-modern-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        cursor: pointer;
+    }
+
+        .btn-modern-primary:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+        }
+
+    .btn-modern-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .btn-modern-secondary:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+            transform: translateY(-1px);
+        }
+
+    /* Grid Layout */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .field-description {
+        background: #f0f9ff;
+        border-left: 3px solid #007BFF;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #2d3748;
+    }
+
+    /* Success Popup */
+    .success-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: all 0.3s ease;
+        padding: 1rem;
+    }
+
+        .success-popup.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+    .success-popup-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        animation: popupFadeIn 0.4s ease forwards;
+        max-width: 420px;
+        width: 100%;
+        border-top: 6px solid #28a745;
+    }
+
+        .success-popup-content i {
+            font-size: 3rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .success-popup-content button {
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .success-popup-content button:hover {
+                background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            }
+
+    /* --- MOBILE RESPONSIVENESS START --- */
+
+    /* 1. Tablet and smaller (Break the grid to 1 column) */
+    @@media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .form-container {
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .container-fluid.mt-4.mb-5 {
+            padding-left: 0;
+            padding-right: 0;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        .form-body {
+            padding: 1.5rem;
+        }
+
+        .form-header {
+            padding: 1.5rem;
+        }
+
+        .form-footer {
+            padding: 1.5rem;
+        }
+    }
+
+    /* 2. Mobile Phones (Stack buttons) */
+    @@media (max-width: 576px) {
+        .form-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .form-body {
+            padding: 1.25rem 1rem;
+        }
+
+        .form-footer {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.25rem 1rem;
+        }
+
+        .btn-modern-primary,
+        .btn-modern-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .success-popup-content {
+            padding: 2rem 1.5rem;
+        }
+    }
+    /* --- MOBILE RESPONSIVENESS END --- */
+</style>
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="bi bi-person-plus-fill me-2"></i>@ViewData["Title"]</h2>
+            <p>Enter details to register a new trainee into the system</p>
+        </div>
+
+        <form asp-action="Create" method="post" id="traineeForm">
+            @Html.AntiForgeryToken()
+            <div class="form-body">
+                <div class="field-description">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Fields marked with <span class="text-danger">*</span> are required
+                </div>
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="Trainee_Name" class="form-label-modern">
+                            <i class="bi bi-person me-1"></i> Full Name <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-vcard"></i>
+                            <input asp-for="Trainee_Name" class="form-control-modern" placeholder="Enter full name" />
+                        </div>
+                        <span asp-validation-for="Trainee_Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Trainee_NIC" class="form-label-modern">
+                            <i class="bi bi-card-heading me-1"></i> NIC Number <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-badge"></i>
+                            <input asp-for="Trainee_NIC" class="form-control-modern" placeholder="Enter NIC" />
+                        </div>
+                        <span asp-validation-for="Trainee_NIC" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="Trainee_Phone" class="form-label-modern">
+                            <i class="bi bi-telephone me-1"></i> Mobile Number <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-phone"></i>
+                            <input asp-for="Trainee_Phone" class="form-control-modern" placeholder="Enter mobile number" />
+                        </div>
+                        <span asp-validation-for="Trainee_Phone" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Trainee_Email" class="form-label-modern">
+                            <i class="bi bi-envelope me-1"></i> Email Address <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-at"></i>
+                            <input asp-for="Trainee_Email" class="form-control-modern" placeholder="Enter email address" />
+                        </div>
+                        <span asp-validation-for="Trainee_Email" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="Trainee_HomeAddress" class="form-label-modern">
+                            <i class="bi bi-geo-alt me-1"></i> Home Address <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-house-door"></i>
+                            <input asp-for="Trainee_HomeAddress" class="form-control-modern" placeholder="Enter home address/city" />
+                        </div>
+                        <span asp-validation-for="Trainee_HomeAddress" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Institute" class="form-label-modern">
+                            <i class="bi bi-building me-1"></i> Institute <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-mortarboard"></i>
+                            <input asp-for="Institute" class="form-control-modern" placeholder="Enter institute" />
+                        </div>
+                        <span asp-validation-for="Institute" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="Training_StartDate" class="form-label-modern">
+                            <i class="bi bi-calendar-event me-1"></i> Training Start Date <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-plus"></i>
+                            <input asp-for="Training_StartDate" type="date" class="form-control-modern" id="StartDate" />
+                        </div>
+                        <span asp-validation-for="Training_StartDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Training_EndDate" class="form-label-modern">
+                            <i class="bi bi-calendar-check me-1"></i>Training End Date <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-x"></i>
+                            <input asp-for="Training_EndDate" type="date" class="form-control-modern" id="EndDate" />
+                        </div>
+                        <span asp-validation-for="Training_EndDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="field_of_spec_id" class="form-label-modern">
+                            <i class="bi bi-stars me-1"></i> Field of Specialization <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-briefcase"></i>
+                            <select asp-for="field_of_spec_id" class="form-control-modern" asp-items="ViewBag.CustomerContacts">
+                                <option value="">Please select specialization</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="field_of_spec_id" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Supervisor" class="form-label-modern">
+                            <i class="bi bi-person-workspace me-1"></i> Supervisor <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-check"></i>
+                            <select asp-for="Supervisor" class="form-control-modern" asp-items="ViewBag.Employees">
+                                <option value="">Please select supervisor</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="Supervisor" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="Languages_Known" class="form-label-modern">
+                            <i class="bi bi-translate me-1"></i> Languages Known <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-chat-text"></i>
+                            <input asp-for="Languages_Known" class="form-control-modern" placeholder="Ex: Python, Java" />
+                        </div>
+                        <span asp-validation-for="Languages_Known" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Target_Date" class="form-label-modern">
+                            <i class="bi bi-flag me-1"></i> Target Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-range"></i>
+                            <input asp-for="Target_Date" type="date" class="form-control-modern" id="TargetDate" />
+                        </div>
+                        <span asp-validation-for="Target_Date" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group-modern">
+                    <label asp-for="AssignedWork_Desc" class="form-label-modern">
+                        <i class="bi bi-file-text me-1"></i> Assigned Work Details
+                    </label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-justify-left" style="top: 1.5rem;"></i>
+                        <textarea asp-for="AssignedWork_Desc" class="form-control-modern" rows="3" placeholder="Describe the assigned work" style="padding-top: 1rem;"></textarea>
+                    </div>
+                    <span asp-validation-for="AssignedWork_Desc" class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <div class="form-footer">
+                <a asp-action="Index" class="btn-modern-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn-modern-primary">
+                    <i class="bi bi-check-circle"></i> Create Trainee
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="successPopup" class="success-popup hidden">
+    <div class="success-popup-content">
+        <i class="bi bi-check-circle-fill"></i>
+        <h4>Trainee Created!</h4>
+        <p>The new trainee has been successfully registered in the system.</p>
+        <button id="popupCloseBtn">OK</button>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('traineeForm');
+
+            // --- 1. Form Submit Validation Highlight Logic ---
+            form.addEventListener('submit', function (e) {
+                // Note: jQuery Unobtrusive Validation handles the actual prevention
+                const requiredFields = this.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!field.value) {
+                        field.style.borderColor = '#dc3545';
+                    } else {
+                        field.style.borderColor = '#e2e8f0';
+                    }
+                });
+            });
+
+            // --- 2. Date Logic ---
+            const startDate = document.getElementById('StartDate');
+            const endDate = document.getElementById('EndDate');
+            const targetDate = document.getElementById('TargetDate');
+            const today = new Date().toISOString().split('T')[0];
+
+            // Set Min Date to Today (Optional)
+            if (startDate) startDate.min = today;
+            if (targetDate) targetDate.min = today;
+
+            // Update End Date & Target Date min values based on Start Date
+            if (startDate) {
+                startDate.addEventListener('change', function () {
+                    if (this.value) {
+                        if (targetDate) targetDate.min = this.value;
+                        if (endDate) endDate.min = this.value;
+                    }
+                });
+            }
+
+            // --- 3. Popup Logic ---
+            const successMessage = '@TempData["SuccessMessage"]';
+            if (successMessage) {
+                const popup = document.getElementById('successPopup');
+                if(popup) popup.classList.remove('hidden');
+            }
+
+            const closeBtn = document.getElementById('popupCloseBtn');
+            if(closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    document.getElementById('successPopup').classList.add('hidden');
+                    window.location.href = '@Url.Action("Index", "Trainee")';
+                });
+            }
+        });
+    </script>
+}

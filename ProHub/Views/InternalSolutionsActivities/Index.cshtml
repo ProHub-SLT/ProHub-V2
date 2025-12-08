@@ -1,0 +1,735 @@
+﻿@model List<PROHUB.Models.ProjectActivity>
+
+@{
+    ViewData["Title"] = "Internal project activities";
+
+    // --- Pagination & Sorting Variables ---
+    int pageSize = ViewData["PageSize"] != null ? Convert.ToInt32(ViewData["PageSize"]) : 10;
+    int currentPage = ViewData["CurrentPage"] != null ? Convert.ToInt32(ViewData["CurrentPage"]) : 1;
+    int totalPages = ViewData["TotalPages"] != null ? Convert.ToInt32(ViewData["TotalPages"]) : 1;
+    int totalEntries = ViewData["TotalEntries"] != null ? Convert.ToInt32(ViewData["TotalEntries"]) : 0;
+
+    int startRecord = totalEntries > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    int endRecord = Math.Min(currentPage * pageSize, totalEntries);
+
+    // Get Search, Sort Column, and Order from Query String
+    string searchTerm = Context.Request.Query["search"];
+    string sortColumn = Context.Request.Query["sortColumn"].ToString();
+    if (string.IsNullOrEmpty(sortColumn)) sortColumn = "CreatedTime";
+    string sortOrder = Context.Request.Query["sortOrder"].ToString();
+    if (string.IsNullOrEmpty(sortOrder)) sortOrder = "desc";
+
+    // Helper to toggle sort order for headers
+    Func<string, string> ToggleSortOrder = column =>
+    {
+        if (string.Equals(column, sortColumn, StringComparison.OrdinalIgnoreCase))
+        {
+            return sortOrder == "asc" ? "desc" : "asc";
+        }
+        return "asc";
+    };
+
+    // Helper to build URLs preserving Search, Sort, and Page
+    string BuildUrl(int page, string sortCol, string sortOrd)
+    {
+        return Url.Action("Index", new { page = page, pageSize = pageSize, search = searchTerm, sortColumn = sortCol, sortOrder = sortOrd });
+    }
+}
+
+<style>
+    /* --- Main Layout & Background --- */
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    /* --- Toolbar & Buttons --- */
+    .toolbar-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.25rem;
+    }
+
+        .toolbar-wrapper:hover {
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.2s ease;
+        }
+
+    .btn-create-new {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    }
+
+        .btn-create-new:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+            color: #fff;
+        }
+
+    .btn-search {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 123, 255, 0.2);
+    }
+
+        .btn-search:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
+            color: white;
+        }
+
+    /* --- Table Styling --- */
+    .data-table-wrapper {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: visible;
+    }
+
+    .table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+        .table thead {
+            background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        }
+
+            .table thead th {
+                color: white;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+                padding: 1rem 0.75rem;
+                border: none;
+                white-space: nowrap;
+                background: transparent !important;
+                vertical-align: middle;
+            }
+
+                .table thead th a {
+                    color: white;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                }
+
+        .table tbody td {
+            padding: 0.875rem 0.75rem;
+            vertical-align: middle;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .table tbody td:last-child {
+            white-space: normal;
+            overflow: visible;
+        }
+
+    /* --- Status Badges  --- */
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    /* Open - Blue */
+    .status-badge-open {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+        border: 1px solid #bbdefb;
+    }
+
+    /* In Progress - Yellow/Gold */
+    .status-badge-progress {
+        background-color: #fffde7;
+        color: #f57f17;
+        border: 1px solid #fff9c4;
+    }
+
+    /* On Hold - Orange */
+    .status-badge-hold {
+        background-color: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffe0b2;
+    }
+
+    /* Close - Red */
+    .status-badge-close {
+        background-color: #ffebee;
+        color: #b71c1c;
+        border: 1px solid #ffcdd2;
+    }
+
+    /* Completed - Green (Optional extra) */
+    .status-badge-completed {
+        background-color: #e8f5e8;
+        color: #1b5e20;
+        border: 1px solid #c8e6c9;
+    }
+
+    /* --- Empty State --- */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+    /* --- Delete Modal --- */
+    .delete-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .delete-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .delete-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-width: 450px;
+        width: 90%;
+        border-top: 6px solid #dc3545;
+        animation: modalSlideIn 0.4s ease forwards;
+        transform: scale(0.7);
+    }
+
+    .delete-modal-overlay.show .delete-modal-content {
+        transform: scale(1);
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            transform: scale(0.7) translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .delete-modal-content i.warning-icon {
+        font-size: 3.5rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .delete-modal-content h4 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.75rem;
+        font-size: 1.5rem;
+    }
+
+    .delete-modal-content p {
+        font-size: 1rem;
+        color: #718096;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-modal-cancel {
+        padding: 0.75rem 1.75rem;
+        background: white;
+        color: #495057;
+        font-weight: 600;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .btn-modal-cancel:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            transform: translateY(-1px);
+        }
+
+    .btn-modal-delete {
+        padding: 0.75rem 1.75rem;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+    }
+
+        .btn-modal-delete:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+        }
+
+    /* --- Success Modal --- */
+    .success-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .success-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .success-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-width: 420px;
+        width: 90%;
+        border-top: 6px solid #28a745;
+        animation: modalSlideIn 0.4s ease forwards;
+        transform: scale(0.7);
+    }
+
+    .success-modal-overlay.show .success-modal-content {
+        transform: scale(1);
+    }
+
+    .success-modal-content i {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    .success-modal-content h4 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-modal-ok {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+    }
+
+        .btn-modal-ok:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+        }
+
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4 text-primary">@ViewData["Title"]</h1>
+
+    <div class="toolbar-wrapper mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a asp-action="Create" class="btn-create-new">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Create New</span>
+                </a>
+            </div>
+
+            <div class="col-lg-5 col-md-6">
+                <form method="get" asp-action="Index" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
+                    <i class="bi bi-search text-muted me-2"></i>
+                    <input type="text" name="search" class="form-control border-0 shadow-none"
+                           placeholder="Search activities..." value="@searchTerm" />
+                    <input type="hidden" name="pageSize" value="@pageSize" />
+                    <button type="submit" class="btn btn-search btn-sm ms-2 px-3">
+                        Search
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-lg-4 col-md-12 d-flex justify-content-lg-end justify-content-start">
+                <form method="get" asp-action="Index" id="entriesForm"
+                      class="d-flex align-items-center bg-white rounded-3 px-3 py-2 border">
+                    <label class="me-2 text-nowrap text-secondary small fw-semibold">Show</label>
+                    <select name="pageSize" class="form-select form-select-sm border-0 shadow-none fw-semibold"
+                            onchange="this.form.submit()">
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="25" selected="@(pageSize == 25)">25</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
+                    </select>
+                    <span class="ms-2 small text-secondary">entries</span>
+                    <input type="hidden" name="search" value="@searchTerm" />
+                    <input type="hidden" name="page" value="1" />
+                    <input type="hidden" name="sortColumn" value="@sortColumn" />
+                    <input type="hidden" name="sortOrder" value="@sortOrder" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="data-table-wrapper">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:9%">
+                            <a href="@BuildUrl(1, "Solution", ToggleSortOrder("Solution"))">
+                                Solution
+                                <i class="bi @(sortColumn == "Solution" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+
+                        <th style="width:9%">Created Time </th>
+
+                        <th style="width:10%">
+                            <a href="@BuildUrl(1, "CreatedBy", ToggleSortOrder("CreatedBy"))">
+                                Created By
+                                <i class="bi @(sortColumn == "CreatedBy" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+
+                        <th style="width:9%">Target Date</th>
+
+                        <th style="width:11%">
+                            <a href="@BuildUrl(1, "AssignedTo", ToggleSortOrder("AssignedTo"))">
+                                Assigned To
+                                <i class="bi @(sortColumn == "AssignedTo" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+
+                        <th style="width:12%">Description</th>
+                        <th style="width:12%">
+                            <a href="@BuildUrl(1, "Status", ToggleSortOrder("Status"))">
+                                Status
+                                <i class="bi @(sortColumn == "Status" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th style="width:10%">Updated Date </th>
+                        <th style="width:10%">
+                            <a href="@BuildUrl(1, "Updatedby ", ToggleSortOrder("Updatedby"))">
+                                Updated by
+                                <i class="bi @(sortColumn == "Updatedby" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th style="width:10%">Comment</th>
+                        <th style="width:13%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td title="@item.SolutionName">
+                                    <span class="fw-semibold">@item.SolutionName </span>
+                                </td>
+                                <td>
+                                    <div class="small text-muted">
+                                        @item.CreatedTime?.ToString("MMM dd, yyyy")<br>
+                                        @item.CreatedTime?.ToString("hh:mm tt")
+                                    </div>
+                                </td>
+                                <td title="@item.CreatedByName">@item.CreatedByName</td>
+                                <td title="@item.TargetDate?.ToString("MMM dd, yyyy")">@item.TargetDate?.ToString("MMM dd, yyyy")</td>
+                                <td title="@(item.AssignedToName ?? "Unassigned")">@(item.AssignedToName ?? "Unassigned")</td>
+                                <td title="@item.Description">
+                                    @(item.Description?.Length > 40 ? item.Description.Substring(0, 40) + "..." : item.Description ?? "N/A")
+                                </td>
+                                <td>
+                                    @{
+                                        var statusLower = (item.Status ?? "").Trim().ToLower();
+                                        var statusClass = statusLower switch
+                                        {
+                                            "open" => "status-badge status-badge-open",
+                                            "in progress" => "status-badge status-badge-progress",
+                                            "on hold" => "status-badge status-badge-hold",
+                                            "close" => "status-badge status-badge-close",
+                                            "completed" => "status-badge status-badge-completed",
+                                            _ => "status-badge bg-secondary text-white"
+                                        };
+                                        var statusDisplay = !string.IsNullOrEmpty(item.Status) ? item.Status : "Unknown";
+                                    }
+                                    <span class="@statusClass">@statusDisplay</span>
+                                </td>
+                                <td>
+                                    <div class="small text-muted">
+                                        @item.UpdatedDate?.ToString("MMM dd, yyyy")<br>
+                                        @item.UpdatedDate?.ToString("hh:mm tt")
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate">@(item.UpdatedByName ?? "-")</div>
+                                </td>
+                                <td title="@(item.LatestComment ?? "-")">
+                                    @(item.LatestComment ?? "-")
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil"></i></a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye"></i></a>
+
+                                    <button type="button" class="btn btn-sm btn-outline-danger me-1"
+                                            onclick="showDeleteModal(@item.Id, 'Activity ID: @item.Id')" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="empty-state">
+                                <i class="bi bi-inbox fs-1 mb-2"></i>
+                                <p class="mb-0">No activities found</p>
+                                <small class="text-muted">Create your first activity by clicking the "Create New" button above.</small>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row mt-3 align-items-center">
+            <div class="col-md-6">
+                <p class="text-muted mb-0">Showing @startRecord to @endRecord of @totalEntries entries</p>
+            </div>
+            <div class="col-md-6">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-end mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@BuildUrl(currentPage - 1, sortColumn, sortOrder)">Previous</a>
+                        </li>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@BuildUrl(i, sortColumn, sortOrder)">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@BuildUrl(currentPage + 1, sortColumn, sortOrder)">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    }
+</div>
+
+<div id="deleteModal" class="delete-modal-overlay">
+    <div class="delete-modal-content">
+        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+        <h4>Are You Sure?</h4>
+        <p>You are about to delete:</p>
+        <p class="item-name" id="deleteItemName" style="font-weight:600; color:#2d3748;"></p>
+        <p style="color: #dc3545; font-size: 0.9rem;">This action cannot be undone!</p>
+        <div class="delete-modal-actions mt-4 d-flex justify-content-center gap-3">
+            <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+            </button>
+            <form id="deleteForm" method="post">
+                <button type="submit" class="btn-modal-delete">
+                    <i class="bi bi-trash-fill me-1"></i> Yes, Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary" id="commentModalLabel">Activity Comments</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form asp-controller="InternalSolutionsActivities" asp-action="AddComment" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="CommentActivityId" name="Activity_ID" />
+
+                    <div class="mb-3">
+                        <label for="CommentText" class="form-label text-muted small fw-bold text-uppercase">New Comment / Note</label>
+                        <textarea class="form-control bg-light border-0"
+                                  id="CommentText"
+                                  name="Comment"
+                                  rows="4"
+                                  placeholder="Type your comment here..."
+                                  required></textarea>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-center small p-2 mt-2" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <div>This will record your ID as the <strong>Updated By</strong> user.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border:none;">
+                        <i class="bi bi-send-fill me-2"></i>Save Comment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="successModal" class="success-modal-overlay">
+    <div class="success-modal-content">
+        <i class="bi bi-check-circle-fill"></i>
+        <h4>Success!</h4>
+        <p id="successMessageText">@TempData["SuccessMessage"]</p>
+        <button type="button" class="btn-modal-ok" onclick="closeSuccessModal()">
+            OK
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // --- Modal Functions ---
+        function showDeleteModal(id, name) {
+            document.getElementById('deleteItemName').textContent = name;
+            var form = document.getElementById('deleteForm');
+            form.action = '/InternalSolutionsActivities/Delete/' + id;
+
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('show');
+        }
+
+        // --- Comment Modal Logic ---
+        function openCommentModal(id, platformName) {
+            document.getElementById('CommentActivityId').value = id;
+            document.getElementById('commentModalLabel').innerText = 'Notes for: ' + platformName + ' (ID: ' + id + ')';
+            document.getElementById('CommentText').value = '';
+
+            if (typeof bootstrap !== 'undefined' && typeof bootstrap.Modal === 'function') {
+                var myModal = new bootstrap.Modal(document.getElementById('commentModal'));
+                myModal.show();
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Close custom modals on outside click
+        document.getElementById('deleteModal').addEventListener('click', function (e) {
+            if (e.target === this) closeDeleteModal();
+        });
+
+        document.getElementById('successModal').addEventListener('click', function (e) {
+            if (e.target === this) closeSuccessModal();
+        });
+
+        // Show success modal if TempData message exists
+        @if (TempData["SuccessMessage"] != null)
+        {
+                    <text>
+                    window.addEventListener('DOMContentLoaded', () => {
+                        document.getElementById('successModal').classList.add('show');
+                    });
+                    </text>
+        }
+    </script>
+}

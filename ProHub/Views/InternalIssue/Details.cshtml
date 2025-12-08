@@ -1,0 +1,449 @@
+﻿@model PROHUB.Models.InternalIssue
+@{
+    ViewData["Title"] = "Internal Issue Details";
+}
+
+<style>
+    /* CORE THEME STYLES */
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        filter: blur(1px);
+        z-index: -1;
+    }
+
+    :root {
+        --primary: #1D9BF0;
+        --secondary: #536471;
+        --background: #FFFFFF;
+        --card-bg: #F7F9F9;
+        --text-primary: #0F1419;
+        --text-secondary: #536471;
+        --accent: #00BA7C;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --border-radius: 12px;
+        --transition: all 0.2s ease;
+    }
+
+    /* Dark mode support */
+    @@media (prefers-color-scheme: dark) {
+        :root {
+            --background: #15202B;
+            --card-bg: #1E2A3C;
+            --text-primary: #E7E9EA;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+    }
+
+    .details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        min-height: 100vh;
+    }
+
+    .section-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .section-header {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+    }
+
+    .section-header i {
+        color: var(--primary);
+        font-size: 1.125rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 0.35rem;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    .empty-value {
+        color: var(--text-secondary);
+        font-style: italic;
+        opacity: 0.7;
+    }
+
+    /* Text Block for Descriptions */
+    .text-block {
+        background: rgba(0,0,0,0.03);
+        padding: 1rem;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Hero Styling */
+    .hero {
+        background: linear-gradient(135deg, var(--primary), #0056b3);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .hero h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .hero-meta {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    /* Custom Badges */
+    .badge {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .bg-danger { background-color: #dc3545 !important; color: white; }
+    .bg-warning { background-color: #ffc107 !important; color: #212529; }
+    .bg-success { background-color: var(--accent) !important; color: white; }
+    .bg-info { background-color: #0dcaf0 !important; color: #212529; }
+    .bg-secondary { background-color: #6c757d !important; color: white; }
+    .bg-primary { background-color: var(--primary) !important; color: white; }
+
+    /* Buttons */
+    .btn-action {
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        border: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-outline:hover {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .btn-edit {
+        background: #F5C33B;
+        color: #212529;
+        margin-right: 0.5rem;
+    }
+
+    .btn-edit:hover {
+        background: #e0a800;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .details-container { padding: 1rem; }
+        .hero { padding: 1.5rem; }
+        .info-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="details-container">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="hero">
+        <div>
+            <h1>@(string.IsNullOrEmpty(Model.InternalAppName) ? "Internal Issue Details" : Model.InternalAppName)</h1>
+            <div class="hero-meta">
+                <i class="bi bi-hash"></i> Ref ID: <strong>@Model.FormattedId</strong>
+            </div>
+            <div style="margin-top: 1rem;">
+                <div class="info-label" style="color: white;">Status</div>
+                @if (!string.IsNullOrWhiteSpace(Model?.Status))
+                {
+                    var statusClass = Model.Status switch {
+                        "Open" => "bg-primary",
+                        "Attending" => "bg-info",
+                        "Awaiting" => "bg-warning",
+                        "Solved" => "bg-success",
+                        _ => "bg-secondary"
+                    };
+                    <span class="badge @statusClass">
+                        <i class="bi bi-activity"></i> @Model.Status
+                    </span>
+                }
+                else 
+                {
+                     <span class="badge bg-secondary">N/A</span>
+                }
+            </div>
+        </div>
+
+        <div style="text-align: right;">
+            <div class="info-label" style="color: rgba(255,255,255,0.7);">Criticality</div>
+            @{
+                var critClass = Model.Criticality?.ToLower() switch {
+                    "high" => "bg-danger",
+                    "medium" => "bg-warning",
+                    "low" => "bg-success",
+                    _ => "bg-secondary"
+                };
+                var critIcon = Model.Criticality?.ToLower() switch {
+                    "high" => "bi-exclamation-triangle-fill",
+                    "medium" => "bi-exclamation-circle",
+                    "low" => "bi-info-circle",
+                    _ => "bi-question-circle"
+                };
+            }
+            <span class="badge @critClass" style="font-size: 0.9rem; margin-top: 0.25rem;">
+                <i class="bi @critIcon"></i> @(Model.Criticality ?? "N/A")
+            </span>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-info-circle"></i> Basic Information</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Issue Start Date/Time</div>
+                <div class="info-value">
+                    @if (Model.IssueStartTime.HasValue)
+                    {
+                        @Model.IssueStartTime.Value.ToString("yyyy-MM-dd") <br/>
+                        <span style="font-size: 0.8em; opacity: 0.7;">@Model.IssueStartTime.Value.ToString("HH:mm")</span>
+                    }
+                    else
+                    {
+                        @Html.Raw("<span class='empty-value'>Not specified</span>")
+                    }
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Reporting Employee SvcNo/Name</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.ReportedBy) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.ReportedBy)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Reporting Person Contact Details </div>
+                <div class="info-value">
+                    @if (!string.IsNullOrEmpty(Model.ReportingPersonContactNo))
+                    {
+                        <a href="tel:@Model.ReportingPersonContactNo" style="text-decoration:none; color:inherit;">
+                            <i class="bi bi-telephone-fill" style="font-size: 0.8rem; color: var(--accent);"></i> @Model.ReportingPersonContactNo
+                        </a>
+                    }
+                    else
+                    {
+                        @Html.Raw("<span class='empty-value'>Not specified</span>")
+                    }
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Entered By</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.EnteredByName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.EnteredByName)
+                </div>
+            </div>
+             <div class="info-item">
+                <div class="info-label">Entered Date/Time</div>
+                <div class="info-value">
+                    @if (Model.EnteredTime.HasValue)
+                    {
+                        @Model.EnteredTime.Value.ToString("yyyy-MM-dd") <br/>
+                        <span style="font-size: 0.8em; opacity: 0.7;">@Model.EnteredTime.Value.ToString("HH:mm")</span>
+                    }
+                    else
+                    {
+                        @Html.Raw("<span class='empty-value'>Not specified</span>")
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-person-check"></i> Assignment & Resolution</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Assigned To</div>
+                <div class="info-value">
+                    @if (!string.IsNullOrEmpty(Model.AssignedToName))
+                    {
+                        <span style="color: var(--accent); font-weight: 600;">
+                            <i class="bi bi-person-fill"></i> @Model.AssignedToName
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="empty-value">Unassigned</span>
+                    }
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Assigned By</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.AssignedByName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AssignedByName)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Assigned Date/Time</div>
+                <div class="info-value">
+                    @if (Model.AssignedTime.HasValue)
+                    {
+                        @Model.AssignedTime.Value.ToString("yyyy-MM-dd") <br/>
+                        <span style="font-size: 0.8em; opacity: 0.7;">@Model.AssignedTime.Value.ToString("HH:mm")</span>
+                    }
+                    else
+                    {
+                        @Html.Raw("<span class='empty-value'>—</span>")
+                    }
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Issue Closed Date/Time</div>
+                <div class="info-value">
+                    @if (Model.IssueClosedTime.HasValue)
+                    {
+                        <span style="color: var(--accent);">
+                            @Model.IssueClosedTime.Value.ToString("yyyy-MM-dd")
+                        </span><br/>
+                        <span style="font-size: 0.8em; opacity: 0.7;">@Model.IssueClosedTime.Value.ToString("HH:mm")</span>
+                    }
+                    else
+                    {
+                        <span class="empty-value">Not closed yet</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-file-text"></i> Details & Actions</div>
+        
+        <div style="display: grid; gap: 1.5rem; grid-template-columns: 1fr;">
+            <div class="info-item">
+                <div class="info-label">Incident Description</div>
+                <div class="text-block">
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        @Model.Description
+                    }
+                    else
+                    {
+                        <span class="empty-value">No description provided.</span>
+                    }
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Action Taken to Resolve the Issue</div>
+                <div class="text-block">
+                    @if (!string.IsNullOrEmpty(Model.ActionTaken))
+                    {
+                        @Model.ActionTaken
+                    }
+                    else
+                    {
+                        <span class="empty-value">No action recorded yet.</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 1.5rem; display: flex; align-items: center;">
+       
+        <a asp-action="Index" class="btn-action btn-outline">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+</div>

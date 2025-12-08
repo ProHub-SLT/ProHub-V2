@@ -1,0 +1,708 @@
+﻿@model List<ProHub.Models.OtherSystemIssuesViewModel>
+
+@{
+    ViewData["Title"] = "Other System Issues";
+    var pageSize = ViewBag.PageSize ?? 10;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalRecords = ViewBag.TotalRecords ?? 0;
+    var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+    var startRecord = totalRecords > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    var endRecord = Math.Min(currentPage * pageSize, totalRecords);
+    string sortColumn = ViewBag.SortColumn ?? "Issue_Start_Time";
+    string sortOrder = ViewBag.SortOrder ?? "desc";
+    string searchTerm = ViewBag.SearchTerm ?? "";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .data-table-wrapper {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+        min-width: 900px;
+    }
+
+        .table thead {
+            background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        }
+
+            .table thead th {
+                color: white;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+                padding: 1rem 0.75rem;
+                border: none;
+                white-space: normal;
+                background: transparent !important;
+                vertical-align: middle;
+                line-height: 1.3;
+            }
+
+                /* Issue Start Date/Time */
+                .table thead th:nth-child(1) {
+                    width: 14%;
+                }
+
+                /* System Name */
+                .table thead th:nth-child(2) {
+                    width: 25%;
+                }
+
+                /* Status */
+                .table thead th:nth-child(3) {
+                    width: 15%;
+                }
+
+                /* Incident Description */
+                .table thead th:nth-child(4) {
+                    width: 42%;
+                }
+
+        .table tbody td {
+            padding: 0.875rem 0.75rem;
+            vertical-align: middle;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+                transform: scale(1.001);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+
+        /* First column styling */
+        .table tbody td:first-child {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+
+        /* Description column - allow text wrapping */
+        .table tbody td:nth-child(4) {
+            white-space: normal;
+            word-break: break-word;
+            max-width: none;
+        }
+
+    /* DateTime Display Styling */
+    .datetime-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .datetime-icon {
+        font-size: 1.1rem;
+        color: #007bff;
+        flex-shrink: 0;
+    }
+
+    .datetime-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        line-height: 1.3;
+    }
+
+    .date-part {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .time-part {
+        font-size: 0.8rem;
+        color: #64748b;
+        white-space: nowrap;
+    }
+
+    /* System Name with Icon */
+    .system-name-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .system-icon {
+        font-size: 1.1rem;
+        color: #28a745;
+        flex-shrink: 0;
+    }
+
+    .system-name-text {
+        font-weight: 500;
+        color: #2d3748;
+    }
+
+    /* Description with Icon */
+    .description-display {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .description-icon {
+        font-size: 1rem;
+        color: #6c757d;
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+    }
+
+    .description-text {
+        flex: 1;
+        line-height: 1.5;
+    }
+
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+    }
+
+        .sortable:hover {
+            background-color: #1e90ff !important;
+        }
+
+    .sort-icon {
+        margin-left: 0.5rem;
+        transition: color 0.2s ease;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+    .toolbar-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.25rem;
+    }
+
+        .toolbar-wrapper:hover {
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.2s ease;
+        }
+
+    .btn-create-new {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+        justify-content: center;
+    }
+
+        .btn-create-new:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+            color: #fff;
+        }
+
+        .btn-create-new:active {
+            transform: translateY(0px);
+            box-shadow: 0 1px 3px rgba(40, 167, 69, 0.2);
+        }
+
+        .btn-create-new i {
+            font-size: 0.95rem;
+        }
+
+    .btn-search {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 123, 255, 0.2);
+    }
+
+        .btn-search:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
+            color: white;
+        }
+
+    /* Status Badge Styles */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.85rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: all 0.2s ease;
+        border: 1px solid;
+    }
+
+        .status-badge i {
+            font-size: 0.85rem;
+        }
+
+    .status-open {
+        background-color: #fff3cd;
+        color: #856404;
+        border-color: #ffeaa7;
+    }
+
+        .status-open:hover {
+            background-color: #ffeaa7;
+            border-color: #ffd93d;
+            transform: scale(1.05);
+        }
+
+    .status-in-progress {
+        background-color: #cfe2ff;
+        color: #084298;
+        border-color: #b6d4fe;
+    }
+
+        .status-in-progress:hover {
+            background-color: #b6d4fe;
+            border-color: #9ec5fe;
+            transform: scale(1.05);
+        }
+
+    .status-resolved {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border-color: #badbcc;
+    }
+
+        .status-resolved:hover {
+            background-color: #badbcc;
+            border-color: #a3cfbb;
+            transform: scale(1.05);
+        }
+
+    .status-closed {
+        background-color: #e2e3e5;
+        color: #41464b;
+        border-color: #d3d6d8;
+    }
+
+        .status-closed:hover {
+            background-color: #d3d6d8;
+            border-color: #c4c8cb;
+            transform: scale(1.05);
+        }
+
+    .status-critical {
+        background-color: #f8d7da;
+        color: #842029;
+        border-color: #f5c2c7;
+    }
+
+        .status-critical:hover {
+            background-color: #f5c2c7;
+            border-color: #f1aeb5;
+            transform: scale(1.05);
+        }
+
+    .footer-info {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-top: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+        .footer-info p {
+            margin-bottom: 0.25rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+    /* Tooltip Enhancement */
+    [title] {
+        position: relative;
+        cursor: help;
+    }
+
+    /* Mobile Responsive Styles */
+    @@media (max-width: 768px) {
+        .container-fluid
+
+    {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+        margin-bottom: 1rem !important;
+    }
+
+    .toolbar-wrapper {
+        padding: 0.875rem 1rem;
+    }
+
+    .btn-create-new {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+
+    .table thead th {
+        font-size: 0.7rem;
+        padding: 0.75rem 0.5rem;
+        letter-spacing: 0.3px;
+    }
+
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .datetime-display {
+        flex-direction: row;
+    }
+
+    .datetime-icon {
+        font-size: 1rem;
+    }
+
+    /* Stack pagination on mobile */
+    .row.mt-3 .col-md-6:first-child {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .pagination {
+        justify-content: center !important;
+        flex-wrap: wrap;
+    }
+
+        .pagination .page-item {
+            margin: 0.125rem;
+        }
+
+        .pagination .page-link {
+            padding: 0.375rem 0.625rem;
+            font-size: 0.875rem;
+        }
+
+    }
+
+    @@media (max-width: 576px) {
+        h1
+
+    {
+        font-size: 1.5rem;
+    }
+
+    .btn-create-new {
+        padding: 0.6rem 0.875rem;
+        font-size: 0.85rem;
+        gap: 0.375rem;
+        width: 100%;
+    }
+
+    .btn-search {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.85rem;
+    }
+
+    .table {
+        min-width: 800px;
+    }
+
+        .table thead th {
+            font-size: 0.65rem;
+            padding: 0.625rem 0.375rem;
+            letter-spacing: 0.2px;
+        }
+
+        .table tbody td {
+            padding: 0.625rem 0.375rem;
+            font-size: 0.8rem;
+        }
+
+    .status-badge {
+        padding: 0.3rem 0.65rem;
+        font-size: 0.75rem;
+    }
+
+    .datetime-icon, .system-icon, .description-icon {
+        font-size: 0.9rem;
+    }
+
+    .empty-state {
+        padding: 2rem 0.5rem;
+    }
+
+        .empty-state i {
+            font-size: 2rem;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+    /* Hide some pagination numbers on very small screens */
+    .pagination .page-item:not(.active):not(:first-child):not(:last-child):not(:nth-child(2)):not(:nth-last-child(2)) {
+        display: none;
+    }
+
+    .footer-info {
+        padding: 0.875rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    }
+
+    /* Tablet adjustments */
+    @@media (min-width: 577px) and (max-width: 991px) {
+        .btn-create-new
+
+    {
+        width: auto;
+    }
+
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4 text-primary">Other System Issues</h1>
+
+    <!-- Inline Toolbar -->
+    <div class="toolbar-wrapper mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-5 col-md-6 col-12">
+                <form method="get" asp-action="Index" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
+                    <i class="bi bi-search text-muted me-2"></i>
+                    <input type="text" name="search" class="form-control border-0 shadow-none"
+                           placeholder="Search issues..." value="@searchTerm" />
+                    <input type="hidden" name="pageSize" value="@pageSize" />
+                    <button type="submit" class="btn btn-search btn-sm ms-2 px-3">
+                        Search
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-lg-4 col-md-12 ms-auto d-flex justify-content-lg-end justify-content-start">
+                <form method="get" asp-action="Index" id="entriesForm"
+                      class="d-flex align-items-center bg-white rounded-3 px-3 py-2 border">
+                    <label class="me-2 text-nowrap text-secondary small fw-semibold">Show</label>
+                    <select name="pageSize" class="form-select form-select-sm border-0 shadow-none fw-semibold"
+                            onchange="this.form.submit()">
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="25" selected="@(pageSize == 25)">25</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
+                    </select>
+                    <span class="ms-2 small text-secondary">entries</span>
+                    <input type="hidden" name="search" value="@searchTerm" />
+                    <input type="hidden" name="page" value="1" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="data-table-wrapper">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="Issue_Start_Time">
+                          
+                            Issue Start Date/Time
+                            <i class="bi sort-icon @(sortColumn == "Issue_Start_Time" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th class="sortable" data-column="System_Name">
+                          
+                            System Name
+                            <i class="bi sort-icon @(sortColumn == "System_Name" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th class="sortable" data-column="Status">
+                            
+                            Status
+                            <i class="bi sort-icon @(sortColumn == "Status" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th>
+                          
+                            Incident Description
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            DateTime? dateTime = item.Issue_Start_Time;
+
+                            <tr>
+                                <td title="@(dateTime?.ToString("MM/dd/yyyy h:mm:ss tt") ?? "N/A")">
+                                    <div class="datetime-display">
+                                        <i class="bi bi-calendar-check datetime-icon"></i>
+                                        <div class="datetime-content">
+                                            @if (dateTime.HasValue)
+                                            {
+                                                <span class="date-part">@dateTime.Value.ToString("MM/dd/yyyy")</span>
+                                                <span class="time-part">@dateTime.Value.ToString("h:mm:ss tt")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="date-part">N/A</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td title="@item.System_Name">
+                                    <div class="system-name-display">
+                                       
+                                        <span class="system-name-text">@item.System_Name</span>
+                                    </div>
+                                </td>
+
+                                <td title="@item.Status">
+                                    @item.Status
+                                </td>
+
+                                <td title="@item.Description">
+                                    <div class="description-display">
+                                       
+                                        <span class="description-text">@item.Description</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p class="mb-0">No system issues found matching your search criteria</p>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="row mt-3 align-items-center">
+        <div class="col-md-6">
+            <p class="text-muted mb-0">
+                
+                Showing @startRecord to @endRecord of @totalRecords entries
+            </p>
+        </div>
+        <div class="col-md-6">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end mb-0">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="?page=@(currentPage - 1)&pageSize=@pageSize&sortColumn=@sortColumn&sortOrder=@sortOrder&search=@searchTerm">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="?page=@i&pageSize=@pageSize&sortColumn=@sortColumn&sortOrder=@sortOrder&search=@searchTerm">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="?page=@(currentPage + 1)&pageSize=@pageSize&sortColumn=@sortColumn&sortOrder=@sortOrder&search=@searchTerm">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sorting functionality
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.style.cursor = "pointer";
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-column');
+                const currentUrl = new URL(window.location.href);
+                const currentOrder = currentUrl.searchParams.get("sortOrder") || "asc";
+                const newOrder = (currentOrder === "asc" ? "desc" : "asc");
+                currentUrl.searchParams.set("sortColumn", column);
+                currentUrl.searchParams.set("sortOrder", newOrder);
+                currentUrl.searchParams.set("page", "1");
+                const searchParam = currentUrl.searchParams.get("search") || "";
+                const pageSize = currentUrl.searchParams.get("pageSize") || "10";
+                currentUrl.searchParams.set("search", searchParam);
+                currentUrl.searchParams.set("pageSize", pageSize);
+                window.location.href = currentUrl.toString();
+            });
+        });
+    </script>
+}

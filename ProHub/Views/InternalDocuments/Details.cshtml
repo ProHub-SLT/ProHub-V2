@@ -1,0 +1,238 @@
+@model ProHub.Models.Document
+@{
+    ViewData["Title"] = "Internal Document Details";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .details-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .details-header {
+        background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+        .details-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+    .details-body {
+        padding: 2.5rem;
+    }
+
+    .details-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-modern-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        cursor: pointer;
+    }
+
+        .btn-modern-primary:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+        }
+
+    .btn-modern-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .btn-modern-secondary:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+            transform: translateY(-1px);
+        }
+
+    .detail-row {
+        display: flex;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: #495057;
+        width: 200px;
+        font-size: 0.9rem;
+    }
+
+    .detail-value {
+        flex: 1;
+        font-size: 0.95rem;
+    }
+
+    /* Disabled field styling */
+    .detail-label.disabled {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .detail-value.disabled {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* Document preview styles */
+    .document-preview {
+        text-align: center;
+        margin: 2rem 0;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 1px dashed #dee2e6;
+    }
+
+        .document-preview i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .document-preview a {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .document-preview a:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+            }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="details-container">
+        <div class="details-header">
+            <h2 class="bi bi-file-earmark-text me-2">@ViewData["Title"]</h2>
+        </div>
+
+        <div class="details-body">
+            <div class="detail-row">
+                <div class="detail-label disabled">Platform</div>
+                <div class="detail-value disabled">Internal</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Solution:</div>
+                <div class="detail-value">@Model.SolutionName</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Document Name:</div>
+                <div class="detail-value">@Model.Doc_Name</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Uploaded Time:</div>
+                <div class="detail-value">@(Model.Created_Time?.ToString("yyyy-MM-dd HH:mm"))</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label disabled">Uploaded By:</div>
+                <div class="detail-value disabled">@Model.CreatedByName</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Document Classification:</div>
+                <div class="detail-value">@Model.Doc_Classification</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Tags:</div>
+                <div class="detail-value">@Model.Tags</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Confidential:</div>
+                <div class="detail-value">@(Model.Confidential ? "Yes" : "No")</div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Doc_URL))
+            {
+                <div class="document-preview">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    <h5>Document Preview</h5>
+                    <p>Click below to view or download the document</p>
+                    <a href="@Model.Doc_URL" target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-download me-2"></i>View Document
+                    </a>
+                </div>
+            }
+        </div>
+
+        <div class="details-footer">
+            <a asp-action="Index" class="btn-modern-secondary">Back to List</a>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.ID" class="btn-modern-primary">Edit</a>
+            </div>
+        </div>
+    </div>
+</div>

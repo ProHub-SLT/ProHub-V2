@@ -1,0 +1,388 @@
+﻿@model IEnumerable<ProHub.Models.ProjectRevenue>
+@{
+    ViewData["Title"] = "Projected Revenue Details";
+    int selectedYear = ViewBag.SelectedYear;
+    string sortColumn = ViewBag.SortColumn ?? "Project_Name";
+    string sortOrder = ViewBag.SortOrder ?? "asc";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .data-table-wrapper {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        width: 100%;
+        margin-bottom: 0;
+        min-width: 700px;
+    }
+
+        .table thead {
+            background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        }
+
+            .table thead th {
+                color: white;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.5px;
+                padding: 1rem 0.5rem;
+                border: none;
+                white-space: nowrap;
+                background: transparent !important;
+                vertical-align: middle;
+            }
+
+                .table thead th:nth-child(1) {
+                    width: 25%;
+                }
+
+                .table thead th:nth-child(2) {
+                    width: 15%;
+                }
+
+                .table thead th:nth-child(3) {
+                    width: 14%;
+                }
+
+                .table thead th:nth-child(4) {
+                    width: 15%;
+                }
+
+                .table thead th:nth-child(5) {
+                    width: 15%;
+                }
+
+                .table thead th:nth-child(6) {
+                    width: 18%;
+                }
+
+        .table tbody td {
+            padding: 0.75rem 0.5rem;
+            vertical-align: middle;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.875rem;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .table tbody td:first-child {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+
+        .table tbody td:not(:first-child) {
+            background-color: white;
+        }
+
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+        position: relative;
+    }
+
+        .sortable:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+    .sort-icon {
+        margin-left: 0.25rem;
+        font-size: 0.7rem;
+        transition: color 0.2s ease;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+    .total-row {
+        background-color: #e8f5e8 !important;
+        font-weight: bold;
+    }
+
+        .total-row td {
+            background-color: #e8f5e8 !important;
+            font-size: 0.9rem !important;
+        }
+
+    /* Mobile responsiveness */
+    @@media (max-width: 768px) {
+        .container-fluid {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .btn-outline-primary {
+            align-self: center;
+        }
+
+        .table thead th {
+            padding: 0.75rem 0.4rem;
+            font-size: 0.7rem;
+        }
+
+        .table tbody td {
+            padding: 0.6rem 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .data-table-wrapper {
+            border-radius: 8px;
+            margin: 0 -5px;
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        h1 {
+            font-size: 1.3rem;
+        }
+
+        .table thead th {
+            padding: 0.6rem 0.3rem;
+            font-size: 0.65rem;
+        }
+
+        .table tbody td {
+            padding: 0.5rem 0.3rem;
+            font-size: 0.75rem;
+        }
+
+        .empty-state {
+            padding: 1.5rem 0.5rem;
+        }
+
+            .empty-state i {
+                font-size: 2rem;
+            }
+
+            .empty-state p {
+                font-size: 0.9rem;
+            }
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+</style>
+
+<div class="container-fluid mt-3 mt-md-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-column flex-md-row">
+        <h1 class="text-primary mb-2 mb-md-0">Projected Revenue Details - @selectedYear</h1>
+        <a asp-controller="RevenueCal" asp-action="ProjectedRevenue" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Summary
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="data-table-wrapper">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="Project_Name">
+                            Project Name
+                            <i class="bi sort-icon @(sortColumn == "Project_Name" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th  data-column="Start_Year">
+                            Launched Year
+                        </th>
+                        <th class="sortable" data-column="Contract_Period">
+                            Contract Period
+                            <i class="bi sort-icon @(sortColumn == "Months_To_Current" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th class="sortable" data-column="OTC">
+                            OTC
+                            <i class="bi sort-icon @(sortColumn == "OTC" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th class="sortable" data-column="MRC">
+                            MRC
+                            <i class="bi sort-icon @(sortColumn == "MRC" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                        <th class="sortable" data-column="MRC_For_Year"> 
+                          
+                             MRC Total for Project Life Time
+                            <i class="bi sort-icon @(sortColumn == "MRC_For_Year" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        // Separate regular rows from total row
+                        var regularRows = Model.Where(x => x.Project_Name != "Total").ToList();
+                        var totalRow = Model.FirstOrDefault(x => x.Project_Name == "Total");
+
+                        // Apply sorting only to regular rows
+                        var sortedRows = sortColumn switch
+                        {
+                            "Project_Name" => sortOrder == "asc" ?
+                            regularRows.OrderBy(x => x.Project_Name).ToList() :
+                            regularRows.OrderByDescending(x => x.Project_Name).ToList(),
+                            "Start_Year" => sortOrder == "asc" ?
+                            regularRows.OrderBy(x => x.Start_Year).ToList() :
+                            regularRows.OrderByDescending(x => x.Start_Year).ToList(),
+                            "Months_To_Current" => sortOrder == "asc" ?
+                            regularRows.OrderBy(x => x.Months_To_Current).ToList() :
+                            regularRows.OrderByDescending(x => x.Months_To_Current).ToList(),
+                            "OTC" => sortOrder == "asc" ?
+                            regularRows.OrderBy(x => x.OTC).ToList() :
+                            regularRows.OrderByDescending(x => x.OTC).ToList(),
+                            "MRC" => sortOrder == "asc" ?
+                            regularRows.OrderBy(x => x.MRC).ToList() :
+                            regularRows.OrderByDescending(x => x.MRC).ToList(),
+                            "MRC_For_Year" => sortOrder == "asc" ?
+                            regularRows.OrderBy(x => x.MRC_For_Year).ToList() :
+                            regularRows.OrderByDescending(x => x.MRC_For_Year).ToList(),
+                            _ => sortOrder == "asc" ?
+                            regularRows.OrderBy(x => x.Project_Name).ToList() :
+                            regularRows.OrderByDescending(x => x.Project_Name).ToList()
+                        };
+
+                        // Display sorted regular rows
+                        foreach (var item in sortedRows)
+                        {
+                            <tr>
+                                <td><strong>@item.Project_Name</strong></td>
+                                <td>@(item.Start_Year > 0 ? item.Start_Year.ToString() : "-")</td>
+                                <td>@(item.Contract_Period > 0 ? item.Contract_Period.ToString() + " Year" : "-")</td>
+                                <td>@(item.OTC > 0 ? $"Rs. {item.OTC.ToString("N0")}" : "-")</td>
+                                <td>@(item.MRC > 0 ? $"Rs. {item.MRC.ToString("N0")}" : "-")</td>
+                                <td>@(item.MRC_For_Year > 0 ? $"Rs. {item.MRC_For_Year.ToString("N0")}" : "-")</td>
+                            </tr>
+                        }
+
+                        // Display total row at the bottom (if exists)
+                        if (totalRow != null)
+                        {
+                            <tr class="total-row">
+                                <td><strong>@totalRow.Project_Name</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td>@(totalRow.OTC > 0 ? $"Rs. {totalRow.OTC.ToString("N0")}" : "-")</td>
+                                <td>@(totalRow.MRC > 0 ? $"Rs. {totalRow.MRC.ToString("N0")}" : "-")</td>
+                                <td>@(totalRow.MRC_For_Year > 0 ? $"Rs. {totalRow.MRC_For_Year.ToString("N0")}" : "-")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p class="mb-0">No projected revenue details available for @selectedYear</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.style.cursor = "pointer";
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-column');
+                const currentUrl = new URL(window.location.href);
+                const currentOrder = currentUrl.searchParams.get("sortOrder") || "asc";
+                const newOrder = (currentOrder === "asc" ? "desc" : "asc");
+
+                currentUrl.searchParams.set("sortColumn", column);
+                currentUrl.searchParams.set("sortOrder", newOrder);
+
+                window.location.href = currentUrl.toString();
+            });
+        });
+
+        // Enhance mobile touch experience
+        document.addEventListener('DOMContentLoaded', function () {
+            const tableResponsive = document.querySelector('.table-responsive');
+            if (tableResponsive) {
+                let isScrolling;
+                tableResponsive.addEventListener('scroll', function () {
+                    window.clearTimeout(isScrolling);
+                    isScrolling = setTimeout(function () {
+                        // Smooth scrolling ended
+                    }, 66);
+                }, false);
+            }
+        });
+    </script>
+}

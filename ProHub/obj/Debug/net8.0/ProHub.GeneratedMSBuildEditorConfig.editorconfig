@@ -1,0 +1,375 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = ProHub
+build_property.RootNamespace = ProHub
+build_property.ProjectDir = C:\Users\Tharuka\Downloads\ProHub-main (2)\ProHub-main\ProHub\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\Tharuka\Downloads\ProHub-main (2)\ProHub-main\ProHub
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Abandoned/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWJhbmRvbmVkXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Abandoned/ViewDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWJhbmRvbmVkXFZpZXdEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Account/AccessDenied.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxBY2Nlc3NEZW5pZWQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Account/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ConsumerPlatform/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29uc3VtZXJQbGF0Zm9ybVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ConsumerPlatform/ViewDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29uc3VtZXJQbGF0Zm9ybVxWaWV3RGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/CustomerContacts/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJDb250YWN0c1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/CustomerContacts/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJDb250YWN0c1xEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/CustomerContacts/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJDb250YWN0c1xFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/CustomerContacts/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJDb250YWN0c1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Employee/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Employee/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Employee/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalDocuments/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxEb2N1bWVudHNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalDocuments/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxEb2N1bWVudHNcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalDocuments/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxEb2N1bWVudHNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalDocuments/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxEb2N1bWVudHNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalIssue/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxJc3N1ZVxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalIssue/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxJc3N1ZVxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalIssue/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxJc3N1ZVxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalIssue/List.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxJc3N1ZVxMaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalSolutionsActivities/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxTb2x1dGlvbnNBY3Rpdml0aWVzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalSolutionsActivities/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxTb2x1dGlvbnNBY3Rpdml0aWVzXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalSolutionsActivities/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxTb2x1dGlvbnNBY3Rpdml0aWVzXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalSolutionsActivities/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxTb2x1dGlvbnNBY3Rpdml0aWVzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ExternalSolutions/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXh0ZXJuYWxTb2x1dGlvbnNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/FieldsOfSpecialization/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmllbGRzT2ZTcGVjaWFsaXphdGlvblxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/FieldsOfSpecialization/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmllbGRzT2ZTcGVjaWFsaXphdGlvblxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/FieldsOfSpecialization/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmllbGRzT2ZTcGVjaWFsaXphdGlvblxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Freelancer/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Freelancer/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Freelancer/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Freelancer/List.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclxMaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalDocuments/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxEb2N1bWVudHNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalDocuments/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxEb2N1bWVudHNcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalDocuments/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxEb2N1bWVudHNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalDocuments/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxEb2N1bWVudHNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalIssue/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxJc3N1ZVxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalIssue/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxJc3N1ZVxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalIssue/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxJc3N1ZVxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalIssue/List.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxJc3N1ZVxMaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolutionRetired/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvblJldGlyZWRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolutionRetired/ViewDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvblJldGlyZWRcVmlld0RldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolutionsAbandoned/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvbnNBYmFuZG9uZWRcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolutionsAbandoned/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvbnNBYmFuZG9uZWRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolutionsActivities/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvbnNBY3Rpdml0aWVzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolutionsActivities/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvbnNBY3Rpdml0aWVzXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolutionsActivities/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvbnNBY3Rpdml0aWVzXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolutionsActivities/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvbnNBY3Rpdml0aWVzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolution/ChangeRequests.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvblxDaGFuZ2VSZXF1ZXN0cy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolution/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvblxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolution/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvblxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolution/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvblxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/InternalSolution/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW50ZXJuYWxTb2x1dGlvblxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/NextWeekPlans/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmV4dFdlZWtQbGFuc1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/NextWeekPlans/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmV4dFdlZWtQbGFuc1xFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/NextWeekPlans/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmV4dFdlZWtQbGFuc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/OtherSystemIssues/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3RoZXJTeXN0ZW1Jc3N1ZXNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Overtime/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3ZlcnRpbWVcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Overtime/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3ZlcnRpbWVcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Overtime/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3ZlcnRpbWVcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Overtime/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3ZlcnRpbWVcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ParentProjects/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyZW50UHJvamVjdHNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ParentProjects/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyZW50UHJvamVjdHNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/ParentProjects/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyZW50UHJvamVjdHNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Partner/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFydG5lclxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Partner/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFydG5lclxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/RevenueCal/ActualRevenue.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2ZW51ZUNhbFxBY3R1YWxSZXZlbnVlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/RevenueCal/ActualRevenue_Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2ZW51ZUNhbFxBY3R1YWxSZXZlbnVlX0RldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/RevenueCal/InternalProjectValue.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2ZW51ZUNhbFxJbnRlcm5hbFByb2plY3RWYWx1ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/RevenueCal/InternalProjectValue_Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2ZW51ZUNhbFxJbnRlcm5hbFByb2plY3RWYWx1ZV9EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/RevenueCal/ProjectedRevenue.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2ZW51ZUNhbFxQcm9qZWN0ZWRSZXZlbnVlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/RevenueCal/ProjectedRevenue_Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2ZW51ZUNhbFxQcm9qZWN0ZWRSZXZlbnVlX0RldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Trainee/ActiveTrainee.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhaW5lZVxBY3RpdmVUcmFpbmVlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Trainee/AllTrainee.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhaW5lZVxBbGxUcmFpbmVlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Trainee/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhaW5lZVxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Trainee/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhaW5lZVxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Trainee/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhaW5lZVxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Trainee/InactiveTrainee.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhaW5lZVxJbmFjdGl2ZVRyYWluZWUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Trainee/PaidTrainee.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhaW5lZVxQYWlkVHJhaW5lZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Tharuka/Downloads/ProHub-main (2)/ProHub-main/ProHub/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-k44wiqmz9u

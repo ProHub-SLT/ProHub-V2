@@ -1,0 +1,640 @@
+﻿@model ProHub.Models.ExternalPlatform
+@{
+    ViewData["Title"] = "Create External Solution";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 1000px; /* Slightly wider for the many fields */
+        margin: 0 auto;
+    }
+
+    .form-header {
+        background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+        .form-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .form-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+    .form-body {
+        padding: 2.5rem;
+    }
+
+    .form-group-modern {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-label-modern {
+        display: block;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+        .form-label-modern .required {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+        .form-control-modern:focus {
+            outline: none;
+            border-color: #28A745;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+    select.form-control-modern {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232d3748' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .input-icon-wrapper .form-control-modern {
+            padding-left: 2.75rem;
+        }
+
+    .form-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-modern-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        cursor: pointer;
+    }
+
+        .btn-modern-primary:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+        }
+
+    .btn-modern-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .btn-modern-secondary:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+            transform: translateY(-1px);
+        }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .field-description {
+        background: #f0f9ff;
+        border-left: 3px solid #007BFF;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #2d3748;
+    }
+
+    /* Success Popup */
+    .success-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: all 0.3s ease;
+    }
+
+        .success-popup.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+    .success-popup-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        animation: popupFadeIn 0.4s ease forwards;
+        max-width: 420px;
+        border-top: 6px solid #28a745;
+    }
+
+        .success-popup-content i {
+            font-size: 3rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .success-popup-content h4 {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-popup-content p {
+            font-size: 0.95rem;
+            color: #718096;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-popup-content button {
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .success-popup-content button:hover {
+                background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="bi bi-folder-plus me-2"></i>@ViewData["Title"]</h2>
+            <p>Create a new external solution to organize your projects</p>
+        </div>
+
+        <form asp-action="Create" method="post" id="externalSolutionForm">
+            @Html.AntiForgeryToken()
+            <div class="form-body">
+                <div class="field-description">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Fields marked with <span class="text-danger">*</span> are required
+                </div>
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="PlatformName" class="form-label-modern">
+                            <i class="bi bi-app-indicator me-1"></i> Application/Platform Name <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-pc-display-horizontal"></i>
+                            <input asp-for="PlatformName" class="form-control-modern" placeholder="Enter name" required />
+                        </div>
+                        <span asp-validation-for="PlatformName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="CompanyId" class="form-label-modern">
+                            <i class="bi bi-building me-1"></i> Company/Customer <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-building-fill"></i>
+                            <select asp-for="CompanyId" class="form-control-modern"
+                                    asp-items="@(new SelectList(ViewBag.Companies ?? new List<ProHub.Models.Company>(), "Id", "CompanyName"))" required>
+                                <option value="">Please select a company</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="CompanyId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="DevelopedById" class="form-label-modern">
+                            <i class="bi bi-person-badge me-1"></i> Developed By
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-workspace"></i>
+                            <select asp-for="DevelopedById" class="form-control-modern"
+                                    asp-items="@(new SelectList(ViewBag.Employees ?? new List<ProHub.Models.Employee>(), "EmpId", "EmpName"))">
+                                <option value="">Please select developer</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="DevelopedById" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="DevelopedTeam" class="form-label-modern">
+                            <i class="bi bi-people me-1"></i> Developed Team
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-people-fill"></i>
+                            <input asp-for="DevelopedTeam" class="form-control-modern" placeholder="Enter team name" />
+                        </div>
+                        <span asp-validation-for="DevelopedTeam" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="StartDate" class="form-label-modern">
+                            <i class="bi bi-calendar-event me-1"></i> Start Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-plus"></i>
+                            <input asp-for="StartDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="TargetDate" class="form-label-modern">
+                            <i class="bi bi-calendar-check me-1"></i> Target Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-check-fill"></i>
+                            <input asp-for="TargetDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="TargetDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="SDLCStageId" class="form-label-modern">
+                            <i class="bi bi-diagram-3 me-1"></i> SDLC Stage
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-activity"></i>
+                            <select asp-for="SDLCStageId" class="form-control-modern"
+                                    asp-items="@(new SelectList(ViewBag.SdlcPhases ?? new List<ProHub.Models.SDLCPhase>(), "Id", "Phase"))">
+                                <option value="">Please select stage</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="SDLCStageId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="PercentageDone" class="form-label-modern">
+                            <i class="bi bi-percent me-1"></i> Percentage Done
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-pie-chart-fill"></i>
+                            <input asp-for="PercentageDone" class="form-control-modern" placeholder="0-100" />
+                        </div>
+                        <span asp-validation-for="PercentageDone" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="BITBucketRepo" class="form-label-modern">
+                            <i class="bi bi-git me-1"></i> BitBucket Repository
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-github"></i>
+                            <input asp-for="BITBucketRepo" class="form-control-modern" placeholder="Enter repository name" />
+                        </div>
+                        <span asp-validation-for="BITBucketRepo" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="SalesTeamId" class="form-label-modern">
+                            <i class="bi bi-cart-check me-1"></i> Sales Team Involved
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-shop"></i>
+                            <select asp-for="SalesTeamId" class="form-control-modern"
+                                    asp-items="@(new SelectList(ViewBag.SalesTeams ?? new List<ProHub.Models.SalesTeam>(), "Id", "SalesTeamName"))">
+                                <option value="">Please select team</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="SalesTeamId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="SalesAM" class="form-label-modern">
+                            <i class="bi bi-person-lines-fill me-1"></i> Sales Account Manager
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-circle"></i>
+                            <input asp-for="SalesAM" class="form-control-modern" placeholder="Enter account manager" />
+                        </div>
+                        <span asp-validation-for="SalesAM" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="SalesManager" class="form-label-modern">
+                            <i class="bi bi-person-gear me-1"></i> Sales Manager
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-check-fill"></i>
+                            <input asp-for="SalesManager" class="form-control-modern" placeholder="Enter sales manager" />
+                        </div>
+                        <span asp-validation-for="SalesManager" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="SalesEngineer" class="form-label-modern">
+                            <i class="bi bi-tools me-1"></i> Sales Engineer
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-wrench-adjustable"></i>
+                            <input asp-for="SalesEngineer" class="form-control-modern" placeholder="Enter engineer name" />
+                        </div>
+                        <span asp-validation-for="SalesEngineer" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="UATDate" class="form-label-modern">
+                            <i class="bi bi-calendar-week me-1"></i> UAT Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar3"></i>
+                            <input asp-for="UATDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="UATDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="LaunchedDate" class="form-label-modern">
+                            <i class="bi bi-rocket-takeoff me-1"></i> Launched Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-rocket-fill"></i>
+                            <input asp-for="LaunchedDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="LaunchedDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="PlatformOTC" class="form-label-modern">
+                            <i class="bi bi-currency-dollar me-1"></i> One-Time Charge (OTC)
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-cash-stack"></i>
+                            <input asp-for="PlatformOTC" class="form-control-modern" placeholder="Enter amount" />
+                        </div>
+                        <span asp-validation-for="PlatformOTC" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="PlatformMRC" class="form-label-modern">
+                            <i class="bi bi-arrow-repeat me-1"></i> Monthly Recurrent Charge (MRC)
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-cash-coin"></i>
+                            <input asp-for="PlatformMRC" class="form-control-modern" placeholder="Enter amount" />
+                        </div>
+                        <span asp-validation-for="PlatformMRC" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="SoftwareValue" class="form-label-modern">
+                            <i class="bi bi-graph-up me-1"></i> Solution Value
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <input asp-for="SoftwareValue" class="form-control-modern" placeholder="Enter value" />
+                        </div>
+                        <span asp-validation-for="SoftwareValue" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="ContractPeriod" class="form-label-modern">
+                            <i class="bi bi-calendar-range me-1"></i> Contract Period (Years)
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-hourglass-split"></i>
+                            <input asp-for="ContractPeriod" class="form-control-modern" placeholder="Enter years" />
+                        </div>
+                        <span asp-validation-for="ContractPeriod" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="SLA" class="form-label-modern">
+                            <i class="bi bi-headset me-1"></i> Support Availability
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-headset"></i>
+                            <select asp-for="SLA" class="form-control-modern">
+                                <option value="">Please select</option>
+                                <option value="24/7">24/7</option>
+                                <option value="24/5">24/5</option>
+                                <option value="8/5">8/5</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="SLA" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="DPOHandoverDate" class="form-label-modern">
+                            <i class="bi bi-calendar2-date me-1"></i> DPO Handover Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-clipboard-check"></i>
+                            <input asp-for="DPOHandoverDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="DPOHandoverDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="DPOHandoverComment" class="form-label-modern">
+                            <i class="bi bi-chat-left-text me-1"></i> DPO Handover Comments
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <input asp-for="DPOHandoverComment" class="form-control-modern" placeholder="Enter comments" />
+                        </div>
+                        <span asp-validation-for="DPOHandoverComment" class="text-danger"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-footer">
+                <a asp-action="Index" class="btn-modern-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn-modern-primary">
+                    <i class="bi bi-check-circle"></i> Create Solution
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="successPopup" class="success-popup hidden">
+    <div class="success-popup-content">
+        <i class="bi bi-check-circle-fill"></i>
+        <h4>External Solution Created!</h4>
+        <p>The new external solution has been successfully saved to the system.</p>
+        <button id="popupCloseBtn">OK</button>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // 1. Validation Logic for Required fields
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    isValid = false;
+                    field.style.borderColor = '#dc3545';
+                } else {
+                    field.style.borderColor = '#e2e8f0';
+                }
+            });
+
+            if (!isValid) {
+                // e.preventDefault(); // Optional: allow ASP.NET validation to also handle it
+                // alert('Please fill in all required fields marked with *');
+            }
+        });
+
+        // 2. Date Constraints Logic (From your original code)
+        document.addEventListener('DOMContentLoaded', function () {
+            const startDate = document.getElementById('StartDate');
+            const targetDate = document.getElementById('TargetDate');
+            const dateFields = ['StartDate', 'TargetDate', 'UATDate', 'LaunchedDate', 'DPOHandoverDate'];
+            const today = new Date().toISOString().split('T')[0];
+
+            // Set Min Date to Today
+            dateFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) {
+                    element.min = today;
+                }
+            });
+
+            // Logic: Target Date cannot be before Start Date
+            if (startDate && targetDate) {
+                startDate.addEventListener('change', function () {
+                    if (this.value) {
+                        targetDate.min = this.value;
+                    }
+                });
+            }
+        });
+
+        // 3. Popup Logic
+        @if (TempData["SuccessMessage"] != null)
+        {
+                    <text>
+                    window.addEventListener('DOMContentLoaded', () => {
+                        document.getElementById('successPopup').classList.remove('hidden');
+                    });
+                    </text>
+        }
+
+        document.getElementById('popupCloseBtn').addEventListener('click', function () {
+            document.getElementById('successPopup').classList.add('hidden');
+            window.location.href = '@Url.Action("Index")';
+        });
+    </script>
+}

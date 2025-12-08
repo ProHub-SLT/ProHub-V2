@@ -1,0 +1,206 @@
+@model ProHub.Models.OvertimeRequest
+
+@{
+    ViewData["Title"] = "Overtime Request Details";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+    /* Blur overlay */
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 100%;
+        background: inherit;
+        filter: blur(1px);
+        z-index: -1;
+    }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+    .form-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .form-body {
+        padding: 2.5rem;
+    }
+
+    .form-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-modern-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        cursor: pointer;
+    }
+
+    .btn-modern-primary:hover {
+        background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+    }
+
+    .btn-modern-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-modern-secondary:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+        color: #212529;
+        transform: translateY(-1px);
+    }
+
+    .detail-row {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        width: 200px;
+        color: #495057;
+    }
+
+    .detail-value {
+        flex: 1;
+        color: #212529;
+    }
+
+    .badge-pending {
+        background-color: #ffc107;
+        color: #000;
+    }
+
+    .badge-approved {
+        background-color: #28a745;
+        color: #fff;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="form-container">
+        <div class="form-header">
+            <h2 class="mb-0">@ViewData["Title"]</h2>
+        </div>
+
+        <div class="form-body">
+            <div class="detail-row">
+                <div class="detail-label">Created Date:</div>
+                <div class="detail-value">@Model.Created_Date?.ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Created By:</div>
+                <div class="detail-value">@Model.CreatedByName</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Work Date:</div>
+                <div class="detail-value">@Model.Date?.ToString("yyyy-MM-dd")</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">No Of Hours:</div>
+                <div class="detail-value">@Model.No_Of_Hours</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Work Description:</div>
+                <div class="detail-value">@Model.Work_Description</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Approval For:</div>
+                <div class="detail-value">@Model.ApprovalForName</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Approved Date:</div>
+                <div class="detail-value">@(Model.Approved_Date?.ToString("dd/MM/yyyy") ?? "-")</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Approved By:</div>
+                <div class="detail-value">@Model.ApprovedByName</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value">
+                    <span class="badge @(Model.Approved_By != null ? "badge-approved" : "badge-pending")">
+                        @(Model.Approved_By != null ? "Approved" : "Pending")
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Comment:</div>
+                <div class="detail-value">@(Model.Comment ?? "-")</div>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <a asp-action="Index" class="btn-modern-secondary">Back to List</a>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.ID" class="btn-modern-primary">Edit</a>
+            </div>
+        </div>
+    </div>
+</div>

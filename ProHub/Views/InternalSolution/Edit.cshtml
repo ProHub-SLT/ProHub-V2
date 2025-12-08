@@ -1,0 +1,752 @@
+﻿@model ProHub.Models.InternalPlatform
+@{
+    ViewData["Title"] = "Edit Internal Solution";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+        .form-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .form-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+    .form-body {
+        padding: 2.5rem;
+    }
+
+    .form-group-modern {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-label-modern {
+        display: block;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+        .form-label-modern .required {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+        .form-control-modern:focus {
+            outline: none;
+            border-color: #28A745;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+    select.form-control-modern {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232d3748' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    /* Specific style for disabled inputs to match theme */
+    .form-control-modern:disabled {
+        background-color: #e9ecef;
+        opacity: 1;
+        cursor: not-allowed;
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .input-icon-wrapper .form-control-modern {
+            padding-left: 2.75rem;
+        }
+
+    .form-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-modern-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        cursor: pointer;
+    }
+
+        .btn-modern-primary:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+        }
+
+    .btn-modern-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .btn-modern-secondary:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+            transform: translateY(-1px);
+        }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .field-description {
+        background: #f0f9ff;
+        border-left: 3px solid #007BFF;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #2d3748;
+    }
+
+    /* Success Popup */
+    .success-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: all 0.3s ease;
+    }
+
+        .success-popup.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+    .success-popup-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        animation: popupFadeIn 0.4s ease forwards;
+        max-width: 420px;
+        border-top: 6px solid #28a745;
+    }
+
+        .success-popup-content i {
+            font-size: 3rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .success-popup-content h4 {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-popup-content p {
+            font-size: 0.95rem;
+            color: #718096;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-popup-content button {
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .success-popup-content button:hover {
+                background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="bi bi-pencil-square me-2"></i>@ViewData["Title"]</h2>
+            <p>Update details for <strong>@Model.AppName</strong></p>
+        </div>
+
+        <form asp-action="Edit" method="post" id="solutionForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-body">
+                <div class="field-description">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Modify the fields below. Fields marked with <span class="text-danger">*</span> are required.
+                </div>
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="AppCategory" class="form-label-modern">
+                            <i class="bi bi-grid-3x3-gap me-1"></i> Application Category
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-list-task"></i>
+                            <select asp-for="AppCategory" class="form-control-modern" id="appCategoryDropdown">
+                                <option value="">Please select</option>
+                                <option value="Main Application">Main Application</option>
+                                <option value="Change Application">Change Application</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="AppCategory" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="MainAppID" class="form-label-modern">
+                            <i class="bi bi-diagram-3 me-1"></i> Main (Parent) Application
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-diagram-2-fill"></i>
+                            <select asp-for="MainAppID" asp-items="ViewBag.MainApplications" class="form-control-modern" id="mainAppDropdown">
+                                <option value="">Please select</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="MainAppID" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="ParentProjectID" class="form-label-modern">
+                            <i class="bi bi-collection me-1"></i> Application Group
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-layers"></i>
+                            <select asp-for="ParentProjectID" asp-items="ViewBag.ParentProjects" class="form-control-modern" id="ParentProjectID">
+                                <option value="">Please select group</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="ParentProjectID" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="AppName" class="form-label-modern">
+                            <i class="bi bi-app me-1"></i> Application Name
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-window-desktop"></i>
+                            <input asp-for="AppName" class="form-control-modern" placeholder="Enter application name" />
+                        </div>
+                        <span asp-validation-for="AppName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="DevelopedById" class="form-label-modern">
+                            <i class="bi bi-person me-1"></i> Developed By
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-badge"></i>
+                            <select asp-for="DevelopedById" class="form-control-modern">
+                                <option value="">Please select developer</option>
+                                @if (ViewBag.Employees != null)
+                                {
+                                    foreach (var employee in ViewBag.Employees)
+                                    {
+                                        <option value="@employee.EmpId">@employee.EmpName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="DevelopedById" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="DevelopedTeam" class="form-label-modern">
+                            <i class="bi bi-people me-1"></i> Developed Team
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-people-fill"></i>
+                            <input asp-for="DevelopedTeam" class="form-control-modern" placeholder="Enter team name" />
+                        </div>
+                        <span asp-validation-for="DevelopedTeam" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="StartDate" class="form-label-modern">
+                            <i class="bi bi-calendar-check me-1"></i> Start Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-plus"></i>
+                            <input asp-for="StartDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="TargetDate" class="form-label-modern">
+                            <i class="bi bi-calendar-event me-1"></i> Target Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-check-fill"></i>
+                            <input asp-for="TargetDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="TargetDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="SDLCPhaseId" class="form-label-modern">
+                            <i class="bi bi-diagram-3 me-1"></i> SDLC Phase
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-activity"></i>
+                            <select asp-for="SDLCPhaseId" class="form-control-modern">
+                                <option value="">Please select</option>
+                                @if (ViewBag.SdlcPhases != null)
+                                {
+                                    foreach (var phase in ViewBag.SdlcPhases)
+                                    {
+                                        <option value="@phase.Id">@phase.Phase</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="SDLCPhaseId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="PercentageDone" class="form-label-modern">
+                            <i class="bi bi-percent me-1"></i> Percentage Done
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-pie-chart"></i>
+                            <input asp-for="PercentageDone" class="form-control-modern" placeholder="0-100" type="number" min="0" max="100" step="0.01" />
+                        </div>
+                        <span asp-validation-for="PercentageDone" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="IntegratedApps" class="form-label-modern">
+                            <i class="bi bi-link-45deg me-1"></i> Integrated Applications
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-diagram-2"></i>
+                            <input asp-for="IntegratedApps" class="form-control-modern" placeholder="Enter integrated applications" />
+                        </div>
+                        <span asp-validation-for="IntegratedApps" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="BitBucketRepo" class="form-label-modern">
+                            <i class="bi bi-git me-1"></i> BitBucket Repository Name
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-github"></i>
+                            <input asp-for="BitBucketRepo" class="form-control-modern" placeholder="Enter repository name" />
+                        </div>
+                        <span asp-validation-for="BitBucketRepo" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="AppIP" class="form-label-modern">
+                            <i class="bi bi-server me-1"></i> Hosted Server IP/Name
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-hdd-network"></i>
+                            <input asp-for="AppIP" class="form-control-modern" placeholder="Enter application IP" />
+                        </div>
+                        <span asp-validation-for="AppIP" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="AppURL" class="form-label-modern">
+                            <i class="bi bi-link me-1"></i> Application URL
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-globe"></i>
+                            <input asp-for="AppURL" class="form-control-modern" placeholder="Enter application URL" />
+                        </div>
+                        <span asp-validation-for="AppURL" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="BusOwner" class="form-label-modern">
+                            <i class="bi bi-briefcase me-1"></i> Business Owner
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-check"></i>
+                            <input asp-for="BusOwner" class="form-control-modern" placeholder="Enter business owner" />
+                        </div>
+                        <span asp-validation-for="BusOwner" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="DR" class="form-label-modern">
+                            <i class="bi bi-shield-check me-1"></i> DR Availability
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-database-check"></i>
+                            <select asp-for="DR" class="form-control-modern">
+                                <option value="">Please select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="DR" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="EndUserTypeId" class="form-label-modern">
+                            <i class="bi bi-people-fill me-1"></i> End User Type
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-lines-fill"></i>
+                            <select asp-for="EndUserTypeId" class="form-control-modern">
+                                <option value="">Please select</option>
+                                @if (ViewBag.EndUserTypes != null)
+                                {
+                                    foreach (var ut in ViewBag.EndUserTypes)
+                                    {
+                                        <option value="@ut.ID">@ut.EndUserType</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="EndUserTypeId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="AppUsers" class="form-label-modern">
+                            <i class="bi bi-building me-1"></i> Specific Section/Division/Group
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-people"></i>
+                            <input asp-for="AppUsers" class="form-control-modern" placeholder="Enter specific section" />
+                        </div>
+                        <span asp-validation-for="AppUsers" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row" style="grid-template-columns: repeat(3, 1fr);">
+
+                    <div class="form-group-modern">
+                        <label asp-for="UATDate" class="form-label-modern">
+                            <i class="bi bi-calendar-check me-1"></i> UAT Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar3"></i>
+                            <input asp-for="UATDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="UATDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="VADate" class="form-label-modern">
+                            <i class="bi bi-calendar-check me-1"></i> VA Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar2-week"></i>
+                            <input asp-for="VADate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="VADate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="LaunchedDate" class="form-label-modern">
+                            <i class="bi bi-rocket me-1"></i> Launched Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-rocket-takeoff"></i>
+                            <input asp-for="LaunchedDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="LaunchedDate" class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <div class="form-row" style="grid-template-columns: repeat(3, 1fr);">
+
+                    <div class="form-group-modern">
+                        <label asp-for="WAF" class="form-label-modern">
+                            <i class="bi bi-shield-lock me-1"></i> Exposed Through WAF?
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-shield-shaded"></i>
+                            <select asp-for="WAF" class="form-control-modern">
+                                <option value="">Please select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="WAF" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Price" class="form-label-modern">
+                            <i class="bi bi-currency-dollar me-1"></i> Solution Value
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-cash-stack"></i>
+                            <input asp-for="Price" class="form-control-modern" placeholder="Enter Value" type="number" min="0" step="0.01" />
+                        </div>
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="SLA" class="form-label-modern">
+                            <i class="bi bi-clock me-1"></i> Support Availability
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-headset"></i>
+                            <select asp-for="SLA" class="form-control-modern">
+                                <option value="">Please select</option>
+                                <option value="24x7">24x7</option>
+                                <option value="24x5">24x5</option>
+                                <option value="8x5">8x5</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="SLA" class="text-danger"></span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-footer">
+                <a asp-controller="InternalSolution" asp-action="Index" class="btn-modern-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancel & Back
+                </a>
+                <button type="submit" class="btn-modern-primary">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="successPopup" class="success-popup hidden">
+    <div class="success-popup-content">
+        <i class="bi bi-check-circle-fill"></i>
+        <h4>Update Successful!</h4>
+        <p>The solution details have been successfully updated.</p>
+        <button id="popupCloseBtn">OK</button>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const appCategoryDropdown = document.getElementById('appCategoryDropdown');
+            const mainAppDropdown = document.getElementById('mainAppDropdown');
+            const parentProjectDropdown = document.getElementById('ParentProjectID');
+            const form = document.getElementById('solutionForm');
+
+            // --- 1. Form Submit Logic  ---
+            form.addEventListener('submit', function (e) {
+                // Ensure disabled fields are re-enabled before submit so model binding works
+                if (parentProjectDropdown.disabled) {
+                    parentProjectDropdown.disabled = false;
+                }
+                if (mainAppDropdown.disabled) {
+                    mainAppDropdown.disabled = false;
+                }
+            });
+
+            // --- 2. Dropdown Logic  ---
+            if (appCategoryDropdown && mainAppDropdown && parentProjectDropdown) {
+
+                function toggleFields() {
+                    if (appCategoryDropdown.value === 'Change Application') {
+                        // Change Application
+                        mainAppDropdown.disabled = false;
+                        parentProjectDropdown.disabled = true;
+                        parentProjectDropdown.style.backgroundColor = "#e9ecef";
+                    } else if (appCategoryDropdown.value === 'Main Application') {
+                        // Main Application
+                        mainAppDropdown.disabled = true;
+                        mainAppDropdown.value = '';
+
+                        parentProjectDropdown.disabled = false;
+                        parentProjectDropdown.style.backgroundColor = "#f8f9fa";
+                    }
+                }
+
+                // Event Listener
+                appCategoryDropdown.addEventListener('change', toggleFields);
+
+                // Run immediately on load to set initial state based on existing model data
+                toggleFields();
+
+                // --- 3. Auto-populate Logic ---
+                // Only trigger fetch on explicit change, not on page load (unless you want to override existing data)
+                mainAppDropdown.addEventListener('change', function () {
+                    const selectedId = this.value;
+
+                    if (selectedId) {
+                        fetch(`/InternalSolution/GetParentProjectByMainApp?mainAppId=${selectedId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.parentProjectId) {
+                                    parentProjectDropdown.value = data.parentProjectId;
+                                    // Visual Feedback
+                                    parentProjectDropdown.style.borderColor = '#28a745';
+                                    setTimeout(() => {
+                                        parentProjectDropdown.style.borderColor = '#e2e8f0';
+                                    }, 1000);
+                                }
+                            })
+                            .catch(error => console.error('Error loading parent project:', error));
+                    }
+                });
+            }
+
+            // --- 4. Date Logic ---
+            const startDate = document.getElementById('StartDate');
+            const targetDate = document.getElementById('TargetDate');
+
+            // NOTE: For Edit view, we typically remove the "min = today" constraint
+            // because you might be editing a historical record.
+            // If you still want to enforce future dates for UPDATES, uncomment below:
+            /*
+            const dateFields = ['StartDate', 'TargetDate', 'UATDate', 'VADate', 'LaunchedDate'];
+            const today = new Date().toISOString().split('T')[0];
+            dateFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element && !element.value) { // Only set min if empty
+                    element.min = today;
+                }
+            });
+            */
+
+            if (startDate && targetDate) {
+                startDate.addEventListener('change', function () {
+                    if (this.value) {
+                        targetDate.min = this.value;
+                    }
+                });
+            }
+
+            // --- 5. Popup Logic ---
+            @if (TempData["SuccessMessage"] != null)
+            {
+                        <text>
+                        document.getElementById('successPopup').classList.remove('hidden');
+                        </text>
+            }
+
+            document.getElementById('popupCloseBtn').addEventListener('click', function () {
+                document.getElementById('successPopup').classList.add('hidden');
+                window.location.href = '@Url.Action("OperationalList", "InternalSolution")';
+            });
+        });
+    </script>
+}

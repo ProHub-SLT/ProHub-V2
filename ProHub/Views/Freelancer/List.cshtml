@@ -1,0 +1,737 @@
+﻿@model IEnumerable<PROHUB.Models.Freelancer>
+@{
+    ViewData["Title"] = "Freelancer List";
+
+    // 1. FIX: Retrieve Sort Variables from ViewData
+    var sortColumn = ViewData["SortColumn"] as string ?? "FreelancerId";
+    var sortOrder = ViewData["SortOrder"] as string ?? "asc";
+
+    var searchTerm = ViewData["SearchTerm"] as string ?? "";
+    var pageSize = ViewData["PageSize"] as int? ?? 10;
+    var currentPage = ViewData["CurrentPage"] as int? ?? 1;
+    var totalPages = ViewData["TotalPages"] as int? ?? 1;
+    var totalEntries = ViewData["TotalEntries"] as int? ?? 0;
+
+    // Calculate pagination entries safely
+    var startEntry = totalEntries == 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
+    var endEntry = Math.Min(currentPage * pageSize, totalEntries);
+
+    // 2. FIX: Helper function to generate URLs (Replaces the missing BuildIndexUrl)
+    string GetSortUrl(string column)
+    {
+        var newOrder = (column == sortColumn && sortOrder == "asc") ? "desc" : "asc";
+        return Url.Action("List", new
+        {
+            page = 1, // Reset to page 1 when sorting
+            pageSize = pageSize,
+            search = searchTerm,
+            sortColumn = column,
+            sortOrder = newOrder
+        });
+    }
+}
+
+<style>
+    /* --- Scoped CSS --- */
+    body {
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #f8f9fa; /* Changed to gray fallback for readability */
+    }
+
+    .table {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .table thead {
+            background: linear-gradient(135deg, #007BFF 0%, #28A745 100%) !important;
+        }
+
+            .table thead th {
+                color: white;
+                font-weight: 700;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.5px;
+                padding: 1rem 0.75rem;
+                border: none;
+                white-space: nowrap;
+                background: transparent !important;
+                vertical-align: middle;
+                border-bottom: 2px solid #dee2e6;
+            }
+
+                .table thead th a {
+                    color: white;
+                    text-decoration: none;
+                    display: flex;
+                    align-items: center;
+                }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+            background-color: rgba(255, 255, 255, 0.95); /* Added slight background for readability over bg image */
+        }
+
+            .table tbody tr:hover {
+                background-color: rgba(0, 123, 255, 0.1);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                z-index: 1;
+                position: relative;
+            }
+
+        .table tbody td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.875rem;
+        }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    .status-badge-open {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #bbdefb;
+    }
+
+    .status-badge-attending {
+        background-color: #fff3e0;
+        color: #f57c00;
+        border: 1px solid #ffe0b2;
+    }
+
+    .status-badge-awaiting {
+        background-color: #fff8e1;
+        color: #ffa000;
+        border: 1px solid #ffecb3;
+    }
+
+    .status-badge-solved {
+        background-color: #e8f5e8;
+        color: #388e3c;
+        border: 1px solid #c8e6c9;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-create-new {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    }
+
+        .btn-create-new:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+    /* Cards & Containers */
+    .main-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .no-records-container {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+        border-radius: 16px;
+        padding: 4rem 2rem;
+        margin: 2rem 0;
+        border: 2px dashed #dee2e6;
+    }
+
+    .no-records-icon {
+        font-size: 3rem;
+        color: #adb5bd;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .toolbar-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.25rem;
+    }
+
+    /* Custom Modals */
+    .delete-modal-overlay, .success-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .delete-modal-overlay.show, .success-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .delete-modal-content, .success-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-width: 450px;
+        width: 90%;
+        transform: scale(0.7);
+        animation: modalSlideIn 0.4s ease forwards;
+    }
+
+    .delete-modal-content {
+        border-top: 6px solid #dc3545;
+    }
+
+    .success-modal-content {
+        border-top: 6px solid #28a745;
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            transform: scale(0.7) translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes iconPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .warning-icon {
+        font-size: 3.5rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+        animation: iconPulse 1.5s infinite;
+        display: block;
+    }
+
+    .bi-check-circle-fill {
+        font-size: 3.5rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: #dc3545;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .delete-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-modal-cancel {
+        padding: 0.75rem 1.75rem;
+        background: white;
+        color: #495057;
+        font-weight: 600;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-modal-cancel:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+        }
+
+    .btn-modal-delete {
+        padding: 0.75rem 1.75rem;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-modal-delete:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+        }
+
+    .btn-modal-ok {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    /* --- MOBILE RESPONSIVENESS OVERRIDES --- */
+    @@media (max-width: 991.98px) {
+        .toolbar-wrapper .row {
+            gap: 1rem;
+        }
+
+        .d-flex.justify-content-lg-end {
+            justify-content: flex-start !important;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        .toolbar-wrapper {
+            padding: 1rem;
+        }
+
+        .btn-create-new {
+            width: 100%;
+        }
+
+        form.d-flex {
+            width: 100%;
+        }
+
+            form.d-flex input[name="search"] {
+                width: 100%;
+            }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table {
+            table-layout: auto;
+            min-width: 1000px;
+        }
+
+            .table thead th, .table tbody td {
+                white-space: nowrap;
+            }
+
+        .delete-modal-content, .success-modal-content {
+            padding: 2rem 1.5rem;
+            width: 95%;
+        }
+
+        .delete-modal-actions {
+            flex-direction: column-reverse;
+        }
+
+        .btn-modal-cancel, .btn-modal-delete {
+            width: 100%;
+        }
+
+        .d-flex.justify-content-between.align-items-center.mt-4 {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center !important;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0 text-primary">@ViewData["Title"]</h1>
+    </div>
+
+    <div class="toolbar-wrapper mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a asp-action="Create" class="btn-create-new">
+                    <i class="bi bi-plus-circle"></i> <span>Create New</span>
+                </a>
+            </div>
+
+            <div class="col-lg-5 col-md-6">
+                <form method="get" asp-controller="Freelancer" asp-action="List" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
+                    <i class="bi bi-search text-muted me-2"></i>
+                    <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Search all records..." value="@searchTerm" />
+                    <input type="hidden" name="pageSize" value="@pageSize" />
+                    <button type="submit" class="btn btn-primary btn-sm ms-2 px-3">Search</button>
+                </form>
+            </div>
+
+            <div class="col-lg-4 col-md-12 d-flex justify-content-lg-end justify-content-start">
+                <form method="get" asp-controller="Freelancer" asp-action="List" id="entriesForm" class="d-flex align-items-center bg-white rounded-3 px-3 py-2 border">
+                    <label class="me-2 text-nowrap text-secondary small fw-semibold">Show</label>
+                    <select name="pageSize" class="form-select form-select-sm border-0 shadow-none fw-semibold" onchange="this.form.submit()">
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="25" selected="@(pageSize == 25)">25</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
+                    </select>
+                    <span class="ms-2 small text-secondary">entries</span>
+                    <input type="hidden" name="search" value="@searchTerm" />
+                    <input type="hidden" name="page" value="1" />
+                    <input type="hidden" name="sortColumn" value="@sortColumn" />
+                    <input type="hidden" name="sortOrder" value="@sortOrder" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card main-card">
+        <div class="card-body p-0">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">
+                                    <a href="@GetSortUrl("FreelancerId")">
+                                        Freelancer ID
+                                        <i class="bi @(sortColumn == "FreelancerId" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                                    </a>
+                                </th>
+                                <th class="sortable" scope="col">
+                                    <a href="@GetSortUrl("Name")">
+                                        Name
+                                        <i class="bi @(sortColumn == "Name" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                                    </a>
+                                </th>
+
+                                <th style="width: 10%">
+                                    <a href="@GetSortUrl("NIC")">
+                                        NIC
+                                        <i class="bi @(sortColumn == "NIC" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                                    </a>
+                                </th>
+
+                                <th style="width: 13%">
+                                    <a href="@GetSortUrl("PROJECT NAME")">
+                                        PROJECT NAME
+                                        <i class="bi @(sortColumn == "PROJECT NAME" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                                    </a>
+                                </th>
+
+                                <th style="width: 9%">AMOUNT</th>
+
+                                <th style="width: 9%">
+                                    <a href="@GetSortUrl("START DATE")">
+                                        START DATE
+                                        <i class="bi @(sortColumn == "START DATE" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                                    </a>
+                                </th>
+
+                                <th style="width: 9%">
+                                    <a href="@GetSortUrl("END DATE")">
+                                        END DATE
+                                        <i class="bi @(sortColumn == "END DATE" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                                    </a>
+                                </th>
+
+                                <th style="width: 9%">
+                                    <a href="@GetSortUrl("DURATION")">
+                                        DURATION
+                                        <i class="bi @(sortColumn == "DURATION" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                                    </a>
+                                </th>
+
+                                <th style="width: 10%">TASKS</th>
+                                <th style="width: 11%">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var freelancer in Model)
+                            {
+                                <tr>
+                                    <td><div class="fw-semibold text-dark">@freelancer.FormattedFreelancerId</div></td>
+                                    <td><div class="text-truncate">@freelancer.Name</div></td>
+                                    <td><div class="text-truncate">@freelancer.NIC</div></td>
+                                    <td><div class="text-truncate">@freelancer.ProjectName</div></td>
+                                    <td>
+                                        <div class="text-truncate">@(string.IsNullOrEmpty(freelancer.Amount) ? "-" : $"Rs {freelancer.Amount}")</div>
+                                        <small class="text-truncate d-block text-muted">@(string.IsNullOrEmpty(freelancer.BudgetAvailable) ? "" : $"Budget: {freelancer.BudgetAvailable}")</small>
+                                    </td>
+                                    <td><div class="text-truncate">@(freelancer.StartDate?.ToString("MMM dd, yyyy") ?? "-")</div></td>
+                                    <td><div class="text-truncate">@(freelancer.EndDate?.ToString("MMM dd, yyyy") ?? "-")</div></td>
+                                    <td><div class="text-truncate">@(string.IsNullOrEmpty(freelancer.Duration) ? "-" : freelancer.Duration)</div></td>
+                                    <td>
+                                        @if (freelancer.Tasks != null && freelancer.Tasks.Any())
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#tasksModal-@freelancer.FreelancerId">
+                                                <i class="bi bi-list-task me-1"></i> View (@freelancer.Tasks.Count())
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-truncate small text-muted">No tasks</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a asp-action="Edit" asp-route-freelancerId="@freelancer.FreelancerId" class="btn btn-action btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="Details" asp-route-freelancerId="@freelancer.FreelancerId" class="btn btn-action btn-outline-info" title="Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-action btn-outline-danger"
+                                                    onclick="showDeleteModal('@freelancer.FreelancerId', '@freelancer.Name', '@Url.Action("Delete", "Freelancer", new { freelancerId = freelancer.FreelancerId })')"
+                                                    title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="no-records-container text-center">
+                    <i class="bi bi-people no-records-icon"></i>
+                    <h3 class="text-muted mb-3">No freelancers found</h3>
+                    <p class="text-muted mb-4">Try adjusting your search terms or create a new freelancer record.</p>
+                    <a asp-action="Create" class="btn btn-primary btn-lg rounded-pill px-4">
+                        <i class="bi bi-plus-circle me-2"></i>Create New Freelancer
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted">
+                Showing @startEntry to @endEntry of @totalEntries entries
+            </div>
+            <nav>
+                <ul class="pagination mb-0">
+                    <li class="page-item @(currentPage > 1 ? "" : "disabled")">
+                        <a class="page-link" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" asp-route-search="@searchTerm" asp-route-sortColumn="@sortColumn" asp-route-sortOrder="@sortOrder">Previous</a>
+                    </li>
+                    @for (var i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" asp-route-page="@i" asp-route-pageSize="@pageSize" asp-route-search="@searchTerm" asp-route-sortColumn="@sortColumn" asp-route-sortOrder="@sortOrder">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage < totalPages ? "" : "disabled")">
+                        <a class="page-link" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize" asp-route-search="@searchTerm" asp-route-sortColumn="@sortColumn" asp-route-sortOrder="@sortOrder">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+@* Task Modals - Placed outside the main container to avoid z-index issues *@
+@if (Model != null)
+{
+    @foreach (var freelancer in Model)
+    {
+        @if (freelancer.Tasks != null && freelancer.Tasks.Any())
+        {
+            <div class="modal fade" id="tasksModal-@freelancer.FreelancerId" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title"><i class="bi bi-list-task me-2"></i> Tasks for @freelancer.Name</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Task Name</th>
+                                            <th>Specification</th>
+                                            <th>Payment</th>
+                                            <th>Due Date</th>
+                                            <th>Status</th>
+                                            <th>Paid</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var task in freelancer.Tasks)
+                                        {
+                                            <tr>
+                                                <td class="fw-semibold">@task.ID</td>
+                                                <td>@task.TaskName</td>
+                                                <td>@(string.IsNullOrEmpty(task.Specification) ? "-" : task.Specification)</td>
+                                                <td class="fw-semibold">@(string.IsNullOrEmpty(task.Payment) ? "-" : $"Rs {task.Payment}")</td>
+                                                <td>@(task.DeliveryDueDate?.ToString("MMM dd, yyyy") ?? "-")</td>
+                                                <td>
+                                                    @{
+                                                        var statusLower = (task.Status ?? "pending").ToLower();
+                                                        var statusClass = statusLower switch
+                                                        {
+                                                            "completed" => "status-badge status-badge-solved",
+                                                            "in progress" => "status-badge status-badge-attending",
+                                                            "pending" => "status-badge status-badge-awaiting",
+                                                            _ => "status-badge bg-secondary text-white"
+                                                        };
+                                                    }
+                                                    <span class="@statusClass">@(task.Status ?? "Pending")</span>
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        var isPaid = (task.Paid ?? "No").ToLower() == "yes";
+                                                    }
+                                                    <span class="badge @(isPaid ? "bg-success" : "bg-warning text-dark")">
+                                                        <i class="bi @(isPaid ? "bi-check-circle" : "bi-clock")"></i> @(isPaid ? "Yes" : "No")
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}
+
+<div id="deleteModal" class="delete-modal-overlay">
+    <div class="delete-modal-content">
+        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+        <h4>Are You Sure?</h4>
+        <p>You are about to delete freelancer:</p>
+        <p class="item-name" id="deleteItemName"></p>
+        <p style="color: #dc3545; font-size: 0.9rem;">This action cannot be undone and all associated tasks will be removed!</p>
+        <div class="delete-modal-actions">
+            <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <form id="deleteForm" method="post" style="display: inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="deleteFreelancerIdInput" name="freelancerId" value="" />
+                <button type="submit" class="btn-modal-delete"><i class="bi bi-trash-fill me-1"></i> Yes, Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="successModal" class="success-modal-overlay">
+    <div class="success-modal-content">
+        <i class="bi bi-check-circle-fill"></i>
+        <h4>Success!</h4>
+        <p id="successMessageContent">@TempData["SuccessMessage"]</p>
+        <button type="button" class="btn-modal-ok" onclick="closeSuccessModal()">OK</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Open Delete Modal
+        function showDeleteModal(id, name, url) {
+            document.getElementById('deleteItemName').textContent = name + " (ID: " + id + ")";
+            document.getElementById('deleteFreelancerIdInput').value = id;
+            document.getElementById('deleteForm').setAttribute('action', url);
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        // Close Functions
+        function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
+        function closeSuccessModal() { document.getElementById('successModal').classList.remove('show'); }
+
+        // Close on Outside Click
+        document.getElementById('deleteModal').addEventListener('click', e => { if (e.target === document.getElementById('deleteModal')) closeDeleteModal(); });
+        document.getElementById('successModal').addEventListener('click', e => { if (e.target === document.getElementById('successModal')) closeSuccessModal(); });
+
+        // Auto-show Success Modal
+        @if (TempData["SuccessMessage"] != null)
+        {
+                    @: window.addEventListener('DOMContentLoaded', () => { document.getElementById('successModal').classList.add('show'); });
+        }
+
+        // Handle Delete Submission
+        document.getElementById('deleteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+            submitBtn.disabled = true;
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Server returned an error');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error deleting freelancer. Please try again.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                closeDeleteModal();
+            });
+        });
+    </script>
+}

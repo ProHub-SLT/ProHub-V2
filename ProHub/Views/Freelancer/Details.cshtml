@@ -1,0 +1,664 @@
+﻿@model PROHUB.Models.Freelancer
+
+@{
+    ViewData["Title"] = "Freelancer Details";
+
+    // --- Helper Functions ---
+    string FormatDate(DateOnly? d) => d.HasValue ? d.Value.ToString("yyyy-MM-dd") : "-";
+    string FormatDateFriendly(DateOnly? d) => d.HasValue ? d.Value.ToString("MMM dd, yyyy") : "-";
+    string FormatAmount(string amt) => string.IsNullOrWhiteSpace(amt) ? "-" : $"Rs {amt}";
+    string Safe(string s) => string.IsNullOrWhiteSpace(s) ? "-" : s;
+
+    // --- Calculation Logic ---
+    double progressPercentage = 0;
+    int completedTasks = 0;
+    int totalTasks = 0;
+
+    if (Model.Tasks != null && Model.Tasks.Any())
+    {
+        totalTasks = Model.Tasks.Count();
+        completedTasks = Model.Tasks.Count(t => (t.Status ?? "").ToLower() == "completed");
+        progressPercentage = Math.Round((double)completedTasks / totalTasks * 100, 1);
+    }
+}
+
+<style>
+    /* --- Base Styles --- */
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/images/bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    :root {
+        --primary: #1D9BF0;
+        --secondary: #536471;
+        --background: #FFFFFF;
+        --background-dark: #15202B;
+        --card-bg: #F7F9F9;
+        --card-bg-dark: #1E2A3C;
+        --text-primary: #0F1419;
+        --text-primary-dark: #E7E9EA;
+        --text-secondary: #536471;
+        --accent: #00BA7C;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --border-radius: 12px;
+        --transition: all 0.2s ease;
+    }
+
+    @@media (prefers-color-scheme: dark) {
+        :root {
+            --background: var(--background-dark);
+            --card-bg: var(--card-bg-dark);
+            --text-primary: var(--text-primary-dark);
+            --shadow: var(--shadow-dark);
+        }
+    }
+
+    .details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        min-height: 100vh;
+    }
+
+    .section-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .section-header {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        justify-content: space-between;
+        flex-wrap: wrap; /* Allows wrapping on mobile */
+    }
+
+        .section-header i {
+            color: var(--accent);
+            font-size: 1.125rem;
+        }
+
+    .info-grid {
+        display: grid;
+        /* Improved responsive behavior */
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .empty-value {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .mini-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+
+    .mini-card {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+    }
+
+        .mini-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mini-card h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .mini-card p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+    .action-btn {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(29, 155, 240, 0.3);
+        }
+
+        .action-btn.secondary {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+            .action-btn.secondary:hover {
+                background: var(--secondary);
+                color: #fff;
+            }
+
+    .hero {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+        .hero h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero small {
+            opacity: 0.85;
+            font-size: 0.875rem;
+        }
+
+    /* --- Table & Component Styles --- */
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+    }
+
+        .custom-table th {
+            text-align: left;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+        }
+
+        .custom-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+    .status-pill {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .progress-wrapper {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        height: 8px;
+        width: 200px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .progress-fill {
+        background: #fff;
+        height: 100%;
+        transition: width 0.5s ease;
+    }
+
+    /* Status Colors */
+    .bg-success-subtle {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .bg-info-subtle {
+        background-color: #cff4fc;
+        color: #055160;
+    }
+
+    .bg-primary-subtle {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+
+    .bg-warning-subtle {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+
+    .bg-secondary-subtle {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .fw-bold {
+        font-weight: 700 !important;
+    }
+
+    .text-success {
+        color: #198754 !important;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    /* --- MOBILE RESPONSIVENESS --- */
+    @@media (max-width: 768px) {
+        .details-container {
+            padding: 1rem;
+        }
+
+        .hero h1 {
+            font-size: 1.25rem;
+        }
+        /* Stack the hero section content */
+        .hero .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+
+        .hero .text-end {
+            text-align: left !important;
+            width: 100%;
+        }
+
+        .progress-wrapper {
+            width: 100%; /* Full width progress bar on mobile */
+        }
+        /* Adjust Grids for mobile */
+        .info-grid {
+            grid-template-columns: 1fr; /* Single column */
+        }
+
+        .mini-card-grid {
+            grid-template-columns: repeat(2, 1fr); /* 2x2 grid for mini cards on mobile */
+        }
+
+        .info-item[style*="grid-column: span 2"] {
+            grid-column: span 1 !important; /* Force spans to break */
+        }
+        /* --- TABLE CARD VIEW TRANSFORMATION --- */
+        .custom-table thead {
+            display: none; /* Hide headers */
+        }
+
+        .custom-table, .custom-table tbody, .custom-table tr, .custom-table td {
+            display: block;
+            width: 100%;
+        }
+
+            .custom-table tr {
+                margin-bottom: 1rem;
+                border: 1px solid rgba(0,0,0,0.1);
+                border-radius: 8px;
+                background: rgba(255,255,255,0.05);
+                padding: 0.5rem;
+            }
+
+            .custom-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center; /* Vertically align items */
+                text-align: right;
+                padding: 0.5rem 0.25rem;
+                border-bottom: 1px solid rgba(0,0,0,0.05);
+                min-height: 2.5rem;
+            }
+
+                .custom-table td:last-child {
+                    border-bottom: none;
+                }
+                /* Inject labels via CSS using data-label attribute */
+                .custom-table td::before {
+                    content: attr(data-label);
+                    float: left;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    font-size: 0.8rem;
+                    text-transform: uppercase;
+                    margin-right: 1rem;
+                }
+                /* Handle long text in Specification column specifically */
+                .custom-table td[data-label="Specification"] {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    text-align: left;
+                    gap: 0.5rem;
+                }
+    }
+</style>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="max-width: 1200px; margin: 1rem auto; padding: 0 1.5rem;">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+}
+
+<div class="details-container">
+
+    <div class="hero">
+        <div class="d-flex justify-content-between flex-wrap align-items-center">
+            <div>
+                <h1 aria-label="Freelancer Name">
+                    @if (string.IsNullOrEmpty(Model.Name))
+                    {
+                        @Html.Raw("<span class='empty-value' style='color: rgba(255,255,255,0.7)'>Name not specified</span>")
+                    }
+                    else
+                    {
+                        @Safe(Model.Name)
+                    }
+                </h1>
+                <small>@(!string.IsNullOrEmpty(Model.FormattedFreelancerId) ? $"ID: {Model.FormattedFreelancerId}" : "New Freelancer")</small>
+            </div>
+
+            <div class="text-end mt-3 mt-md-0">
+                <div class="mb-1" style="font-size: 0.85rem; opacity: 0.9;">
+                    Project Progress: <strong>@progressPercentage%</strong>
+                </div>
+                <div class="progress-wrapper">
+                    <div class="progress-fill" style="width: @progressPercentage%"></div>
+                </div>
+                <div style="font-size: 0.75rem; margin-top: 4px; opacity: 0.8;">
+                    @completedTasks / @totalTasks tasks completed
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <span><i class="bi bi-person-vcard"></i> Freelancer & Project Information</span>
+        </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">NIC Number</div>
+                <div class="info-value">@Safe(Model.NIC)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Project Name</div>
+                <div class="info-value">@Safe(Model.ProjectName)</div>
+            </div>
+            <div class="info-item" style="grid-column: span 2;">
+                <div class="info-label">Project Scope</div>
+                <div class="info-value">@Safe(Model.ProjectScope)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Total Amount</div>
+                <div class="info-value text-success fw-bold">@FormatAmount(Model.Amount)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Budget Available</div>
+                <div class="info-value">@Safe(Model.BudgetAvailable)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <span><i class="bi bi-calendar-range"></i> Project Timeline</span>
+        </div>
+        <div class="mini-card-grid">
+            <div class="mini-card">
+                <h4>@FormatDateFriendly(Model.StartDate)</h4>
+                <p>Start Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@FormatDateFriendly(Model.EndDate)</h4>
+                <p>End Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@Safe(Model.Duration)</h4>
+                <p>Duration</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <span><i class="bi bi-list-check"></i> Assigned Tasks</span>
+
+            <div class="mini-card" style="padding: 0.4rem 1rem; min-width: auto; margin: 0; box-shadow: none; border: 1px solid rgba(0,0,0,0.1);">
+                <h4 style="font-size: 1.1rem; margin-bottom: 0; line-height: 1;">@completedTasks</h4>
+                <p style="font-size: 0.65rem; margin-bottom: 0; opacity: 0.8; line-height: 1.2;">Tasks Done</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="custom-table" id="taskTable">
+                <thead>
+                    <tr>
+                        <th width="5%">ID</th>
+                        <th width="20%">Task</th>
+                        <th width="30%">Specification</th>
+                        <th width="10%">Payment</th>
+                        <th width="15%">Due Date</th>
+                        <th width="10%">Status</th>
+                        <th width="10%">Paid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Tasks != null && Model.Tasks.Any())
+                    {
+                        foreach (var task in Model.Tasks)
+                        {
+                            var statusLower = (task.Status ?? "pending").ToLower();
+                            var statusClass = statusLower switch
+                            {
+                                "completed" => "bg-success-subtle",
+                                "in progress" => "bg-info-subtle",
+                                "new" => "bg-primary-subtle",
+                                "pending" => "bg-warning-subtle",
+                                _ => "bg-secondary-subtle"
+                            };
+
+                            var isPaid = (task.Paid ?? "No").ToLower() == "yes";
+                            var isOverdue = task.DeliveryDueDate.HasValue && task.DeliveryDueDate.Value < DateOnly.FromDateTime(DateTime.Today);
+
+                            <tr>
+                                @* data-label attributes added for Mobile Card View *@
+                                <td data-label="ID" style="vertical-align: top;">@task.ID</td>
+                                <td data-label="Task" style="font-weight: 500; vertical-align: top;">@(string.IsNullOrEmpty(task.TaskName) ? "-" : task.TaskName)</td>
+                                <td data-label="Specification" style="vertical-align: top;">
+                                    <span style="font-size: 0.85rem; white-space: normal; word-wrap: break-word; display: block;">
+                                        @(string.IsNullOrEmpty(task.Specification) ? "-" : task.Specification)
+                                    </span>
+                                </td>
+                                <td data-label="Payment" style="color: var(--accent); font-weight: 600; vertical-align: top;">
+                                    @(string.IsNullOrEmpty(task.Payment) ? "-" : $"Rs {task.Payment}")
+                                </td>
+                                <td data-label="Due Date" style="vertical-align: top;">
+                                    @if (task.DeliveryDueDate.HasValue)
+                                    {
+                                        <span class="@(isOverdue && statusLower != "completed" ? "text-danger fw-bold" : "")">
+                                            @task.DeliveryDueDate.Value.ToString("MMM dd, yyyy")
+                                            @if (isOverdue && statusLower != "completed")
+                                            {
+                                                <i class="bi bi-exclamation-triangle-fill ms-1"></i>
+                                            }
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td data-label="Status" style="vertical-align: top;">
+                                    <span class="status-pill @statusClass">
+                                        @(!string.IsNullOrEmpty(task.Status) ? task.Status : "Pending")
+                                    </span>
+                                </td>
+                                <td data-label="Paid" style="vertical-align: top;">
+                                    @if (isPaid)
+                                    {
+                                        <span class="text-success"><i class="bi bi-check-circle-fill"></i> Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-warning"><i class="bi bi-hourglass"></i> No</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <span class="empty-value">No tasks assigned yet.</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <span><i class="bi bi-wallet2"></i> Financial Summary</span>
+        </div>
+        @{
+            decimal totalPayment = 0;
+            decimal paidAmount = 0;
+            if (Model.Tasks != null)
+            {
+                foreach (var task in Model.Tasks)
+                {
+                    if (decimal.TryParse(task.Payment, out decimal payment))
+                    {
+                        totalPayment += payment;
+                        if ((task.Paid ?? "No").ToLower() == "yes")
+                        {
+                            paidAmount += payment;
+                        }
+                    }
+                }
+            }
+        }
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Total Task Value</div>
+                <div class="info-value" style="font-size: 1.25rem;">Rs @totalPayment</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Total Paid</div>
+                <div class="info-value text-success" style="font-size: 1.25rem;">Rs @paidAmount</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Remaining Balance</div>
+                <div class="info-value" style="color: var(--primary); font-size: 1.25rem;">Rs @(totalPayment - paidAmount)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-start mt-4 d-flex gap-3">
+        <a asp-controller="Freelancer" asp-action="List" class="action-btn secondary" aria-label="Back to List">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.custom-table tbody tr');
+        rows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Prevent trigger if clicking a button/link inside the row
+                if(e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+                   // Logic to view task details if needed
+                }
+            });
+        });
+    });
+</script>

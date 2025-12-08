@@ -1,0 +1,276 @@
+@model ProHub.Models.OvertimeRequest
+@{
+    ViewData["Title"] = "Edit Overtime Request";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+    /* Blur overlay */
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 100%;
+        background: inherit;
+        filter: blur(1px);
+        z-index: -1;
+    }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+    .form-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .form-body {
+        padding: 2.5rem;
+    }
+
+    .form-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-modern-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        cursor: pointer;
+    }
+
+    .btn-modern-primary:hover {
+        background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+    }
+
+    .btn-modern-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-modern-secondary:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+        color: #212529;
+        transform: translateY(-1px);
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .form-control-modern:focus {
+        outline: none;
+        border-color: #28A745;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+    .form-control,
+    .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: #28A745;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .alert {
+        border-radius: 0.375rem;
+    }
+    
+    .form-field {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Style for disabled/read-only fields */
+    .form-control-modern[readonly],
+    .form-select:disabled {
+        cursor: not-allowed;
+        background-color: #e9ecef;
+    }
+    
+    .form-control-modern[readonly]:hover,
+    .form-select:disabled:hover {
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="form-container">
+        <div class="form-header">
+            <h2 class="mb-0">@ViewData["Title"]</h2>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success mx-4 mt-4">@TempData["Success"]</div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger mx-4 mt-4">@TempData["Error"]</div>
+        }
+
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="ID" />
+            <div class="form-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="form-field">
+                            <label class="form-label">Created Date</label>
+                            <input type="text" class="form-control-modern" 
+                                   value="@Model.Created_Date?.ToString("dd/MM/yyyy HH:mm")" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-field">
+                            <label asp-for="Created_By" class="form-label">Created By</label>
+                            <select asp-for="Created_By" class="form-select" asp-items="@(new SelectList(ViewBag.Employees, "Emp_ID", "Emp_Name"))" disabled>
+                                <option value="">Select Employee</option>
+                            </select>
+                            <span asp-validation-for="Created_By" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-field">
+                            <label asp-for="Date" class="form-label">Work Date</label>
+                            <input asp-for="Date" class="form-control-modern" type="date" required />
+                            <span asp-validation-for="Date" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-field">
+                            <label asp-for="No_Of_Hours" class="form-label">No Of Hours</label>
+                            <input asp-for="No_Of_Hours" class="form-control-modern" step="0.25" required />
+                            <span asp-validation-for="No_Of_Hours" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-field">
+                            <label asp-for="Work_Description" class="form-label">Work Description</label>
+                            <textarea asp-for="Work_Description" class="form-control-modern" rows="4" required></textarea>
+                            <span asp-validation-for="Work_Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-field">
+                            <label asp-for="Approval_For" class="form-label">Approval For</label>
+                            <select asp-for="Approval_For" class="form-select" asp-items="@(new SelectList(ViewBag.Employees, "Emp_ID", "Emp_Name"))" required>
+                                <option value="">Select Manager</option>
+                            </select>
+                            <span asp-validation-for="Approval_For" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-field">
+                            <label asp-for="Comment" class="form-label">Comment</label>
+                            <textarea asp-for="Comment" class="form-control-modern" rows="3"></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-field">
+                            <label asp-for="Approved_By" class="form-label">Approved By</label>
+                            <select asp-for="Approved_By" class="form-select" asp-items="@(new SelectList(ViewBag.Employees, "Emp_ID", "Emp_Name"))" disabled>
+                                <option value="">Select Employee</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <a asp-action="Index" class="btn-modern-secondary">Back to List</a>
+                <button type="submit" class="btn-modern-primary">
+                    <i class="bi bi-check-circle"></i>Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

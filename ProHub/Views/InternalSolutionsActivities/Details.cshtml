@@ -1,0 +1,443 @@
+﻿@model PROHUB.Models.ProjectActivity
+@{
+    ViewData["Title"] = "Activity Details";
+}
+
+<style>
+    /* --- Shared Style System --- */
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/images/bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    :root {
+        --primary: #1D9BF0;
+        --secondary: #536471;
+        --background: #FFFFFF;
+        --background-dark: #15202B;
+        --card-bg: #F7F9F9;
+        --card-bg-dark: #1E2A3C;
+        --text-primary: #0F1419;
+        --text-primary-dark: #E7E9EA;
+        --text-secondary: #536471;
+        --accent: #00BA7C;
+        --danger: #f4212e;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --border-radius: 12px;
+        --transition: all 0.2s ease;
+    }
+
+    /* Dark mode adjustments  */
+    @@media (prefers-color-scheme: dark) {
+        :root {
+            --background: var(--background-dark);
+            --card-bg: var(--card-bg-dark);
+            --text-primary: var(--text-primary-dark);
+            --shadow: var(--shadow-dark);
+        }
+    }
+
+
+
+
+    .details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        min-height: 100vh;
+    }
+
+    .section-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .section-header {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+    }
+
+        .section-header i {
+            color: var(--accent);
+            font-size: 1.125rem;
+        }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .empty-value {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .mini-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .mini-card {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+    }
+
+        .mini-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mini-card h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            margin-top: 0;
+        }
+
+        .mini-card p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: 0;
+        }
+
+    .action-btn {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(29, 155, 240, 0.3);
+        }
+
+        .action-btn.secondary {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+            .action-btn.secondary:hover {
+                background: var(--secondary);
+                color: #fff;
+            }
+
+        .action-btn.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+            .action-btn.danger:hover {
+                background: var(--danger);
+                color: #fff;
+            }
+
+    .hero {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+        .hero h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero small {
+            opacity: 0.85;
+            font-size: 0.875rem;
+        }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 16px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+        .status-badge i {
+            margin-right: 0.25rem;
+        }
+
+    /* Note block specific style */
+    .note-block {
+        background: rgba(0,0,0,0.03);
+        border-left: 4px solid var(--primary);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    @@media (max-width: 768px) {
+        .details-container {
+            padding: 1rem;
+        }
+
+        .hero h1 {
+            font-size: 1.25rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .mini-card-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="details-container">
+
+    <div class="details-container">
+
+        <div class="hero">
+            <div class="d-flex justify-content-between flex-wrap align-items-center">
+                <div>
+                    <h1 aria-label="Activity Name">
+                        @(string.IsNullOrEmpty(Model.SolutionName)
+                                                ? Html.Raw("<span style='opacity:0.7'>Untitled Activity</span>")
+                                                : Model.SolutionName)
+                    </h1>
+                    <small class="opacity-75">Internal activity ID: @Model.Id</small>
+                </div>
+
+                <div class="text-end mt-3 mt-md-0">
+                    @{
+                        var status = (Model.Status ?? "").ToLower();
+                        var statusIcon = status switch
+                        {
+                            "completed" => "bi-check-circle-fill",
+                            "pending" => "bi-hourglass-split",
+                            "active" => "bi-play-circle-fill",
+                            "in progress" => "bi-arrow-repeat",
+                            _ => "bi-info-circle-fill"
+                        };
+
+
+                        var badgeColorClass = status switch
+                        {
+                            "completed" => "bg-success",
+                            "active" => "bg-primary",
+                            _ => ""
+                        };
+                    }
+
+                    <div class="d-flex flex-column align-items-end">
+                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9;">Current Status</span>
+                        <div class="status-badge @badgeColorClass" role="status">
+                            <i class="bi @statusIcon"></i>
+                            @(string.IsNullOrEmpty(Model.Status) ? "Unknown Status" : Model.Status)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-header"><i class="bi bi-calendar-range"></i> Timeline</div>
+            <div class="mini-card-grid">
+                <div class="mini-card">
+                    <p>Created Date/Time</p>
+
+                    <h4>@(Model.CreatedTime?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                    <h4>@Model.CreatedTime?.ToString("hh:mm tt")</h4>
+                </div>
+
+                <div class="mini-card">
+                    <p>Target Date</p>
+                    <h4>@(Model.TargetDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+
+                </div>
+                <div class="mini-card">
+                    <p>Last Updated/Time</p>
+                    <h4>@(Model.UpdatedDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                    <h4>@Model.UpdatedDate?.ToString("hh:mm tt")</h4>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-header"><i class="bi bi-people-fill"></i> Personnel Involved</div>
+
+            <div class="mini-card-grid">
+
+                <!-- Assigned To -->
+                <div class="mini-card">
+                    <p>Assigned To</p>
+                    <div class="info-value pt-2">
+                        @if (!string.IsNullOrEmpty(Model.AssignedToName))
+                        {
+                            @Model.AssignedToName
+                        }
+                        else
+                        {
+                            @Html.Raw("<span class='empty-value'>Not modified</span>")
+                        }
+                    </div>
+                </div>
+
+                <!-- Created By -->
+                <div class="mini-card">
+                    <p>Created By</p>
+                    <div class="info-value pt-2">
+                        @if (!string.IsNullOrEmpty(Model.CreatedByName))
+                        {
+                            @Model.CreatedByName
+                        }
+                        else
+                        {
+                            @Html.Raw("<span class='empty-value'>Not modified</span>")
+                        }
+                    </div>
+                </div>
+
+                <!-- Updated By -->
+                <div class="mini-card">
+                    <p>Updated By</p>
+                    <div class="info-value pt-2">
+                        @if (!string.IsNullOrEmpty(Model.UpdatedByName))
+                        {
+                            @Model.UpdatedByName
+                        }
+                        else
+                        {
+                            @Html.Raw("<span class='empty-value'>Not modified</span>")
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="section-card">
+            <div class="section-header"><i class="bi bi-chat-quote-fill"></i> Comment </div>
+            <div style="background: rgba(0,0,0,0.02); border-left: 4px solid var(--primary); padding: 1rem; border-radius: 0 8px 8px 0;">
+                @if (!string.IsNullOrEmpty(Model.LatestComment))
+                {
+                    <i class="bi bi-quote" style="font-size: 1.5rem; color: var(--primary); opacity: 0.5;"></i>
+                    <span style="font-style: italic; color: var(--text-primary);">@Model.LatestComment</span>
+                }
+                else
+                {
+                    <span class="empty-value">No recent comments or notes logged.</span>
+                }
+            </div>
+        </div>
+        <div class="section-card">
+            <div class="section-header"><i class="bi bi-card-text"></i>  Description</div>
+            <div class="info-value">
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    @Model.Description
+                }
+                else
+                {
+                    @Html.Raw("<span class='empty-value'>No description provided for this activity.</span>")
+                }
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <a asp-action="Index" class="action-btn secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    function confirmDelete(id) {
+        if(confirm('Are you sure you want to delete this activity? This action cannot be undone.')) {
+            var form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/InternalSolutionsActivities/Delete/' + id;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>

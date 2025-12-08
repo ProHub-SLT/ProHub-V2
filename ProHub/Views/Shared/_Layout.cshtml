@@ -1,0 +1,1374 @@
+﻿@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.OpenIdConnect
+@using Microsoft.Identity.Web
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PROHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/@@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navigation Bar */
+        .navbar-prohub {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            padding: 0.8rem 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 0.98rem;
+        }
+
+        .navbar-brand-prohub {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .nav-link-prohub {
+            color: white !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+            .nav-link-prohub:hover {
+                background-color: rgba(255,255,255,0.1);
+                transform: translateY(-1px);
+            }
+
+        .dropdown-menu-prohub {
+            background: #ffffff;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+        }
+
+        /* Scrollable dropdown for Platforms/Solutions */
+        .dropdown-menu-platforms {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .dropdown-item-prohub {
+            padding: 0.5rem 1.5rem;
+            color: #2c3e50 !important;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+        }
+
+            .dropdown-item-prohub:hover {
+                background-color: #3498db;
+                color: white !important;
+            }
+
+        .main-content {
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* ===== PROFILE SECTION - COMPLETELY FIXED ===== */
+        .profile-dropdown {
+            position: relative;
+        }
+
+            .profile-dropdown .nav-link {
+                color: white !important;
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+                padding: 0.5rem 1rem !important;
+                border-radius: 25px;
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.12);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                font-weight: 500;
+            }
+
+                .profile-dropdown .nav-link:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                    border-color: rgba(255, 255, 255, 0.4);
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                }
+
+        /* Avatar Styles */
+        .avatar-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db 0%, #1abc9c 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .profile-dropdown .nav-link:hover .avatar {
+            transform: scale(1.15);
+            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.5);
+        }
+
+        .avatar-status {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #27ae60;
+            border: 2px solid white;
+            border-radius: 50%;
+            bottom: 0;
+            right: 0;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(39, 174, 96, 0);
+            }
+        }
+
+        /* Profile Dropdown Menu - FIXED FOR ALL DEVICES */
+        .profile-dropdown .dropdown-menu {
+            background: white;
+            border: 1px solid #e0e6ed;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            padding: 1rem 0;
+            min-width: 320px;
+            margin-top: 0.8rem;
+            animation: slideDown 0.25s ease-out;
+            overflow: hidden;
+            z-index: 1060 !important;
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ✅ FIXED MOBILE PROFILE DROPDOWN - CRITICAL */
+        @@media (max-width: 991.98px) {
+            .profile-dropdown {
+                position: relative !important;
+            }
+
+                .profile-dropdown .dropdown-menu {
+                    position: absolute !important;
+                    top: 100% !important;
+                    right: 0 !important;
+                    left: auto !important;
+                    width: 300px !important;
+                    min-width: 280px !important;
+                    max-width: 90vw !important;
+                    margin-top: 0.5rem !important;
+                    margin-right: -1rem !important;
+                    border-radius: 14px !important;
+                    border: 1px solid #e0e6ed !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+                    background: white !important;
+                    z-index: 1060 !important;
+                    transform: none !important;
+                    display: none !important;
+                }
+
+                    .profile-dropdown .dropdown-menu.show {
+                        display: block !important;
+                    }
+            /* Profile header card mobile styling */
+            .profile-header-card {
+                border-radius: 14px 14px 0 0 !important;
+                margin: 0 !important;
+            }
+
+            .profile-info-section {
+                padding: 1rem 1.25rem !important;
+                background: white;
+                margin-bottom: 0 !important;
+            }
+
+            .profile-actions {
+                padding: 1rem 1.25rem !important;
+                background: white;
+                border-radius: 0 0 14px 14px !important;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .profile-dropdown .dropdown-menu {
+                min-width: calc(100vw - 2rem) !important;
+                left: 1rem !important;
+                right: 1rem !important;
+                width: calc(100vw - 2rem) !important;
+                max-width: none !important;
+            }
+        }
+
+        /* Profile Header Card */
+        .profile-header-card {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 1.2rem;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 14px 14px 0 0;
+        }
+
+            .profile-header-card::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -10%;
+                width: 200px;
+                height: 200px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+            }
+
+        .profile-header-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-avatar-large {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            flex-shrink: 0;
+        }
+
+        .profile-header-text h6 {
+            margin: 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .profile-header-text h5 {
+            margin: 0.3rem 0 0;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: capitalize;
+        }
+
+        /* Profile Info Blocks */
+        .profile-info-section {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #e0e6ed;
+        }
+
+            .profile-info-section:last-of-type {
+                border-bottom: none;
+            }
+
+        .profile-info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+            margin-bottom: 0.6rem;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+            .profile-info-item:last-child {
+                margin-bottom: 0;
+            }
+
+            .profile-info-item i {
+                color: #3498db;
+                font-size: 1rem;
+                min-width: 1.2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin-top: 0.1rem;
+            }
+
+            .profile-info-item .label {
+                font-weight: 600;
+                color: #2c3e50;
+                min-width: 60px;
+                text-transform: capitalize;
+            }
+
+            .profile-info-item .value {
+                color: #5a6c7d;
+                word-break: break-word;
+                flex: 1;
+            }
+
+            /* Role Badge Styles */
+            .profile-info-item.role-info-item {
+                align-items: center !important;
+                flex-wrap: nowrap !important;
+                min-height: 24px;
+                margin-bottom: 0.8rem;
+            }
+
+                .profile-info-item.role-info-item .label {
+                    min-width: 45px !important;
+                    margin-right: 0.5rem;
+                    white-space: nowrap;
+                }
+
+        .role-badges-container {
+            display: flex !important;
+            flex-wrap: wrap;
+            gap: 0.4rem !important;
+            align-items: center;
+            flex: 1;
+            margin-left: 0 !important;
+            min-width: 0;
+        }
+
+        .role-badge {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.3rem !important;
+            background: linear-gradient(135deg, #3498db 0%, #0072CE 100%);
+            color: white;
+            padding: 0.3rem 0.7rem !important;
+            border-radius: 10px !important;
+            font-size: 0.7rem !important;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            box-shadow: 0 1px 4px rgba(52, 152, 219, 0.2);
+            transition: all 0.3s ease;
+            cursor: default;
+            white-space: nowrap;
+            line-height: 1.2;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+
+            .role-badge i {
+                font-size: 0.65rem !important;
+                color: aquamarine;
+            }
+
+        .role-badge-pending {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .profile-info-item.role-info-item .role-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Quick Actions */
+        .profile-actions {
+            padding: 0.8rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            width: 100%;
+        }
+
+            .btn-logout:hover {
+                background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+                color: white;
+            }
+
+        .btn-login {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-weight: 600;
+            padding: 0.55rem 1.5rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+            .btn-login:hover {
+                background: rgba(255, 255, 255, 0.3);
+                border-color: rgba(255, 255, 255, 0.5);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                color: white;
+            }
+
+        .profile-dropdown .dropdown-divider {
+            margin: 0;
+            border-color: #e0e6ed;
+            height: 1px;
+        }
+
+        /* Footer */
+        .footer-prohub {
+            background: #ffffff;
+            color: #2c3e50;
+            padding: 3rem 0 0;
+            margin-top: auto;
+            position: relative;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+            .footer-prohub::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            }
+
+        .footer-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo-img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .footer-logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .footer-description {
+            font-size: 0.9rem;
+            color: #5a6c7d;
+            max-width: 300px;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .footer-heading {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            color: #2c3e50;
+            position: relative;
+            padding-bottom: 0.6rem;
+        }
+
+            .footer-heading::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 50px;
+                height: 3px;
+                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                border-radius: 2px;
+            }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+            .footer-links li {
+                margin-bottom: 0.6rem;
+            }
+
+        .footer-link {
+            color: #5a6c7d;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+            .footer-link:hover {
+                color: #3498db;
+                transform: translateX(5px);
+            }
+
+            .footer-link i {
+                margin-right: 8px;
+                font-size: 0.9rem;
+                color: #3498db;
+            }
+
+        .footer-contact {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.9rem;
+            color: #5a6c7d;
+            font-size: 0.95rem;
+        }
+
+            .footer-contact i {
+                margin-right: 12px;
+                color: #3498db;
+                font-size: 1.1rem;
+                min-width: 20px;
+            }
+
+        .footer-bottom {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1.5rem 0;
+            margin-top: 2.5rem;
+            border-top: 1px solid #e0e6ed;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-copyright,
+        .footer-login-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #5a6c7d;
+            font-weight: 500;
+        }
+
+            .footer-copyright i,
+            .footer-login-info i {
+                margin-right: 5px;
+                color: #3498db;
+            }
+
+        .footer-social {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+            justify-content: flex-start;
+        }
+
+        .social-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #3498db;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: 1px solid #e0e6ed;
+        }
+
+            .social-icon:hover {
+                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                color: white;
+                transform: translateY(-3px);
+                box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+                border-color: transparent;
+            }
+
+
+
+        * === FOOTER ANIMATED SHAPES - FULLY RESTORED === */
+        .footer-animation {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 20px;
+            opacity: 0.15;
+        }
+
+        .bar {
+            width: 80px;
+            height: 16px;
+            border-radius: 10px;
+            transform: rotate(45deg);
+        }
+
+            .bar.blue {
+                background-color: #0072CE;
+                animation: moveBlue 14s ease-in-out infinite alternate;
+            }
+
+            .bar.cyan {
+                background-color: #00B6F1;
+                animation: moveCyan 16s ease-in-out infinite alternate;
+            }
+
+            .bar.green {
+                background-color: #39B54A;
+                animation: moveGreen 18s ease-in-out infinite alternate;
+            }
+
+        .dot {
+            width: 24px;
+            height: 24px;
+            background-color: #39B54A;
+            border-radius: 50%;
+            animation: moveDot 12s ease-in-out infinite alternate;
+        }
+
+        @@keyframes moveBlue {
+            0% {
+                top: 20%;
+                left: 10%;
+                transform: rotate(45deg) translate(0,0);
+            }
+
+            100% {
+                top: 40%;
+                left: 80%;
+                transform: rotate(60deg) translate(20px,20px);
+            }
+        }
+
+        @@keyframes moveCyan {
+            0% {
+                top: 50%;
+                left: 30%;
+                transform: rotate(45deg);
+            }
+
+            100% {
+                top: 10%;
+                left: 70%;
+                transform: rotate(75deg);
+            }
+        }
+
+        @@keyframes moveGreen {
+            0% {
+                top: 60%;
+                left: 70%;
+                transform: rotate(45deg);
+            }
+
+            100% {
+                top: 30%;
+                left: 15%;
+                transform: rotate(65deg);
+            }
+        }
+
+        @@keyframes moveDot {
+            0% {
+                top: 55%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            100% {
+                top: 35%;
+                left: 80%;
+                transform: translate(-50%, -50%) scale(1.3);
+            }
+        }
+        /* ================================================ */
+
+
+
+        /* Mobile Navbar Toggle Button */
+        .navbar-toggler-prohub {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.25rem 0.5rem;
+        }
+
+            .navbar-toggler-prohub:focus {
+                box-shadow: none;
+            }
+
+        .navbar-toggler-icon-prohub {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* FIXED: Mobile Dropdown Behavior - EXCLUDING PROFILE */
+        @@media (max-width: 991.98px) {
+            /* Regular dropdowns (Platforms, My Work, etc.) */
+            .navbar-nav .dropdown:not(.profile-dropdown) {
+                position: static !important;
+            }
+
+                .navbar-nav .dropdown:not(.profile-dropdown) .dropdown-menu {
+                    position: static !important;
+                    float: none !important;
+                    width: auto !important;
+                    margin-top: 0 !important;
+                    background-color: #ffffff !important;
+                    border: 1px solid rgba(0,0,0,.15) !important;
+                    border-radius: 0.375rem !important;
+                    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                    padding: 0.5rem 0 !important;
+                    display: none !important;
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
+                }
+
+                    .navbar-nav .dropdown:not(.profile-dropdown) .dropdown-menu.show {
+                        display: block !important;
+                    }
+                /* Fix dropdown item padding for mobile (regular dropdowns only) */
+                .navbar-nav .dropdown:not(.profile-dropdown) .dropdown-item-prohub {
+                    padding: 0.75rem 1.25rem !important;
+                    clear: both !important;
+                    white-space: nowrap !important;
+                    font-size: 0.95rem !important;
+                    width: 100% !important;
+                }
+        }
+
+        /* Custom scrollbar for dropdowns */
+        .dropdown-menu-platforms::-webkit-scrollbar,
+        .profile-dropdown .dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-menu-platforms::-webkit-scrollbar-track,
+        .profile-dropdown .dropdown-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .dropdown-menu-platforms::-webkit-scrollbar-thumb,
+        .profile-dropdown .dropdown-menu::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+            .dropdown-menu-platforms::-webkit-scrollbar-thumb:hover,
+            .profile-dropdown .dropdown-menu::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
+
+        /* Profile Responsive */
+        @@media (max-width: 768px) {
+            .avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+            }
+
+            .profile-dropdown .nav-link {
+                padding: 0.4rem 0.8rem !important;
+                gap: 0.4rem;
+            }
+
+            .role-badges-container {
+                flex-direction: row !important;
+                flex-wrap: wrap;
+                gap: 0.3rem !important;
+            }
+
+            .role-badge {
+                padding: 0.25rem 0.6rem !important;
+                font-size: 0.65rem !important;
+                max-width: 100px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.75rem;
+            }
+
+            .role-badge {
+                padding: 0.2rem 0.5rem !important;
+                font-size: 0.6rem !important;
+                max-width: 80px;
+            }
+        }
+
+        /* Mobile Footer Adjustments */
+        @@media (max-width: 768px) {
+            .footer-prohub {
+                padding: 2rem 0 0;
+            }
+
+            .footer-logo {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .footer-description {
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
+            }
+
+            .footer-heading {
+                text-align: center;
+            }
+
+                .footer-heading::after {
+                    left: 50%;
+                    transform: translateX(-50%);
+                }
+
+            .footer-links {
+                text-align: center;
+            }
+
+            .footer-contact {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
+        }
+
+        @@media (max-width: 991px) {
+            .footer-prohub .row > div {
+                margin-bottom: 2rem;
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-prohub">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="@Url.Action("Index", "Home")">
+                <img src="/images/SltLogo.png" width="30" height="30" class="me-2">
+                <span class="navbar-brand navbar-brand-prohub">PROHUB</span>
+            </a>
+
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler navbar-toggler-prohub" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon navbar-toggler-icon-prohub"></span>
+            </button>
+
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Platforms/Solutions
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-prohub dropdown-menu-platforms">
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolution")">Internal Solutions - Operational</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="#">Internal Solutions - In Progress</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="#">Internal Solutions - Recently Launched</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionRetired")">Internal Solutions - Retired</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionsAbandoned")">Internal Solutions - Abandoned</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ConsumerPlatform")">Customer Service Platform</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("create", "ExternalSolutions")">External Solutions - Operational</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="#">External Solutions - Prospective</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="#">External Solutions - Retired</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Abandoned")">External Solutions - Abandoned</a></li>
+
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "ConsumerPlatform")">Internal Solutions - Backup Matrix</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "ExternalPlatform")">External Solutions - Backup Matrix</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ProjectedRevenue", "RevenueCal")">External Solutions - Projected Revenue</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ActualRevenue", "RevenueCal")">External Solutions - Financial Revenue</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("InternalProjectValue", "RevenueCal")">Internal Solutions - Annual Contribution</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            My Work
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-prohub">
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Create", "NextWeekPlans")">Update Weekly Plan</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "NextWeekPlans")">Weekly Plan - Report</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "NextWeekPlans")">My Applications - Backup Matrix</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Report Incidents
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-prohub">
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("List", "ExternalIssue")">External Solutions</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("List", "InternalIssue")">Internal Solutions</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "OtherSystemIssues")">Other Solutions</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Reference Data
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-prohub">
+                            <li><a class="dropdown-item dropdown-item-prohub" href="#">Companies/Customers</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "CustomerContacts")">Customer Contacts</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Employee")">Divisional Members</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ParentProjects")">Application Groups</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "FieldsOfSpecialization")">Fields of Specialization</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            DMS
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-prohub">
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalDocuments")">Internal Solutions Documents</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ExternalDocuments")">External Solutions Documents</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Project Activities
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-prohub">
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionsActivities")">Internal Solutions Activities</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ExternalSolutionsActivities")">External Solutions Activities</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Overtime")">Overtime Data</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Trainees
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-prohub">
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Trainee")">All Trainees</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ActiveTrainee", "Trainee")">Active Trainees</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("InactiveTrainee", "Trainee")">Inactive Trainees</a></li>
+                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("PaidTrainee", "Trainee")">Paid Trainees</a></li>
+                        </ul>
+                    </li>
+
+
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-prohub" href="@Url.Action("Index", "Partner")">
+                            Partners
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-prohub" href="@Url.Action("List", "Freelancer")">
+                            Freelancer
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Profile / Login Section -->
+                <ul class="navbar-nav ms-auto">
+                    @{
+                        string displayName = User.FindFirst("name")?.Value ?? "Guest";
+                        string email = User.FindFirst("preferred_username")?.Value
+                        ?? User.FindFirst("upn")?.Value
+                        ?? "Not logged in";
+                        string initials = "U";
+                        if (!string.IsNullOrEmpty(displayName) && displayName != "Guest")
+                        {
+                            var parts = displayName.Split(' ');
+                            if (parts.Length == 1)
+                                initials = parts[0][0].ToString().ToUpper();
+                            else
+                                initials = (parts[0][0].ToString() + parts[1][0].ToString()).ToUpper();
+                        }
+                        var rolesList = User.Claims
+                        .Where(c => c.Type.EndsWith("/role") || c.Type == "roles")
+                        .Select(c => c.Value)
+                        .ToList();
+                    }
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item dropdown profile-dropdown">
+                            <a class="nav-link dropdown-toggle" href="#"
+                               role="button"
+                               data-bs-toggle="dropdown"
+                               data-bs-auto-close="true"
+                               aria-expanded="false"
+                               id="profileDropdown">
+                                <div class="avatar-container">
+                                    <div class="avatar">@initials</div>
+                                    <div class="avatar-status"></div>
+                                </div>
+                                <span class="text-capitalize d-none d-sm-inline">@displayName.Split(' ')[0]</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                <!-- Profile Header -->
+                                <li class="profile-header-card">
+                                    <div class="profile-header-content">
+                                        <div class="profile-avatar-large">@initials</div>
+                                        <div class="profile-header-text">
+                                            <h6>Welcome Back</h6>
+                                            <h5>@displayName</h5>
+                                        </div>
+                                    </div>
+                                </li>
+                                <!-- Profile Information -->
+                                <li>
+                                    <div class="profile-info-section">
+                                        <div class="profile-info-item">
+                                            <i class="bi bi-person-circle"></i>
+                                            <span class="label">Name:</span>
+                                            <span class="value text-capitalize">@displayName</span>
+                                        </div>
+                                        <div class="profile-info-item">
+                                            <i class="bi bi-envelope"></i>
+                                            <span class="label">Email:</span>
+                                            <span class="value">@email</span>
+                                        </div>
+                                    </div>
+                                    <div class="profile-info-section">
+                                        <div class="profile-info-item role-info-item">
+                                            <i class="bi bi-shield-check"></i>
+                                            <span class="label">Role:</span>
+                                            <div class="role-badges-container">
+                                                @if (rolesList.Any())
+                                                {
+                                                    @foreach (var role in rolesList)
+                                                    {
+                                                        <span class="role-badge">
+                                                            <i class="bi bi-check-circle"></i>
+                                                            @role
+                                                        </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="role-badge role-badge-pending">
+                                                        <i class="bi bi-dash-circle"></i>
+                                                        Pending
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li class="profile-actions">
+                                    <form asp-controller="Account" asp-action="SignOut" method="post" style="margin: 0;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-logout">
+                                            <i class="bi bi-box-arrow-right"></i>
+                                            Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="SignIn" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-login">
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                    Login
+                                </button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content container-fluid py-4">
+        @RenderBody()
+    </div>
+
+    <!-- Footer with Animation -->
+    <footer class="footer-prohub">
+        <div class="footer-animation">
+            <div class="shape bar blue"></div>
+            <div class="shape bar cyan"></div>
+            <div class="shape bar green"></div>
+            <div class="shape dot"></div>
+        </div>
+        <div class="container footer-content">
+            <div class="row">
+                <!-- Logo and Description -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="footer-logo">
+                        <img src="~/images/SltLogo.png" alt="PROHUB" class="footer-logo-img">
+                        <span class="footer-logo-text">PROHUB</span>
+                    </div>
+                    <p class="footer-description">
+                        Digital Platform for SLT Internal Solutions Management. Streamlining operations and enhancing productivity across all divisions.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-icon" title="Email">
+                            <i class="bi bi-envelope-fill"></i>
+                        </a>
+                        <a href="#" class="social-icon" title="Microsoft Teams">
+                            <i class="bi bi-microsoft-teams"></i>
+                        </a>
+                        <a href="#" class="social-icon" title="Share">
+                            <i class="bi bi-share-fill"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="footer-heading">Quick Access</h5>
+                    <ul class="footer-links">
+                        <li><a href="#" class="footer-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li><a href="#" class="footer-link"><i class="bi bi-calendar-week"></i> Weekly Plan</a></li>
+                        <li><a href="#" class="footer-link"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
+                        <li><a href="#" class="footer-link"><i class="bi bi-person-badge"></i> Profile</a></li>
+                    </ul>
+                </div>
+                <!-- Resources -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-heading">Resources</h5>
+                    <ul class="footer-links">
+                        <li><a href="#" class="footer-link"><i class="bi bi-journal-text"></i> Documentation</a></li>
+                        <li><a href="#" class="footer-link"><i class="bi bi-question-circle"></i> Help Center</a></li>
+                        <li><a href="#" class="footer-link"><i class="bi bi-download"></i> Downloads</a></li>
+                        <li><a href="#" class="footer-link"><i class="bi bi-info-circle"></i> System Status</a></li>
+                    </ul>
+                </div>
+                <!-- Contact Info -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-heading">Support</h5>
+                    <div class="footer-contact">
+                        <i class="bi bi-telephone-fill"></i>
+                        <span>IT Help Desk: Ext. 4357</span>
+                    </div>
+                    <div class="footer-contact">
+                        <i class="bi bi-envelope-fill"></i>
+                        <span>support@prohub.slt.lk</span>
+                    </div>
+                    <div class="footer-contact">
+                        <i class="bi bi-clock-fill"></i>
+                        <span>Mon - Fri: 8:00 AM - 5:00 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container text-center">
+                <span class="footer-copyright">
+                    <i class="bi bi-c-circle"></i> @DateTime.Now.Year PROHUB Digital Platform
+                </span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ✅ COMPLETELY FIXED: Mobile Dropdown JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('✅ PROHUB Layout: Fixed mobile dropdowns initialized');
+
+            const navbar = document.getElementById('navbarContent');
+            const profileDropdown = document.querySelector('.profile-dropdown');
+
+            // ✅ SIMPLIFIED: Mobile navbar auto-close (EXCLUDE profile)
+            function setupMobileAutoClose() {
+                const navigationLinks = document.querySelectorAll([
+                    '.dropdown-item-prohub[href]:not([href="#"])',
+                    '.nav-link-prohub[href]:not([href="#"])'
+                ].join(','));
+
+                navigationLinks.forEach(link => {
+                    if (!link.closest('.profile-dropdown')) {
+                        link.addEventListener('click', function (e) {
+                            if (window.innerWidth < 992 &&
+                                this.getAttribute('href') &&
+                                this.getAttribute('href') !== '#') {
+
+                                // Close navbar after short delay
+                                setTimeout(() => {
+                                    if (navbar && navbar.classList.contains('show')) {
+                                        const bsCollapse = bootstrap.Collapse.getInstance(navbar);
+                                        if (bsCollapse) {
+                                            bsCollapse.hide();
+                                        }
+                                    }
+                                }, 250);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // ✅ FIXED: Click outside handler
+            document.addEventListener('click', function (e) {
+                if (window.innerWidth < 992) {
+                    const navbarToggler = document.querySelector('.navbar-toggler');
+                    const isClickInsideNavbar = navbar && navbar.contains(e.target);
+                    const isToggleClick = navbarToggler && navbarToggler.contains(e.target);
+
+                    if (!isClickInsideNavbar && !isToggleClick &&
+                        navbar && navbar.classList.contains('show')) {
+
+                        // Check if profile dropdown is open
+                        const profileMenu = document.querySelector('.profile-dropdown .dropdown-menu.show');
+                        if (!profileMenu) {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbar);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ✅ FIXED: Reset dropdowns when navbar collapses
+            if (navbar) {
+                navbar.addEventListener('hidden.bs.collapse', function () {
+                    // Close only regular dropdowns
+                    document.querySelectorAll('.dropdown-menu:not(.profile-dropdown .dropdown-menu)').forEach(menu => {
+                        if (menu.classList.contains('show')) {
+                            menu.classList.remove('show');
+                        }
+                    });
+
+                    document.querySelectorAll('.dropdown-toggle:not(.profile-dropdown .dropdown-toggle)').forEach(toggle => {
+                        if (toggle.getAttribute('aria-expanded') === 'true') {
+                            toggle.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                });
+            }
+
+            // ✅ Handle window resize
+            let resizeTimeout;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function () {
+                    if (window.innerWidth >= 992) {
+                        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                            menu.classList.remove('show');
+                        });
+                        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+                            toggle.setAttribute('aria-expanded', 'false');
+                        });
+                    }
+                }, 250);
+            });
+
+            // ✅ Initialize mobile auto-close
+            setupMobileAutoClose();
+
+            // ✅ FORCE Profile dropdown initialization
+            const profileToggle = document.querySelector('#profileDropdown');
+            if (profileToggle) {
+                // Destroy existing instance if any
+                const existingInstance = bootstrap.Dropdown.getInstance(profileToggle);
+                if (existingInstance) {
+                    existingInstance.dispose();
+                }
+
+                // Create new Bootstrap dropdown instance
+                new bootstrap.Dropdown(profileToggle, {
+                    autoClose: true
+                });
+
+                console.log('✅ Profile dropdown initialized successfully');
+            }
+
+            // ✅ Profile dropdown touch enhancement for mobile
+            if (profileToggle) {
+                profileToggle.addEventListener('click', function (e) {
+                    console.log('Profile dropdown clicked');
+                    // Let Bootstrap handle everything naturally
+                });
+            }
+
+            console.log('✅ All mobile dropdown fixes applied successfully');
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

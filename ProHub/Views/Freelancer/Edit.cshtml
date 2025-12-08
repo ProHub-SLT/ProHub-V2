@@ -1,0 +1,948 @@
+﻿@model PROHUB.Models.Freelancer
+@{
+    ViewData["Title"] = "Edit Freelancer";
+}
+
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+        .form-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .form-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+    .form-body {
+        padding: 2.5rem;
+    }
+
+    .form-group-modern {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-label-modern {
+        display: block;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+        .form-control-modern:focus {
+            outline: none;
+            border-color: #28A745;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .form-control-modern[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+    select.form-control-modern {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232d3748' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .input-icon-wrapper .form-control-modern {
+            padding-left: 2.75rem;
+        }
+
+    .form-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-modern-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        cursor: pointer;
+    }
+
+        .btn-modern-primary:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+        }
+
+    .btn-modern-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .btn-modern-secondary:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+            transform: translateY(-1px);
+        }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .field-description {
+        background: #f0f9ff;
+        border-left: 3px solid #007BFF;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #2d3748;
+    }
+
+    .section-title {
+        color: #007bff;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Table Styling */
+    .table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background: white;
+    }
+
+        .table thead {
+            background: linear-gradient(135deg, #007BFF 0%, #28A745 100%) !important;
+        }
+
+            .table thead th {
+                color: white;
+                font-weight: 700;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.5px;
+                padding: 1rem 0.75rem;
+                border: none;
+                white-space: nowrap;
+                background: transparent !important;
+                vertical-align: middle;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+                text-align: center;
+                position: relative;
+            }
+
+                .table thead th:not(:last-child)::after {
+                    content: '';
+                    position: absolute;
+                    right: 0;
+                    top: 20%;
+                    height: 60%;
+                    width: 1px;
+                    background: rgba(255, 255, 255, 0.3);
+                }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+            .table tbody tr:hover {
+                background-color: rgba(0, 123, 255, 0.05);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        .table tbody td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.875rem;
+            word-wrap: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    /* Badge Tweaks */
+    .badge-modern {
+        padding: 0.45em 0.8em;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.3px;
+    }
+
+    /* Action Buttons in Table */
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        margin: 0 2px;
+    }
+
+    /* --- Mobile Responsive CSS --- */
+    @@media screen and (max-width: 991px) {
+        /* Form Container adjustments */
+        .form-container {
+            margin: 10px;
+            width: auto;
+        }
+
+        .form-header {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .form-body {
+            padding: 1.5rem;
+        }
+        /* Make Grids Stack Vertically (1 Column) */
+        .form-row,
+        .form-row-3 {
+            grid-template-columns: 1fr; /* Force single column */
+            gap: 1rem;
+        }
+        /* Override inline style for "Project Scope" to fit mobile */
+        .form-group-modern[style*="span 2"] {
+            grid-column: span 1 !important;
+        }
+        /* Align "Add Task" button section */
+        .form-row-3.align-items-end {
+            align-items: stretch; /* Stretch inputs */
+        }
+        /* Adjust Buttons */
+        .form-footer {
+            flex-direction: column-reverse; /* Stack buttons, Save on top usually or keeps order */
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .btn-modern-primary,
+        .btn-modern-secondary {
+            width: 100%; /* Full width buttons */
+            justify-content: center;
+        }
+        /* Fix Table Scrolling */
+        /* Since table has fixed layout, we force it to scroll on small screens */
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto; /* Enable horizontal scrolling */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table {
+            min-width: 800px; /* Force minimum width to prevent squashing */
+            table-layout: auto; /* Allow columns to take necessary space */
+        }
+        /* Adjust specific input heights for consistency */
+        .input-icon-wrapper i {
+            font-size: 1.1rem;
+        }
+        /* Add Task Button area */
+        .col-12.d-flex.justify-content-end {
+            justify-content: center !important;
+            width: 100%;
+        }
+
+            .col-12.d-flex.justify-content-end button {
+                width: 100%;
+            }
+    }
+
+    /* Extra small devices (Phones under 576px) */
+    @@media screen and (max-width: 576px) {
+        .form-header h2 {
+            font-size: 1.4rem;
+        }
+
+        .form-body {
+            padding: 1rem;
+        }
+    }
+
+    .form-label-modern .required {
+        color: #dc3545;
+        margin-left: 0.25rem;
+    }
+</style>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show m-3" role="alert" style="max-width: 1100px; margin: 20px auto !important;">
+        <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Validation Error
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Removal
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to remove this task?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmYes">Yes, Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="bi bi-pencil-square me-2"></i>Edit Freelancer</h2>
+            <p>Update the details for this Freelancer</p>
+        </div>
+
+        <form asp-action="Edit" method="post" id="freelancerForm">
+            @Html.AntiForgeryToken()
+            <input asp-for="FreelancerId" type="hidden" />
+
+            <div class="form-body">
+                <div class="field-description">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Fields marked with <span class="text-danger">*</span> are required
+                </div>
+                <h5 class="section-title">Freelancer & Project Details</h5>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="Name" class="form-label-modern">
+                            <i class="bi bi-person me-1"></i> Name <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-badge"></i>
+                            <input asp-for="Name" class="form-control-modern" placeholder="Enter full name" />
+                        </div>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="NIC" class="form-label-modern">
+                            <i class="bi bi-card-text me-1"></i> NIC <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-card-heading"></i>
+                            <input asp-for="NIC" class="form-control-modern" placeholder="Enter NIC number" />
+                        </div>
+                        <span asp-validation-for="NIC" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="ProjectName" class="form-label-modern">
+                            <i class="bi bi-folder me-1"></i> Project Name <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-folder2-open"></i>
+                            <input asp-for="ProjectName" class="form-control-modern" placeholder="Enter project name" />
+                        </div>
+                        <span asp-validation-for="ProjectName" class="text-danger small"></span>
+                    </div>
+                    <div class="form-group-modern">
+                        <label asp-for="BudgetAvailable" class="form-label-modern">
+                            <i class="bi bi-wallet2 me-1"></i> Budget Available <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-wallet"></i>
+                            <select asp-for="BudgetAvailable" class="form-control-modern">
+                                <option value="">-- Select --</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="BudgetAvailable" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern" style="grid-column: span 2;">
+                        <label asp-for="ProjectScope" class="form-label-modern">
+                            <i class="bi bi-list-task me-1"></i> Project Scope <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-file-text"></i>
+                            <textarea asp-for="ProjectScope" class="form-control-modern" style="min-height: 80px; padding-left: 2.75rem;" placeholder="Enter project scope"></textarea>
+                        </div>
+                        <span asp-validation-for="ProjectScope" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="Amount" class="form-label-modern">
+                            <i class="bi bi-currency-dollar me-1"></i> Amount <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-cash-stack"></i>
+                            <input asp-for="Amount" type="number" class="form-control-modern" placeholder="Enter amount" />
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="StartDate" class="form-label-modern">
+                            <i class="bi bi-calendar-check me-1"></i> Start Date <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-plus"></i>
+                            <input asp-for="StartDate" id="StartDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="StartDate" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="EndDate" class="form-label-modern">
+                            <i class="bi bi-calendar-x me-1"></i> End Date <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-minus"></i>
+                            <input asp-for="EndDate" id="EndDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="EndDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="Duration" class="form-label-modern">
+                            <i class="bi bi-hourglass-split me-1"></i> Duration
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-clock-history"></i>
+                            <input asp-for="Duration" id="Duration" readonly class="form-control-modern" />
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="section-title mt-4">Add Task</h5>
+
+                <div class="form-row-3 align-items-end">
+                    <div class="form-group-modern">
+                        <label for="TaskName" class="form-label-modern">
+                            <i class="bi bi-check2-square me-1"></i> Task
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-list-check"></i>
+                            <input id="TaskName" class="form-control-modern" placeholder="Enter task name" />
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="Specification" class="form-label-modern">
+                            <i class="bi bi-file-text me-1"></i> Specification
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-justify-left"></i>
+                            <input id="Specification" class="form-control-modern" placeholder="Enter specifications" />
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="Payment" class="form-label-modern">
+                            <i class="bi bi-cash me-1"></i> Payment
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-currency-dollar"></i>
+                            <input id="Payment" type="number" class="form-control-modern" placeholder="Enter payment amount" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row-3 align-items-end">
+                    <div class="form-group-modern">
+                        <label for="DeliveryDueDate" class="form-label-modern">
+                            <i class="bi bi-clock-history me-1"></i> Delivery Due Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-event"></i>
+                            <input id="DeliveryDueDate" type="date" class="form-control-modern" />
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="Status" class="form-label-modern">
+                            <i class="bi bi-flag me-1"></i> Status
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-flag-fill"></i>
+                            <select id="Status" class="form-control-modern">
+                                <option value="">-- Select --</option>
+                                <option value="New">New</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label for="Paid" class="form-label-modern">
+                            <i class="bi bi-credit-card me-1"></i> Paid
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-credit-card-2-front"></i>
+                            <select id="Paid" class="form-control-modern">
+                                <option value="">-- Select --</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-12 d-flex justify-content-end">
+                        <button type="button" class="btn-modern-primary" onclick="addTask()" style="padding: 0.6rem 1.5rem;">
+                            <i class="bi bi-plus-circle"></i> Add Task
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-4" id="taskTableContainer" style="@(Model.Tasks.Any() ? "display: block;" : "display: none;")">
+                    <h6 class="section-title" style="border:none; font-size: 1rem; margin-bottom: 1rem;">Tasks Added</h6>
+                    <div class="table-responsive table-container">
+                        <table class="table" id="taskTable">
+                            <thead>
+                                <tr>
+                                    <th width="6%">ID</th>
+                                    <th width="16%">Task</th>
+                                    <th width="20%">Specification</th>
+                                    <th width="12%">Payment</th>
+                                    <th width="13%">Due Date</th>
+                                    <th width="12%">Status</th>
+                                    <th width="10%">Paid</th>
+                                    <th width="10%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Tasks.Count; i++)
+                                {
+                                    var task = Model.Tasks[i];
+                                    <tr>
+                                        <td>@task.ID</td>
+                                        <td>
+                                            @task.TaskName
+                                            <input type="hidden" name="Tasks[@i].ID" value="@task.ID" />
+                                            <input type="hidden" name="Tasks[@i].TaskName" value="@task.TaskName" />
+                                        </td>
+                                        <td>
+                                            @task.Specification
+                                            <input type="hidden" name="Tasks[@i].Specification" value="@task.Specification" />
+                                        </td>
+                                        <td>
+                                            Rs @task.Payment
+                                            <input type="hidden" name="Tasks[@i].Payment" value="@task.Payment" />
+                                        </td>
+                                        <td>
+                                            @task.DeliveryDueDate?.ToString("dd/MM/yyyy")
+                                            <input type="hidden" name="Tasks[@i].DeliveryDueDate" value="@task.DeliveryDueDate?.ToString("yyyy-MM-dd")" />
+                                        </td>
+                                        <td>
+                                            @{
+                                                var statusBadgeClass = "bg-primary";
+                                                if (task.Status == "In Progress") { statusBadgeClass = "bg-warning text-dark"; }
+                                                else if (task.Status == "Completed") { statusBadgeClass = "bg-success"; }
+                                            }
+                                            <span class="badge badge-modern @statusBadgeClass">@task.Status</span>
+                                            <input type="hidden" name="Tasks[@i].Status" value="@task.Status" />
+                                        </td>
+                                        <td>
+                                            @{
+                                                var paidBadgeClass = (task.Paid == "Yes") ? "bg-success" : "bg-danger";
+                                            }
+                                            <span class="badge badge-modern @paidBadgeClass">@task.Paid</span>
+                                            <input type="hidden" name="Tasks[@i].Paid" value="@task.Paid" />
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <button type="button" class="btn btn-action btn-outline-primary" onclick="editTask(this)" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-action btn-outline-danger" onclick="removeRow(this)" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-footer">
+                <a asp-controller="Freelancer" asp-action="List" class="btn-modern-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="button" class="btn-modern-primary" onclick="submitForm()">
+                    <i class="bi bi-check-circle"></i> Update Freelancer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Initialize based on existing model data
+        let taskIndex = @Model.Tasks.Count;
+        let taskIdCounter = @(Model.Tasks.Any() ? Model.Tasks.Max(t => t.ID) + 1 : 1);
+        let editingIndex = -1;
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        }
+
+        function submitForm() {
+            document.getElementById('freelancerForm').submit();
+        }
+
+        // Helper: Get Badge HTML for Status
+        function getStatusBadge(status) {
+            let badgeClass = 'bg-primary';
+            if (status === 'In Progress') badgeClass = 'bg-warning text-dark';
+            else if (status === 'Completed') badgeClass = 'bg-success';
+            return `<span class="badge badge-modern ${badgeClass}">${status}</span>`;
+        }
+
+        // Helper: Get Badge HTML for Paid Status
+        function getPaidBadge(paid) {
+            let badgeClass = (paid === 'Yes') ? 'bg-success' : 'bg-danger';
+            return `<span class="badge badge-modern ${badgeClass}">${paid}</span>`;
+        }
+
+        function addTask() {
+            const name = document.getElementById("TaskName").value;
+            const spec = document.getElementById("Specification").value;
+            const pay = document.getElementById("Payment").value;
+            const due = document.getElementById("DeliveryDueDate").value;
+            const status = document.getElementById("Status").value;
+            const paidValue = document.getElementById("Paid").value;
+
+            if (!name) return showError("Please enter a task name");
+            if (!spec) return showError("Please enter task specifications");
+            if (!pay) return showError("Please enter payment amount");
+            if (!due) return showError("Please select a due date");
+            if (!status) return showError("Please select a status");
+            if (!paidValue) return showError("Please select payment status");
+
+            const tableBody = document.querySelector("#taskTable tbody");
+            const row = document.createElement("tr");
+            const taskTableContainer = document.getElementById("taskTableContainer");
+            if (tableBody.children.length === 0) taskTableContainer.style.display = 'block';
+
+            const currentTaskId = taskIdCounter;
+
+            // Generate Badges
+            const statusBadgeHtml = getStatusBadge(status);
+            const paidBadgeHtml = getPaidBadge(paidValue);
+
+            if (editingIndex === -1) {
+                row.innerHTML = `
+                    <td>${currentTaskId}</td>
+                    <td>${name}
+                        <input type="hidden" name="Tasks[${taskIndex}].ID" value="${currentTaskId}" />
+                        <input type="hidden" name="Tasks[${taskIndex}].TaskName" value="${name}" />
+                    </td>
+                    <td>${spec}<input type="hidden" name="Tasks[${taskIndex}].Specification" value="${spec}" /></td>
+                    <td>Rs ${pay}<input type="hidden" name="Tasks[${taskIndex}].Payment" value="${pay}" /></td>
+                    <td>${formatDateForDisplay(due)}<input type="hidden" name="Tasks[${taskIndex}].DeliveryDueDate" value="${due}" /></td>
+                    <td>${statusBadgeHtml}<input type="hidden" name="Tasks[${taskIndex}].Status" value="${status}" /></td>
+                    <td>${paidBadgeHtml}<input type="hidden" name="Tasks[${taskIndex}].Paid" value="${paidValue}" /></td>
+                    <td>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button type="button" class="btn btn-action btn-outline-primary" onclick="editTask(this)" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-action btn-outline-danger" onclick="removeRow(this)" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                taskIndex++;
+                taskIdCounter++;
+            } else {
+                const existingRow = tableBody.children[editingIndex];
+                const existingId = existingRow.querySelector('input[name*="ID"]').value;
+
+                existingRow.innerHTML = `
+                    <td>${existingRow.cells[0].textContent}</td>
+                    <td>${name}
+                        <input type="hidden" name="Tasks[${editingIndex}].ID" value="${existingId}" />
+                        <input type="hidden" name="Tasks[${editingIndex}].TaskName" value="${name}" />
+                    </td>
+                    <td>${spec}<input type="hidden" name="Tasks[${editingIndex}].Specification" value="${spec}" /></td>
+                    <td>Rs ${pay}<input type="hidden" name="Tasks[${editingIndex}].Payment" value="${pay}" /></td>
+                    <td>${formatDateForDisplay(due)}<input type="hidden" name="Tasks[${editingIndex}].DeliveryDueDate" value="${due}" /></td>
+                    <td>${statusBadgeHtml}<input type="hidden" name="Tasks[${editingIndex}].Status" value="${status}" /></td>
+                    <td>${paidBadgeHtml}<input type="hidden" name="Tasks[${editingIndex}].Paid" value="${paidValue}" /></td>
+                    <td>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button type="button" class="btn btn-action btn-outline-primary" onclick="editTask(this)" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-action btn-outline-danger" onclick="removeRow(this)" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                editingIndex = -1;
+                const btn = document.querySelector("button[onclick='addTask()']");
+                btn.innerHTML = '<i class="bi bi-plus-circle"></i> Add Task';
+            }
+
+            clearTaskInputs();
+        }
+
+        function formatDateForDisplay(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        function formatDateForInput(dateString) {
+             const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                const parts = dateString.split('/');
+                if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                return dateString;
+            }
+            return date.toISOString().split('T')[0];
+        }
+
+        function editTask(btn) {
+            const row = btn.closest("tr");
+            const cells = row.cells;
+            const rowIndex = Array.from(row.parentNode.children).indexOf(row);
+
+            // Fetch values from hidden inputs
+            document.getElementById("TaskName").value = row.querySelector('input[name*="TaskName"]').value;
+            document.getElementById("Specification").value = row.querySelector('input[name*="Specification"]').value;
+            document.getElementById("Payment").value = row.querySelector('input[name*="Payment"]').value;
+            document.getElementById("DeliveryDueDate").value = row.querySelector('input[name*="DeliveryDueDate"]').value;
+            document.getElementById("Status").value = row.querySelector('input[name*="Status"]').value;
+            document.getElementById("Paid").value = row.querySelector('input[name*="Paid"]').value;
+
+            editingIndex = rowIndex;
+            const addBtn = document.querySelector("button[onclick='addTask()']");
+            addBtn.innerHTML = '<i class="bi bi-check-circle"></i> Update Task';
+        }
+
+        function removeRow(btn) {
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+            document.getElementById('confirmYes').onclick = function() {
+                const row = btn.closest("tr");
+                const tableBody = row.parentNode;
+                const rowIndex = Array.from(tableBody.children).indexOf(row);
+
+                row.remove();
+
+                const taskTableContainer = document.getElementById("taskTableContainer");
+                if (tableBody.children.length === 0) taskTableContainer.style.display = 'none';
+
+                const rows = document.querySelectorAll("#taskTable tbody tr");
+                rows.forEach((row, index) => {
+                    // Update index of hidden inputs
+                    const inputs = row.querySelectorAll('input[type="hidden"]');
+                    inputs.forEach(input => {
+                        input.name = input.name.replace(/Tasks\[\d+\]/, `Tasks[${index}]`);
+                    });
+                });
+
+                taskIndex = rows.length;
+
+                if (editingIndex === rowIndex) {
+                    editingIndex = -1;
+                    clearTaskInputs();
+                    const addBtn = document.querySelector("button[onclick='addTask()']");
+                    addBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Add Task';
+                } else if (editingIndex > rowIndex) editingIndex--;
+
+                confirmModal.hide();
+            };
+
+            confirmModal.show();
+        }
+
+        function clearTaskInputs() {
+            document.getElementById("TaskName").value = "";
+            document.getElementById("Specification").value = "";
+            document.getElementById("Payment").value = "";
+            document.getElementById("DeliveryDueDate").value = "";
+            document.getElementById("Status").value = "";
+            document.getElementById("Paid").value = "";
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const startDate = document.getElementById('StartDate');
+            const endDate = document.getElementById('EndDate');
+            const duration = document.getElementById('Duration');
+
+            function calculateDuration() {
+                if (startDate.value && endDate.value) {
+                    const start = new Date(startDate.value);
+                    const end = new Date(endDate.value);
+                    if (start > end) {
+                        showError("End date must be after start date");
+                        duration.value = 'Invalid dates';
+                        return;
+                    }
+                    const diffTime = end - start;
+                    const diffDays = Math.ceil(diffTime / (1000*60*60*24));
+                    duration.value = diffDays + ' day' + (diffDays !== 1 ? 's' : '');
+                } else duration.value = '';
+            }
+
+            calculateDuration();
+            startDate.addEventListener('change', calculateDuration);
+            endDate.addEventListener('change', calculateDuration);
+        });
+    </script>
+}

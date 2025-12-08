@@ -1,0 +1,517 @@
+@model ProHub.Models.NextWeekPlan
+@{
+    ViewData["Title"] = "Edit - Next Week Plan";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+    /* Blur overlay */
+    body::before {
+        content: "";
+        position: absolute;
+        /* changed from fixed */
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 100%;
+        /* ensures it stretches with content */
+        background: inherit;
+        filter: blur(1px);
+        z-index: -1;
+    }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        padding: 2rem;
+        color: white;
+    }
+
+    .form-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .form-body {
+        padding: 2.5rem;
+    }
+
+    .form-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+
+    .btn-modern-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        cursor: pointer;
+    }
+
+    .btn-modern-primary:hover {
+        background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+    }
+
+    .btn-modern-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-modern-secondary:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+        color: #212529;
+        transform: translateY(-1px);
+    }
+
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .form-control-modern:focus {
+        outline: none;
+        border-color: #28A745;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+
+    .work-plan-container {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .project-entry {
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px dashed #dee2e6;
+    }
+
+    .project-entry:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .project-name {
+        font-weight: 600;
+        color: #007bff;
+        margin-bottom: 0.1rem;
+        font-size: 0.9rem;
+    }
+
+    .project-details {
+        margin-left: 0.5rem;
+        font-size: 0.85rem;
+        line-height: 1.3;
+        color: #495057;
+    }
+
+    .dropdown-menu-work-plan {
+        max-height: 240px;
+        overflow-y: auto;
+        width: 100%;
+        padding: 0.5rem 0;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown-item-work-plan {
+        padding: 0.25rem 1rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+        transition: background-color 0.2s ease;
+    }
+
+    .dropdown-item-work-plan:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .dropdown-item-work-plan .form-check-input {
+        margin-top: 0.2rem;
+    }
+
+    .dropdown-menu-work-plan::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .dropdown-menu-work-plan::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .dropdown-menu-work-plan::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+
+    .dropdown-menu-work-plan::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    .form-control,
+    .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: #28A745;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .alert {
+        border-radius: 0.375rem;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="form-container">
+        <div class="form-header">
+            <h2 class="bi bi-folder-plus me-2">@ViewData["Title"]</h2>
+        </div>
+
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <form asp-action="Edit" method="post" id="editPlanForm">
+            <input type="hidden" asp-for="ID" />
+            @Html.AntiForgeryToken()
+
+            <!-- Week Selection -->
+            <div class="form-body">
+                <div class="mb-3 row">
+                    <label asp-for="StartDate" class="col-sm-4 col-form-label">Week</label>
+                    <div class="col-sm-8">
+                        <input asp-for="StartDate" class="form-control" readonly />
+                        <input type="hidden" asp-for="EndDate" />
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- External Projects -->
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label">External Projects</label>
+                    <div class="col-sm-8">
+                        <div class="dropdown">
+                            <button class="form-control form-select shadow-sm border-primary text-start" type="button"
+                                id="externalProjectsDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                style="cursor: pointer;">
+                                <span class="dropdown-text">Select External Projects</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-work-plan w-100" aria-labelledby="externalProjectsDropdown">
+                                @foreach (var project in Model.ExternalPlatforms)
+                                {
+                                    <li>
+                                        <div class="dropdown-item dropdown-item-work-plan ">
+                                            <input type="checkbox" class="form-check-input me-2 project-checkbox"
+                                                id="external_@project.Id" name="ExternalProjectIds" value="@project.Id"
+                                                data-project-name="@project.PlatformName" data-project-type="External"
+                                                @(Model.ExternalProjectIds != null &&
+                                                                                            Model.ExternalProjectIds.Contains(project.Id) ? "checked" : "")>
+                                            <label class="form-check-label"
+                                                for="external_@project.Id">@project.PlatformName</label>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internal Projects -->
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label">Internal Projects</label>
+                    <div class="col-sm-8">
+                        <div class="dropdown">
+                            <button class="form-control form-select shadow-sm border-primary text-start" type="button"
+                                id="internalProjectsDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                style="cursor: pointer;">
+                                <span class="dropdown-text ">Select Internal Projects</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-work-plan w-100" aria-labelledby="internalProjectsDropdown">
+                                @foreach (var project in Model.InternalPlatforms)
+                                {
+                                    <li>
+                                        <div class="dropdown-item dropdown-item-work-plan ">
+                                            <input type="checkbox" class="form-check-input me-2 project-checkbox"
+                                                id="internal_@project.Id" name="InternalProjectIds" value="@project.Id"
+                                                data-project-name="@project.AppName" data-project-type="Internal"
+                                                @(Model.InternalProjectIds != null &&
+                                                                                            Model.InternalProjectIds.Contains(project.Id) ? "checked" : "")>
+                                            <label class="form-check-label"
+                                                for="internal_@project.Id">@project.AppName</label>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Plan Details -->
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label">Work Plan Details</label>
+                    <div class="col-sm-8">
+                        <div id="workPlanDetailsContainer" class="work-plan-container">
+                            <div id="noProjectsMessage">No projects selected. Please select at least one project to
+                                enter
+                                work plan details.</div>
+                        </div>
+                        <input type="hidden" id="workPlanDetailsJson" name="WorkPlanDetails"
+                            asp-for="WorkPlanDetails" />
+                    </div>
+                </div>
+
+                <!-- Updated By (Employee) - Now automatically populated from authenticated user -->
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label">Employee</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control-modern" value="@ViewBag.EmployeeName" readonly />
+
+                        <!-- Hidden field to store the UpdatedByName value -->
+                        <input type="hidden" asp-for="UpdatedByName" value="@ViewBag.EmployeeName" />
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-footer">
+                <a asp-action="Index" class="btn-modern-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn-modern-primary">
+                    <i class="bi bi-check-circle"></i> Update Plan
+                </button>
+            </div>
+
+        </form>
+
+
+    </div>
+</div>
+</div>
+
+<!-- Modal for Work Plan Details -->
+<div class="modal fade" id="workPlanModal" tabindex="-1" aria-labelledby="workPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="workPlanModalLabel">Work Plan Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="projectId" />
+                <input type="hidden" id="projectType" />
+                <div class="mb-3">
+                    <label class="form-label">Project:</label>
+                    <input type="text" class="form-control-modern" id="projectName" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Work Plan Details:</label>
+                    <textarea class="form-control-modern" id="workPlanText" rows="5"
+                        placeholder="Enter work plan details..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveWorkPlan">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let projectWorkPlans = {};
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize projectWorkPlans with existing data
+            try {
+                const existingData = '@Html.Raw(Model.WorkPlanDesc?.Replace("\\", "\\\\").Replace("'", "\\'"))';
+                if (existingData) {
+                    projectWorkPlans = JSON.parse(existingData);
+                }
+            } catch (e) {
+                console.log('No existing work plan data or invalid JSON');
+            }
+
+            updateWorkPlanDisplay();
+
+            const externalCheckboxes = document.querySelectorAll('input[name="ExternalProjectIds"]');
+            const internalCheckboxes = document.querySelectorAll('input[name="InternalProjectIds"]');
+            const externalDropdownText = document.querySelector('#externalProjectsDropdown .dropdown-text');
+            const internalDropdownText = document.querySelector('#internalProjectsDropdown .dropdown-text');
+
+            // Update dropdown text
+            function updateDropdownText(checkboxes, textElement) {
+                const selected = Array.from(checkboxes).filter(c => c.checked);
+                if (selected.length === 0) {
+                    textElement.textContent = textElement.parentElement.id.includes('external')
+                        ? 'Select External Projects' : 'Select Internal Projects';
+                } else if (selected.length === 1) {
+                    textElement.textContent = selected[0].nextElementSibling.textContent;
+                } else {
+                    const first = selected[0].nextElementSibling.textContent;
+                    textElement.textContent = `${first} and ${selected.length - 1} more`;
+                }
+            }
+
+            // Handle checkbox change
+            function handleChange(checkbox) {
+                updateDropdownText(
+                    checkbox.name === 'ExternalProjectIds' ? externalCheckboxes : internalCheckboxes,
+                    checkbox.name === 'ExternalProjectIds' ? externalDropdownText : internalDropdownText
+                );
+                if (checkbox.checked) {
+                    const modal = new bootstrap.Modal(document.getElementById('workPlanModal'));
+                    document.getElementById('projectId').value = checkbox.value;
+                    document.getElementById('projectType').value = checkbox.dataset.projectType;
+                    document.getElementById('projectName').value = checkbox.dataset.projectName;
+                    document.getElementById('workPlanText').value = (projectWorkPlans[checkbox.value]?.details) || '';
+                    modal.show();
+                } else {
+                    delete projectWorkPlans[checkbox.value];
+                    updateWorkPlanDisplay();
+                }
+            }
+
+            // Attach events
+            [...externalCheckboxes, ...internalCheckboxes].forEach(cb => {
+                cb.addEventListener('change', () => handleChange(cb));
+            });
+
+            // Save from modal
+            document.getElementById('saveWorkPlan').addEventListener('click', () => {
+                const id = document.getElementById('projectId').value;
+                const name = document.getElementById('projectName').value;
+                const type = document.getElementById('projectType').value;
+                const details = document.getElementById('workPlanText').value;
+
+                projectWorkPlans[id] = { id, name, type, details };
+                updateWorkPlanDisplay();
+                bootstrap.Modal.getInstance(document.getElementById('workPlanModal')).hide();
+            });
+
+            // Update display
+            function updateWorkPlanDisplay() {
+                const container = document.getElementById('workPlanDetailsContainer');
+                const count = Object.keys(projectWorkPlans).length;
+                container.innerHTML = count === 0
+                    ? '<div id="noProjectsMessage">No projects selected. Please select at least one project to enter work plan details.</div>'
+                    : Object.values(projectWorkPlans).map(p => `
+                                        <div class="project-entry">
+                                            <div class="project-name">${p.name} (${p.type})</div>
+                                            <div class="project-details">${p.details || 'No details provided'}</div>
+                                        </div>
+                                    `).join('');
+                document.getElementById('workPlanDetailsJson').value = JSON.stringify(projectWorkPlans);
+            }
+
+            // Initialize dropdown texts
+            updateDropdownText(externalCheckboxes, externalDropdownText);
+            updateDropdownText(internalCheckboxes, internalDropdownText);
+
+            // Form submit validation
+            document.getElementById('editPlanForm').addEventListener('submit', function (e) {
+                const hasProject = externalCheckboxes.length > 0 || internalCheckboxes.length > 0;
+                const anyChecked = [...externalCheckboxes, ...internalCheckboxes].some(c => c.checked);
+                const allHaveDetails = Object.keys(projectWorkPlans).length ===
+                    [...externalCheckboxes, ...internalCheckboxes].filter(c => c.checked).length;
+
+                if (!anyChecked) {
+                    alert('Please select at least one project.');
+                    e.preventDefault();
+                } else if (!allHaveDetails) {
+                    alert('Please provide work plan details for all selected projects.');
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -367,6 +367,47 @@
                         <span asp-validation-for="DevelopedTeam" class="text-danger"></span>
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="BackupOfficer1Id" class="form-label-modern">
+                            <i class="bi bi-person-check me-1"></i> Backup Person (Primary)
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-check-fill"></i>
+                            <select asp-for="BackupOfficer1Id" class="form-control-modern">
+                                <option value="">Please select Backup Person</option>
+                                @if (ViewBag.Employees != null)
+                                {
+                                    foreach (var employee in ViewBag.Employees)
+                                    {
+                                        <option value="@employee.EmpId">@employee.EmpName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="BackupOfficer1Id" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="BackupOfficer2Id" class="form-label-modern">
+                            <i class="bi bi-person-plus me-1"></i> Backup Person (Secondary)
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-person-plus-fill"></i>
+                            <select asp-for="BackupOfficer2Id" class="form-control-modern">
+                                <option value="">Please select Backup Person</option>
+                                @if (ViewBag.Employees != null)
+                                {
+                                    foreach (var employee in ViewBag.Employees)
+                                    {
+                                        <option value="@employee.EmpId">@employee.EmpName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="BackupOfficer2Id" class="text-danger"></span>
+                    </div>
+                </div>
 
                 <div class="form-row">
                     <div class="form-group-modern">
@@ -414,6 +455,22 @@
                     </div>
 
                     <div class="form-group-modern">
+                        <label asp-for="SLA" class="form-label-modern">
+                            <i class="bi bi-flag me-1"></i> Priority Level
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-flag-fill"></i>
+                            <select asp-for="SLA" class="form-control-modern">
+                                <option value="">Please select</option>
+                                <option value="Level 1">Level 1</option>
+                                <option value="Level 2">Level 2</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="SLA" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group-modern">
                         <label asp-for="PercentageDone" class="form-label-modern">
                             <i class="bi bi-percent me-1"></i> Percentage Done
                         </label>
@@ -423,9 +480,6 @@
                         </div>
                         <span asp-validation-for="PercentageDone" class="text-danger"></span>
                     </div>
-                </div>
-
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="IntegratedApps" class="form-label-modern">
                             <i class="bi bi-link-45deg me-1"></i> Integrated Applications
@@ -436,6 +490,9 @@
                         </div>
                         <span asp-validation-for="IntegratedApps" class="text-danger"></span>
                     </div>
+                </div>
+
+                <div class="form-row">
 
                     <div class="form-group-modern">
                         <label asp-for="BitBucketRepo" class="form-label-modern">
@@ -447,9 +504,7 @@
                         </div>
                         <span asp-validation-for="BitBucketRepo" class="text-danger"></span>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="AppIP" class="form-label-modern">
                             <i class="bi bi-server me-1"></i> Hosted Server IP/Name
@@ -460,6 +515,10 @@
                         </div>
                         <span asp-validation-for="AppIP" class="text-danger"></span>
                     </div>
+                </div>
+
+                <div class="form-row">
+
 
                     <div class="form-group-modern">
                         <label asp-for="AppURL" class="form-label-modern">
@@ -471,9 +530,7 @@
                         </div>
                         <span asp-validation-for="AppURL" class="text-danger"></span>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="BusOwner" class="form-label-modern">
                             <i class="bi bi-briefcase me-1"></i> Business Owner
@@ -484,7 +541,9 @@
                         </div>
                         <span asp-validation-for="BusOwner" class="text-danger"></span>
                     </div>
+                </div>
 
+                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="DR" class="form-label-modern">
                             <i class="bi bi-shield-check me-1"></i> DR Availability
@@ -499,12 +558,9 @@
                         </div>
                         <span asp-validation-for="DR" class="text-danger"></span>
                     </div>
-                </div>
-
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="EndUserTypeId" class="form-label-modern">
-                            <i class="bi bi-people-fill me-1"></i> End User Type
+                            <i class="bi bi-people-fill me-1"></i> Application End Users
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-person-lines-fill"></i>
@@ -521,10 +577,12 @@
                         </div>
                         <span asp-validation-for="EndUserTypeId" class="text-danger"></span>
                     </div>
+                </div>
 
+                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="AppUsers" class="form-label-modern">
-                            <i class="bi bi-building me-1"></i> Specific Section/Division/Group
+                            <i class="bi bi-building me-1"></i> User Specific Section/Division/Group
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-people"></i>
@@ -532,10 +590,6 @@
                         </div>
                         <span asp-validation-for="AppUsers" class="text-danger"></span>
                     </div>
-                </div>
-
-                <div class="form-row" style="grid-template-columns: repeat(3, 1fr);">
-
                     <div class="form-group-modern">
                         <label asp-for="UATDate" class="form-label-modern">
                             <i class="bi bi-calendar-check me-1"></i> UAT Date
@@ -546,7 +600,9 @@
                         </div>
                         <span asp-validation-for="UATDate" class="text-danger"></span>
                     </div>
+                </div>
 
+                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="VADate" class="form-label-modern">
                             <i class="bi bi-calendar-check me-1"></i> VA Date
@@ -568,8 +624,9 @@
                         </div>
                         <span asp-validation-for="LaunchedDate" class="text-danger"></span>
                     </div>
-
                 </div>
+
+
 
                 <div class="form-row" style="grid-template-columns: repeat(3, 1fr);">
 
@@ -617,6 +674,18 @@
 
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group-modern" style="grid-column: span 2;">
+                        <label asp-for="Comment" class="form-label-modern">
+                            <i class="bi bi-chat-left-text me-1"></i> Comment
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-pencil" style="top: 20px; transform: none;"></i>
+                            <textarea asp-for="Comment" class="form-control-modern" rows="4" placeholder="Enter comments here..."></textarea>
+                        </div>
+                        <span asp-validation-for="Comment" class="text-danger"></span>
+                    </div>
+                </div>
             </div>
 
             <div class="form-footer">

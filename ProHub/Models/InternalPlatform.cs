@@ -86,6 +86,8 @@ namespace ProHub.Models
         public string? BackupOfficer2Name { get; set; }
         public string? MainAppName { get; set; }
 
-        public string? ParentProjectGroupName { get; set; }   // <-- ADD THIS
+        public string? ParentProjectGroupName { get; set; }
+
+        public string? Comment { get; set; }
     }
 }

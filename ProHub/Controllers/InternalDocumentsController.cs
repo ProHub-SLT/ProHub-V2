@@ -25,7 +25,7 @@ namespace ProHub.Controllers
             _empRepo = empRepo;
         }
 
-        // INDEX – Everyone can view
+        // INDEX ï¿½ Everyone can view
         public IActionResult Index(string search = "", int page = 1, int pageSize = 10)
         {
             var docs = _docRepo.GetInternalDocuments(search, page, pageSize);
@@ -40,7 +40,7 @@ namespace ProHub.Controllers
             return View(docs);
         }
 
-        // CREATE – Only Admin + Developer
+        // CREATE ï¿½ Only Admin + Developer
         [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpGet]
         public IActionResult Create()
@@ -66,6 +66,7 @@ namespace ProHub.Controllers
             model.Created_Time = DateTime.Now;
 
             var platformId = _internalRepo.GetInternalPlatformId();
+            // Use platform ID from Main_Platforms table, fallback to 1 if not found
             model.Platform_ID = platformId ?? 1;
 
             if (ImagePath != null && ImagePath.Length > 0)
@@ -89,7 +90,7 @@ namespace ProHub.Controllers
             return View(model);
         }
 
-        // EDIT – Only Admin OR Owner
+        // EDIT ï¿½ Only Admin OR Owner
         [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpGet]
         public IActionResult Edit(int id)
@@ -141,14 +142,14 @@ namespace ProHub.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // DETAILS – Everyone
+        // DETAILS ï¿½ Everyone
         public IActionResult Details(int id)
         {
             var doc = _docRepo.GetById(id);
             return doc == null ? NotFound() : View(doc);
         }
 
-        // DELETE – Only Admin OR Owner
+        // DELETE ï¿½ Only Admin OR Owner
         [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpPost]
         [ValidateAntiForgeryToken]

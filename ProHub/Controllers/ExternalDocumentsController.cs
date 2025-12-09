@@ -64,6 +64,7 @@ namespace ProHub.Controllers
             model.Created_Time = DateTime.Now;
 
             var platformId = _externalRepo.GetExternalPlatformId();
+            // Use platform ID from Main_Platforms table, fallback to 2 if not found
             model.Platform_ID = platformId ?? 2;
 
             if (ImagePath != null && ImagePath.Length > 0)

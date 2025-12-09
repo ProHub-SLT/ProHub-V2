@@ -31,14 +31,14 @@ namespace ProHub.Data
         private int GetInternalPlatformId()
         {
             var internalPlatformId = _internalRepo.GetInternalPlatformId();
-            return internalPlatformId ?? 1; // Fallback to 1 if not found
+            return internalPlatformId ?? 1; // Fallback to 1 if not found in Main_Platforms table
         }
 
         // Get the platform ID for "external" documents
         private int GetExternalPlatformId()
         {
             var externalPlatformId = _externalRepo.GetExternalPlatformId();
-            return externalPlatformId ?? 2; // Fallback to 2 if not found
+            return externalPlatformId ?? 2; // Fallback to 2 if not found in Main_Platforms table
         }
 
         public List<Document> GetInternalDocuments(string search, int page, int pageSize)

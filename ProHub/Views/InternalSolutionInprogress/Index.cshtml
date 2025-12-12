@@ -1,0 +1,1165 @@
+﻿@model List<ProHub.Models.InternalPlatform>
+
+@{
+    ViewData["Title"] = "Internal Solutions - In-Progress";
+
+    // --- Pagination & Sort Logic ---
+    int pageSize = Convert.ToInt32(ViewData["PageSize"] ?? 10);
+    int currentPage = Convert.ToInt32(ViewData["CurrentPage"] ?? 1);
+    int totalRecords = Convert.ToInt32(ViewData["TotalEntries"] ?? 0);
+    int totalPages = Convert.ToInt32(ViewData["TotalPages"] ?? 1);
+    if (totalPages == 0) totalPages = 1;
+
+    int startRecord = totalRecords > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    int endRecord = totalRecords > 0 ? Math.Min(currentPage * pageSize, totalRecords) : 0;
+
+    string sortColumn = (ViewData["SortColumn"] ?? "AppName").ToString();
+    string sortOrder = (ViewData["SortOrder"] ?? "asc").ToString().ToLowerInvariant();
+    string searchTerm = (ViewData["SearchTerm"] ?? string.Empty).ToString();
+    string activeTab = (ViewData["ActiveTab"] ?? "level1").ToString().ToLower();
+
+    // Helper for sorting toggles
+    Func<string, string> ToggleSortOrder = column =>
+    {
+        if (string.Equals(column, sortColumn, StringComparison.OrdinalIgnoreCase))
+        {
+            return sortOrder == "asc" ? "desc" : "asc";
+        }
+        return "asc";
+    };
+
+    // Helper for URL building
+    Func<int, int, string, string, string, string, string> BuildIndexUrl = (page, pageSizeLocal, sortCol, sortOrd, search, tab) =>
+    {
+        return Url.Action("Index", new
+        {
+            page,
+            pageSize = pageSizeLocal,
+            sortColumn = sortCol,
+            sortOrder = sortOrd,
+            search,
+            activeTab = tab
+        }) ?? "#";
+    };
+}
+
+<style>
+    /* --- Base Styles --- */
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    /* --- Table Styles --- */
+    .data-table-wrapper {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: visible;
+    }
+
+    .table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+        .table thead {
+            background: linear-gradient(90deg, #007BFF 0%, #28A745 100%);
+        }
+
+            .table thead th {
+                color: white;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+                padding: 1rem 0.75rem;
+                border: none;
+                white-space: nowrap;
+                background: transparent !important;
+                vertical-align: middle;
+            }
+
+                .table thead th a {
+                    color: white;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                }
+
+        .table tbody td {
+            padding: 0.875rem 0.75rem;
+            vertical-align: middle;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .table tbody td:last-child {
+            white-space: normal;
+            overflow: visible;
+        }
+
+    /* --- Toolbar Styling --- */
+    .toolbar-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.25rem;
+    }
+
+        .toolbar-wrapper:hover {
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.2s ease;
+        }
+
+    /* --- Buttons --- */
+    .btn-create-new {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    }
+
+        .btn-create-new:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+            color: #fff;
+        }
+
+    .btn-search {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 123, 255, 0.2);
+    }
+
+        .btn-search:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
+            color: white;
+        }
+
+    /* Export Button Specific */
+    .btn-export-excel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.5rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-export-excel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-export-excel:hover::before {
+            left: 100%;
+        }
+
+        .btn-export-excel i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-export-excel:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+            color: #fff;
+        }
+
+            .btn-export-excel:hover i {
+                transform: scale(1.15) rotate(-5deg);
+            }
+
+        .btn-export-excel:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+    /* --- Status Badges  --- */
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        white-space: nowrap;
+        border: 1px solid transparent; /* Base border */
+    }
+
+    /* 1. Proposal Preparation - Light Grey */
+    .status-badge-prep {
+        background-color: #f2f2f2;
+        color: #616161;
+        border-color: #d6d6d6;
+    }
+
+    /* 2. Proposal Submitted - Sky Blue */
+    .status-badge-submitted {
+        background-color: #e1f5fe;
+        color: #0277bd;
+        border-color: #b3e5fc;
+    }
+
+    /* 3. Requirement Gathering - Dark Blue theme */
+    .status-badge-req {
+        background-color: #e8eaf6;
+        color: #283593;
+        border-color: #c5cae9;
+    }
+
+    /* 4. Design - Purple */
+    .status-badge-design {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+        border-color: #e1bee7;
+    }
+
+    /* 5. Coding or Implementation - Orange */
+    .status-badge-coding {
+        background-color: #fff3e0;
+        color: #ef6c00;
+        border-color: #ffe0b2;
+    }
+
+    /* 6. Testing - Amber/Yellow */
+    .status-badge-testing {
+        background-color: #fff8e1;
+        color: #ff8f00;
+        border-color: #ffecb3;
+    }
+
+    /* 7. Deployment - Green */
+    .status-badge-deploy {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-color: #c8e6c9;
+    }
+
+    /* Fallback / Default */
+    .status-badge-default {
+        background-color: #ffffff;
+        color: #424242;
+        border-color: #e0e0e0;
+    }
+
+    /* --- Modals --- */
+    .success-modal-overlay, .delete-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .success-modal-overlay.show, .delete-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .success-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-width: 420px;
+        width: 90%;
+        border-top: 6px solid #28a745;
+        animation: modalSlideIn 0.4s ease forwards;
+        transform: scale(0.7);
+    }
+
+    .delete-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-width: 450px;
+        width: 90%;
+        border-top: 6px solid #dc3545;
+        animation: modalSlideIn 0.4s ease forwards;
+        transform: scale(0.7);
+    }
+
+    .success-modal-overlay.show .success-modal-content,
+    .delete-modal-overlay.show .delete-modal-content {
+        transform: scale(1);
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            transform: scale(0.7) translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .success-modal-content i {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    .delete-modal-content i.warning-icon {
+        font-size: 3.5rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+        animation: iconPulse 1.5s ease-in-out infinite;
+        display: block;
+    }
+
+    @@keyframes iconPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .success-modal-content h4, .delete-modal-content h4 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .success-modal-content p, .delete-modal-content p {
+        font-size: 0.95rem;
+        color: #718096;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-modal-ok {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+    }
+
+        .btn-modal-ok:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+        }
+
+    .delete-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-modal-cancel {
+        padding: 0.75rem 1.75rem;
+        background: white;
+        color: #495057;
+        font-weight: 600;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .btn-modal-cancel:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            transform: translateY(-1px);
+        }
+
+    .btn-modal-delete {
+        padding: 0.75rem 1.75rem;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+    }
+
+        .btn-modal-delete:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+        }
+
+    /* --- Comment Modal Container --- */
+    .comment-modal-content {
+        max-width: 1000px;
+        width: 95%; /* Prevents overflowing on smaller screens */
+        margin: 2rem auto; /* Centers it if used as a standalone block */
+        text-align: left;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.1); /* Smoother shadow */
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; /* Smoother animation curve */
+        position: relative;
+    }
+
+    /* --- Table Styling --- */
+    #commentsContainer .table {
+        width: 100%;
+        border-collapse: separate; /* Allows border-radius on rows if needed later */
+        border-spacing: 0;
+    }
+
+        #commentsContainer .table thead th {
+            background: linear-gradient(135deg, #007BFF 0%, #28A745 100%);
+            color: white; /* Ensure text is readable on gradient */
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+            /* Rounded corners for the header row */
+            #commentsContainer .table thead th:first-child {
+                border-top-left-radius: 8px;
+            }
+
+            #commentsContainer .table thead th:last-child {
+                border-top-right-radius: 8px;
+            }
+
+        #commentsContainer .table tbody td {
+            padding: 1.25rem 1rem; /* More breathing room */
+            vertical-align: top;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+    /* --- Comment Text Box & Scrollbar --- */
+    #commentsContainer .comment-text {
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.6;
+        color: #2d3748;
+        max-height: 150px;
+        overflow-y: auto;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border: 1px solid #e2e8f0; /* Subtle border definition */
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+        /* Custom Scrollbar for Comment Text */
+        #commentsContainer .comment-text::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #commentsContainer .comment-text::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #commentsContainer .comment-text::-webkit-scrollbar-thumb {
+            background-color: #cbd5e0;
+            border-radius: 20px;
+        }
+
+            #commentsContainer .comment-text::-webkit-scrollbar-thumb:hover {
+                background-color: #a0aec0;
+            }
+
+    /* --- Badges --- */
+    #commentsContainer .user-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.85rem;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-radius: 50px; /* Pill shape looks more modern than 8px */
+        font-weight: 600;
+        color: #0d47a1; /* Slightly darker for better contrast */
+        font-size: 0.85rem;
+        box-shadow: 0 2px 5px rgba(25, 118, 210, 0.15);
+    }
+
+    #commentsContainer .date-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: #495057;
+        white-space: nowrap;
+    }
+
+    /* --- Header & Layout --- */
+    .comment-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+        .comment-modal-header h4 {
+            margin: 0;
+            color: #1a202c;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+            .comment-modal-header h4 i {
+                color: #ffc107;
+                margin-right: 0.75rem;
+                filter: drop-shadow(0 2px 4px rgba(255, 193, 7, 0.3)); /* Glow effect on icon */
+            }
+
+    /* Close Button (Suggested Addition) */
+    .comment-modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #a0aec0;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+        .comment-modal-close:hover {
+            color: #e53e3e;
+        }
+
+    .comment-subtitle {
+        color: #718096;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* --- States --- */
+    .comment-loading {
+        padding: 4rem;
+        text-align: center;
+        color: #718096;
+    }
+
+        .comment-loading .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.25rem;
+            color: #007BFF;
+        }
+
+    .comment-empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: #a0aec0;
+    }
+
+        .comment-empty-state i {
+            font-size: 3.5rem;
+            color: #cbd5e0;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+    /* --- Animations --- */
+    @@keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Custom Tabs Styling */
+    .nav-tabs {
+        border-bottom: none;
+        gap: 0.5rem;
+    }
+
+        .nav-tabs .nav-link {
+            border: none;
+            background: white;
+            color: #495057;
+            font-weight: 500;
+            border-radius: 8px !important;
+            padding: 0.6rem 1.2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+            .nav-tabs .nav-link.active {
+                background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+                color: white;
+                box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+            }
+
+            .nav-tabs .nav-link:hover:not(.active) {
+                background: #e9ecef;
+                transform: translateY(-1px);
+            }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4 text-primary">@ViewData["Title"]</h1>
+
+    @* --- Tabs --- *@
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "level1" ? "active" : "")"
+               href="@BuildIndexUrl(1, pageSize, sortColumn, sortOrder, searchTerm, "level1")">
+                Level 1
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "other" ? "active" : "")"
+               href="@BuildIndexUrl(1, pageSize, sortColumn, sortOrder, searchTerm, "other")">
+                Others
+            </a>
+        </li>
+    </ul>
+
+    @* --- Toolbar --- *@
+    <div class="toolbar-wrapper mb-4">
+        <div class="row g-3 align-items-center">
+            @* --- 1. Create Button --- *@
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a asp-action="Create" class="btn-create-new">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Create New</span>
+                </a>
+            </div>
+
+            @* --- 2. Search Box --- *@
+            <div class="col-lg-5 col-md-6">
+                <form method="get" asp-action="Index" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
+                    <i class="bi bi-search text-muted me-2"></i>
+                    <input type="text" name="search" class="form-control border-0 shadow-none"
+                           placeholder="Search solutions..." value="@searchTerm" />
+
+                    @if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <a href="@Url.Action("Index", new { activeTab = activeTab, pageSize = pageSize })" class="text-secondary text-decoration-none me-2">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </a>
+                    }
+
+                    <input type="hidden" name="pageSize" value="@pageSize" />
+                    <input type="hidden" name="activeTab" value="@activeTab" />
+
+                    <button type="submit" class="btn btn-search btn-sm ms-2 px-3">
+                        Search
+                    </button>
+                </form>
+            </div>
+
+            @* --- 3. Page Size Selector --- *@
+            <div class="col-lg-4 col-md-12 d-flex justify-content-lg-end justify-content-start">
+                <form method="get" asp-action="Index" id="entriesForm"
+                      class="d-flex align-items-center bg-white rounded-3 px-3 py-2 border">
+                    <label class="me-2 text-nowrap text-secondary small fw-semibold">Show</label>
+                    <select name="pageSize" class="form-select form-select-sm border-0 shadow-none fw-semibold"
+                            onchange="this.form.submit()">
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="25" selected="@(pageSize == 25)">25</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
+                    </select>
+                    <span class="ms-2 small text-secondary">entries</span>
+                    <input type="hidden" name="search" value="@searchTerm" />
+                    <input type="hidden" name="activeTab" value="@activeTab" />
+                    <input type="hidden" name="page" value="1" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @* --- Data Table --- *@
+    <div class="data-table-wrapper">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="sortable" style="width:14%">
+                            <a href="@BuildIndexUrl(1, pageSize, "ParentProjectGroupName", ToggleSortOrder("ParentProjectGroupName"), searchTerm, activeTab)">
+                                Application Group <i class="bi @(sortColumn == "ParentProjectGroupName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th class="sortable" style="width:14%">
+                            <a href="@BuildIndexUrl(1, pageSize, "AppName", ToggleSortOrder("AppName"), searchTerm, activeTab)">
+                                Application Name <i class="bi @(sortColumn == "AppName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th class="sortable" style="width:12%">
+                            <a href="@BuildIndexUrl(1, pageSize, "Developed By", ToggleSortOrder("Developed By"), searchTerm, activeTab)">
+                                Developed By <i class="bi @(sortColumn == "Developed By" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th style="width:10%">SDLC Phase</th>
+                        <th class="sortable" style="width:10%">
+                            <a href="@BuildIndexUrl(1, pageSize, "Start", ToggleSortOrder("Start"), searchTerm, activeTab)">
+                                Start <i class="bi @(sortColumn == "Start" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th class="sortable" style="width:10%">
+                            <a href="@BuildIndexUrl(1, pageSize, "Target", ToggleSortOrder("Target"), searchTerm, activeTab)">
+                                Target <i class="bi @(sortColumn == "Target" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th class="sortable" style="width:6%">
+                            <a href="@BuildIndexUrl(1, pageSize, "UD", ToggleSortOrder("UD"), searchTerm, activeTab)">
+                                UD <i class="bi @(sortColumn == "UD" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th class="sortable" style="width:10%">
+                            <a href="@BuildIndexUrl(1, pageSize, "Value", ToggleSortOrder("Value"), searchTerm, activeTab)">
+                                Value <i class="bi @(sortColumn == "Value" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th style="width:14%" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td title="@(item.ParentProject?.ParentProjectGroup ?? item.AppCategory)">
+                                    <div class="text-truncate">@(item.ParentProject?.ParentProjectGroup ?? item.AppCategory ?? "-")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-truncate" title="@item.AppName">@item.AppName</div>
+                                </td>
+                                <td title="@(item.DevelopedBy?.EmpName)">
+                                    <div class="text-truncate">@(item.DevelopedBy?.EmpName ?? "-")</div>
+                                </td>
+                                <td>
+                                    @{
+                                        var phaseName = item.SDLCPhase?.Phase ?? "";
+                                        var p = phaseName.ToLower().Trim();
+                                        var badgeClass = "status-badge status-badge-default";
+
+
+                                        if (p.Contains("proposal preparation")) { badgeClass = "status-badge status-badge-prep"; }
+                                        else if (p.Contains("proposal submitted")) { badgeClass = "status-badge status-badge-submitted"; }
+                                        else if (p.Contains("requirement") || p.Contains("gathering")) { badgeClass = "status-badge status-badge-req"; }
+                                        else if (p.Contains("design")) { badgeClass = "status-badge status-badge-design"; }
+                                        else if (p.Contains("coding") || p.Contains("implementation") || p.Contains("development")) { badgeClass = "status-badge status-badge-coding"; }
+                                        else if (p.Contains("testing") || p.Contains("qa")) { badgeClass = "status-badge status-badge-testing"; }
+                                        else if (p.Contains("deployment") || p.Contains("completed") || p.Contains("live")) { badgeClass = "status-badge status-badge-deploy"; }
+                                    }
+
+                                    <span class="@badgeClass">
+                                        @(string.IsNullOrEmpty(phaseName) ? "-" : phaseName)
+                                    </span>
+                                </td>
+                                <td>@(item.StartDate?.ToString("MMM dd, yyyy") ?? "-")</td>
+                                <td>@(item.TargetDate?.ToString("MMM dd, yyyy") ?? "-")</td>
+                                <td>@(item.AppUsers ?? "-")</td>
+                                <td>@(item.Price.HasValue ? $"Rs.{item.Price.Value:N2}" : "-")</td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                onclick="showDeleteModal(@item.Id, '@(item.AppName?.Replace("'", "\\'") ?? "")')" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+
+                                        <a href="@Url.Action("Index", "InternalDocuments", new { platformId = item.Id })" class="btn btn-sm btn-outline-secondary" title="Folder">
+                                            <i class="bi bi-folder"></i>
+                                        </a>
+
+                                        @if (item.CommentCount > 0)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-warning"
+                                                    onclick="loadComments(@item.Id, '@(item.AppName?.Replace("'", "\\'") ?? "")')"
+                                                    title="View Comments">
+                                                <i class="bi bi-chat-quote-fill"></i>
+                                            </button>
+                                        }
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="empty-state">
+                                <i class="bi bi-search fs-1 mb-2"></i>
+                                <p class="mb-0">No solutions found matching your search criteria</p>
+                                <small class="text-muted">Try adjusting your search terms or create a new solution.</small>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @* --- Excel Button --- *@
+    <div class="mt-3 d-flex justify-content-start">
+        <a asp-action="ExportInProgressToExcel"
+           asp-route-search="@searchTerm"
+           asp-route-activeTab="@activeTab"
+           class="btn-export-excel">
+            <i class="bi bi-file-earmark-excel"></i>
+            <span>Export @(activeTab == "level1" ? "Level 1" : "Others") Data to Excel</span>
+        </a>
+    </div>
+
+    @* --- Pagination --- *@
+    <div class="row mt-3 align-items-center mb-5">
+        <div class="col-md-6">
+            <p class="text-muted mb-0">Showing @startRecord to @endRecord of @totalRecords entries</p>
+        </div>
+        <div class="col-md-6">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end mb-0">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@BuildIndexUrl(Math.Max(1, currentPage - 1), pageSize, sortColumn, sortOrder, searchTerm, activeTab)">Previous</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="@BuildIndexUrl(i, pageSize, sortColumn, sortOrder, searchTerm, activeTab)">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@BuildIndexUrl(Math.Min(totalPages, currentPage + 1), pageSize, sortColumn, sortOrder, searchTerm, activeTab)">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div> @* FIX: This closing div was previously misplaced at the top *@
+
+@* --- Success Modal --- *@
+<div id="successModal" class="success-modal-overlay">
+    <div class="success-modal-content">
+        <i class="bi bi-check-circle-fill"></i>
+        <h4>Success!</h4>
+        <p>@TempData["SuccessMessage"]</p>
+        <button type="button" class="btn-modal-ok" onclick="closeSuccessModal()">
+            OK
+        </button>
+    </div>
+</div>
+
+@* --- Enhanced Comment History Modal --- *@
+<div id="commentModal" class="success-modal-overlay">
+    <div class="comment-modal-content">
+        <div class="comment-modal-header">
+            <h4><i class="bi bi-chat-dots-fill"></i>Comments History</h4>
+            <button type="button" class="btn-close" onclick="closeCommentModal()"></button>
+        </div>
+
+        <p class="comment-subtitle">Application Name: <strong id="commentSolutionName"></strong></p>
+
+        <div id="commentsContainer">
+            <div class="comment-loading">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted fw-semibold">Loading comments...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* --- Delete Modal --- *@
+<div id="deleteModal" class="delete-modal-overlay">
+    <div class="delete-modal-content">
+        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+        <h4>Are You Sure?</h4>
+        <p>You are about to delete:</p>
+        <p class="item-name" id="deleteItemName"></p>
+        <p style="color: #dc3545; font-size: 0.9rem;">This action cannot be undone!</p>
+        <div class="delete-modal-actions">
+            <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+            </button>
+            <form id="deleteForm" method="post" asp-action="Delete" style="display: inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="deleteId" />
+                <button type="submit" class="btn-modal-delete">
+                    <i class="bi bi-trash-fill me-1"></i> Yes, Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // --- Success Modal Logic ---
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('show');
+        }
+
+        // --- Delete Modal Logic ---
+        function showDeleteModal(id, name) {
+            document.getElementById('deleteItemName').textContent = name;
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        // --- Event Listeners for Outside Clicks ---
+        window.onclick = function (event) {
+            var successModal = document.getElementById('successModal');
+            var deleteModal = document.getElementById('deleteModal');
+            var commentModal = document.getElementById('commentModal');
+
+            if (event.target == successModal) {
+                closeSuccessModal();
+            }
+            if (event.target == deleteModal) {
+                closeDeleteModal();
+            }
+            if (event.target == commentModal) {
+                closeCommentModal();
+            }
+        }
+
+        // Show success modal if TempData message exists
+        @if (TempData["SuccessMessage"] != null)
+        {
+                    <text>
+                    window.addEventListener('DOMContentLoaded', () => {
+                        document.getElementById('successModal').classList.add('show');
+                    });
+                    </text>
+        }
+
+        // --- Enhanced Comment Modal Logic ---
+        function loadComments(id, appName) {
+            const modal = document.getElementById('commentModal');
+            const container = document.getElementById('commentsContainer');
+            const title = document.getElementById('commentSolutionName');
+
+            // Show Modal & Set Title
+            title.textContent = appName;
+            modal.classList.add('show');
+
+            // Reset Container to Loading
+            container.innerHTML = `
+                <div class="comment-loading">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted fw-semibold">Loading comments...</p>
+                </div>
+            `;
+
+            // Fetch Data
+            fetch(`/InternalSolutionInprogress/GetComments?id=${id}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    container.innerHTML = '';
+
+                    // Empty State
+                    if (!data || data.length === 0) {
+                        container.innerHTML = `
+                            <div class="comment-empty-state">
+                                <i class="bi bi-chat-left-text"></i>
+                                <h5 class="mb-2">No Comments Yet</h5>
+                                <p class="text-muted mb-0">Be the first to add a comment!</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // Build Enhanced Table
+                    let html = `
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50%;">Comment</th>
+                                        <th style="width: 25%;">Updated By</th>
+                                        <th style="width: 25%;">Date & Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    data.forEach((item) => {
+
+                        let dateDisplay = 'N/A';
+                        if(item.updatedTime) {
+                            dateDisplay = new Date(item.updatedTime).toLocaleString();
+                        }
+
+                        html += `
+                            <tr>
+                                <td>
+                                    <div class="comment-text">${escapeHtml(item.comment || 'No comment text')}</div>
+                                </td>
+                                <td>
+                                    <div class="user-badge">
+                                        <i class="bi bi-person-circle"></i>
+                                        <span>${escapeHtml(item.updatedBy || 'Unknown')}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-badge">
+                                        <i class="bi bi-calendar-event"></i>
+                                        <span>${dateDisplay}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    container.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading comments:', error);
+                    container.innerHTML = `
+                        <div class="alert alert-danger m-3" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Error!</strong> Failed to load comments. Please try again.
+                        </div>
+                    `;
+                });
+        }
+
+        // Helper function to escape HTML and prevent XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function closeCommentModal() {
+            document.getElementById('commentModal').classList.remove('show');
+        }
+    </script>
+}

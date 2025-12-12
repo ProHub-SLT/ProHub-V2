@@ -411,35 +411,38 @@ namespace PROHUB.Controllers
         // ------------------ Export Action ------------------
 
         public async Task<IActionResult> ExportToExcel(
-            string tab = "operational",
-            string sortColumn = "AppName",
-            string sortOrder = "asc",
-            string search = ""
-        )
+     string tab = "operational",
+     string sortColumn = "AppName",
+     string sortOrder = "asc",
+     string search = "")
         {
             try
             {
-                // 1. Retrieve Data and Filter (Same logic as Index)
+                // 1. Setup Filters
                 tab = (tab ?? "operational").Trim().ToLowerInvariant();
-                sortColumn = string.IsNullOrWhiteSpace(sortColumn) ? "AppName" : sortColumn.Trim();
-                sortOrder = (sortOrder ?? "asc").Trim().ToLowerInvariant();
                 search = search?.Trim() ?? string.Empty;
 
                 var all = await _dataAccess.GetAllAsync() ?? new List<InternalPlatform>();
                 IEnumerable<InternalPlatform> filtered = all;
 
-                // Tab Logic
+                // --- FILTERING LOGIC ---
+                string fileNamePrefix = "InternalSolutions"; // Default name
+
                 if (tab == "operational")
                 {
+                    // Filter: Maintenance Only
                     filtered = filtered.Where(x => string.Equals(x.SDLCPhaseName, "Maintenance", StringComparison.OrdinalIgnoreCase));
+                    fileNamePrefix = "Operational_Solutions";
                 }
                 else if (tab == "withoutcr" || tab == "without_cr")
                 {
+                    // Filter: Maintenance AND Main Application (No CRs)
                     filtered = filtered.Where(x => string.Equals(x.SDLCPhaseName, "Maintenance", StringComparison.OrdinalIgnoreCase));
                     filtered = filtered.Where(x => string.Equals(x.AppCategory, "Main Application", StringComparison.OrdinalIgnoreCase));
+                    fileNamePrefix = "Operational_Solutions_NoCR";
                 }
 
-                // Search Logic
+                // --- SEARCH LOGIC (Preserve search if needed) ---
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     filtered = filtered.Where(x =>
@@ -450,7 +453,7 @@ namespace PROHUB.Controllers
                     );
                 }
 
-                // Sorting Logic
+                // --- SORTING LOGIC ---
                 bool ascending = sortOrder == "asc";
                 filtered = sortColumn switch
                 {
@@ -468,59 +471,51 @@ namespace PROHUB.Controllers
                 // 2. Create Excel File
                 using (var workbook = new XLWorkbook())
                 {
-                    var worksheet = workbook.Worksheets.Add("Internal Solutions");
-                    int currentRow = 1;
+                    var worksheet = workbook.Worksheets.Add("Solutions");
 
-                    // Headers
-                    worksheet.Cell(currentRow, 1).Value = "Group";
-                    worksheet.Cell(currentRow, 2).Value = "App Name";
-                    worksheet.Cell(currentRow, 3).Value = "Category";
-                    worksheet.Cell(currentRow, 4).Value = "Developed By";
-                    worksheet.Cell(currentRow, 5).Value = "Launched Date";
-                    worksheet.Cell(currentRow, 6).Value = "VA Date";
-                    worksheet.Cell(currentRow, 7).Value = "Price (Rs)";
-                    worksheet.Cell(currentRow, 8).Value = "Platform Owner";
-                    worksheet.Cell(currentRow, 9).Value = "Main App (if CR)";
-                    worksheet.Cell(currentRow, 10).Value = "SDLC Phase";
+                    // HEADERS
+                    string[] headers = { "Group", "App Name", "Category", "Developed By", "Launched Date", "VA Date", "Price (Rs)", "Platform Owner", "Main App", "SDLC Phase" };
+                    for (int i = 0; i < headers.Length; i++) worksheet.Cell(1, i + 1).Value = headers[i];
 
-                    // Style Headers
-                    var headerRange = worksheet.Range(currentRow, 1, currentRow, 10);
+                    // STYLING
+                    var headerRange = worksheet.Range(1, 1, 1, headers.Length);
                     headerRange.Style.Font.Bold = true;
                     headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#007BFF");
                     headerRange.Style.Font.FontColor = XLColor.White;
 
-                    // Data Rows
+                    // DATA ROWS
+                    int row = 2;
                     foreach (var item in dataList)
                     {
-                        currentRow++;
-                        worksheet.Cell(currentRow, 1).Value = item.ParentProjectGroupName;
-                        worksheet.Cell(currentRow, 2).Value = item.AppName;
-                        worksheet.Cell(currentRow, 3).Value = item.AppCategory;
-                        worksheet.Cell(currentRow, 4).Value = item.DevelopedByName;
-                        worksheet.Cell(currentRow, 5).Value = item.LaunchedDate?.ToString("yyyy-MM-dd");
-                        worksheet.Cell(currentRow, 6).Value = item.VADate?.ToString("yyyy-MM-dd");
-                        worksheet.Cell(currentRow, 7).Value = item.Price;
-                        worksheet.Cell(currentRow, 8).Value = item.PlatformOwner;
-                        worksheet.Cell(currentRow, 9).Value = item.MainAppName;
-                        worksheet.Cell(currentRow, 10).Value = item.SDLCPhaseName;
+                        worksheet.Cell(row, 1).Value = item.ParentProjectGroupName;
+                        worksheet.Cell(row, 2).Value = item.AppName;
+                        worksheet.Cell(row, 3).Value = item.AppCategory;
+                        worksheet.Cell(row, 4).Value = item.DevelopedByName;
+                        worksheet.Cell(row, 5).Value = item.LaunchedDate; // ClosedXML handles DateTime automatically
+                        worksheet.Cell(row, 6).Value = item.VADate;
+                        worksheet.Cell(row, 7).Value = item.Price;
+                        worksheet.Cell(row, 8).Value = item.PlatformOwner;
+                        worksheet.Cell(row, 9).Value = item.MainAppName;
+                        worksheet.Cell(row, 10).Value = item.SDLCPhaseName;
+                        row++;
                     }
 
-                    // Auto fit columns
                     worksheet.Columns().AdjustToContents();
 
                     using (var stream = new MemoryStream())
                     {
                         workbook.SaveAs(stream);
                         var content = stream.ToArray();
-                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"InternalSolutions_{DateTime.Now:yyyyMMdd}.xlsx");
+                        string excelName = $"{fileNamePrefix}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error exporting data to Excel.");
+                // _logger.LogError(ex, "Export failed");
                 TempData["ErrorMessage"] = "Failed to export data.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { tab = tab });
             }
         }
 

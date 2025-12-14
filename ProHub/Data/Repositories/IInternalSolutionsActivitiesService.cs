@@ -15,7 +15,7 @@ namespace PROHUB.Data
     // ---------------------------------------------------------
     public interface IInternalSolutionsActivitiesService
     {
-        Task<List<ProjectActivity>> GetAllAsync(string search = null, string sortColumn = null, string sortOrder = null);
+        Task<List<ProjectActivity>> GetAllAsync(string search = null, string sortColumn = null, string sortOrder = null, int? filterPlatformId = null);
 
         Task<ProjectActivity?> GetByIdAsync(int id);
         Task<int> CreateAsync(ProjectActivity activity);
@@ -28,6 +28,7 @@ namespace PROHUB.Data
         Task<List<Employee>> GetEmployeesAsync();
         Task<List<MainPlatform>> GetMainPlatformsAsync();
         Task<List<InternalPlatform>> GetInternalSolutionsAsync();
+        Task<Employee?> GetEmployeeByEmailAsync(string email);
     }
 
     // ---------------------------------------------------------
@@ -48,7 +49,7 @@ namespace PROHUB.Data
 
         // --- CRUD OPERATIONS ---
 
-        public async Task<List<ProjectActivity>> GetAllAsync(string search = null, string sortColumn = null, string sortOrder = null)
+        public async Task<List<ProjectActivity>> GetAllAsync(string search = null, string sortColumn = null, string sortOrder = null, int? filterPlatformId = null)
         {
             var list = new List<ProjectActivity>();
             using var connection = GetConnection();
@@ -70,7 +71,18 @@ namespace PROHUB.Data
                 LEFT JOIN Employee e1 ON pa.Created_By = e1.Emp_ID
                 LEFT JOIN Employee e2 ON pa.Assigned_To = e2.Emp_ID
                 LEFT JOIN Employee e3 ON pa.Updated_By = e3.Emp_ID
-                WHERE pa.Platform_ID = 1";
+                WHERE 1=1";
+
+            if (filterPlatformId.HasValue)
+            {
+                query += " AND pa.Platform_ID = @PlatformId";
+            }
+            else
+            {
+                // Default fallback if needed, or remove this else block to show all if not filtered.
+                // Keeping original behavior for safety if not specified, assuming 1 was intended default.
+                query += " AND pa.Platform_ID = 1"; 
+            }
 
             // 1. Search Logic
             bool hasSearch = !string.IsNullOrEmpty(search);
@@ -111,6 +123,11 @@ namespace PROHUB.Data
             if (hasSearch)
             {
                 command.Parameters.AddWithValue("@Search", $"%{search}%");
+            }
+
+            if (filterPlatformId.HasValue)
+            {
+                command.Parameters.AddWithValue("@PlatformId", filterPlatformId.Value);
             }
 
             using var reader = await command.ExecuteReaderAsync();
@@ -280,6 +297,29 @@ namespace PROHUB.Data
                 });
             }
             return list;
+        }
+
+        public async Task<Employee?> GetEmployeeByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return null;
+
+            using var connection = GetConnection();
+            await connection.OpenAsync();
+            const string query = "SELECT * FROM Employee WHERE Emp_Email = @Email LIMIT 1";
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@Email", email);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return new Employee
+                {
+                    EmpId = reader.GetInt32(reader.GetOrdinal("Emp_ID")),
+                    EmpName = reader.GetString(reader.GetOrdinal("Emp_Name")),
+                    EmpEmail = reader.GetString(reader.GetOrdinal("Emp_Email"))
+                };
+            }
+            return null;
         }
 
         // --- MAPPERS & HELPERS ---

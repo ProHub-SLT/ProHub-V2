@@ -116,10 +116,24 @@ namespace PROHUB.Controllers
 
                 if (ViewBag.Platforms is List<MainPlatform> platforms)
                 {
-                    var externalSolution = platforms.FirstOrDefault(p => p.Platforms == "External Solutions");
+                    var externalSolution = platforms.FirstOrDefault(p => p.Platforms != null && p.Platforms.Contains("External", StringComparison.OrdinalIgnoreCase));
                     if (externalSolution != null)
                     {
                         model.PlatformId = externalSolution.ID;
+                    }
+                }
+
+                // Logic: Auto-select current user for CreatedBy
+                if (User.Identity.IsAuthenticated)
+                {
+                    var email = User.FindFirst("preferred_username")?.Value ?? User.FindFirst("upn")?.Value;
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        var employee = await _activityService.GetEmployeeByEmailAsync(email);
+                        if (employee != null)
+                        {
+                            model.CreatedBy = employee.EmpId;
+                        }
                     }
                 }
 
@@ -184,6 +198,22 @@ namespace PROHUB.Controllers
                 }
 
                 await LoadDropdownDataAsync();
+
+                // Logic: Auto-select current user for UpdatedBy
+                if (User.Identity.IsAuthenticated)
+                {
+                    var email = User.FindFirst("preferred_username")?.Value ?? User.FindFirst("upn")?.Value;
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        var employee = await _activityService.GetEmployeeByEmailAsync(email);
+                        if (employee != null)
+                        {
+                            // Default the UpdatedBy dropdown to the current user
+                            activity.UpdatedBy = employee.EmpId;
+                        }
+                    }
+                }
+
                 return View(activity);
             }
             catch (Exception ex)

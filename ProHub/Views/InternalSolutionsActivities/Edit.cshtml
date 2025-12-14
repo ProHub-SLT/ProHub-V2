@@ -322,6 +322,14 @@
             <input type="hidden" asp-for="CreatedTime" />
 
             <div class="form-body">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
                 <div class="field-description">
                     <i class="bi bi-info-circle me-2"></i>
                     Fields marked with <span class="text-danger fw-bold">*</span> are required.
@@ -494,6 +502,7 @@
     }
     <script>
         // --- FORM VALIDATION ---
+        // --- FORM VALIDATION ---
         document.getElementById('editActivityForm').addEventListener('submit', function (e) {
             let isValid = true;
             let firstInvalidField = null;
@@ -514,25 +523,23 @@
             const updatedBy = document.querySelector('select[name="UpdatedBy"]');
 
             // Validate Platform
-            if (!platformId.value) {
+            if (platformId && !platformId.value) {
                 isValid = false;
-                platformId.style.borderColor = '#dc3545';
                 const errorSpan = platformId.closest('.form-group-modern').querySelector('.helper-text');
                 if (errorSpan) errorSpan.textContent = 'Platform is required.';
-                if (!firstInvalidField) firstInvalidField = platformId;
+                if (!firstInvalidField) firstInvalidField = platformId.closest('.form-group-modern');
             }
 
             // Validate Solution
-            if (!solutionId.value) {
+            if (solutionId && !solutionId.value) {
                 isValid = false;
-                solutionId.style.borderColor = '#dc3545';
                 const errorSpan = solutionId.closest('.form-group-modern').querySelector('.helper-text');
                 if (errorSpan) errorSpan.textContent = 'Solution is required.';
-                if (!firstInvalidField) firstInvalidField = solutionId;
+                if (!firstInvalidField) firstInvalidField = solutionId.closest('.form-group-modern');
             }
 
             // Validate Target Date
-            if (!targetDate.value) {
+            if (targetDate && !targetDate.value) {
                 isValid = false;
                 targetDate.style.borderColor = '#dc3545';
                 const errorSpan = targetDate.closest('.form-group-modern').querySelector('.helper-text');
@@ -541,7 +548,7 @@
             }
 
             // Validate Status
-            if (!status.value) {
+            if (status && !status.value) {
                 isValid = false;
                 status.style.borderColor = '#dc3545';
                 const errorSpan = status.closest('.form-group-modern').querySelector('.helper-text');
@@ -562,7 +569,12 @@
                 e.preventDefault();
                 if (firstInvalidField) {
                     firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstInvalidField.focus();
+                    // Only focus if it's an input/select and NOT disabled
+                    if (firstInvalidField.tagName && 
+                        (firstInvalidField.tagName === 'INPUT' || firstInvalidField.tagName === 'SELECT' || firstInvalidField.tagName === 'TEXTAREA') && 
+                        !firstInvalidField.disabled) {
+                        firstInvalidField.focus();
+                    }
                 }
             }
         });

@@ -113,7 +113,7 @@
         }
 
         .hello-user {
-            font-size: 22px;
+            font-size: 26px;
             font-weight: 600;
             color: #0f172a;
             margin-bottom: 10px;
@@ -132,6 +132,28 @@
             }
         }
 
+        .wave-emoji {
+            display: inline-block;
+            animation: wave 2.5s infinite;
+            transform-origin: 70% 70%;
+        }
+
+        @@keyframes wave {
+            0% { transform: rotate(0.0deg) }
+            10% { transform: rotate(14.0deg) }
+            20% { transform: rotate(-8.0deg) }
+            30% { transform: rotate(14.0deg) }
+            40% { transform: rotate(-4.0deg) }
+            50% { transform: rotate(10.0deg) }
+            60% { transform: rotate(0.0deg) }
+            100% { transform: rotate(0.0deg) }
+        }
+
+        .hello-name {
+            font-weight: 800;
+            color: #0f172a;
+        }
+
         @@media (max-width: 768px) {
             .hero-section {
                 padding-top: 100px;
@@ -146,7 +168,7 @@
             @if (User.Identity.IsAuthenticated)
             {
                 <div class="hello-user text-capitalize">
-                    👋 Hello, @ViewBag.DisplayName
+                    <span class="wave-emoji">👋</span> <span id="typing-prefix"></span><span id="typing-name" class="hello-name"></span>
                 </div>
             }
 
@@ -154,5 +176,38 @@
             <p class="hero-subtitle">Streamline collaboration, boost productivity, and transform how your team works with PROHUB's integrated platform.</p>
         </div>
     </section>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const prefix = "Hello, ";
+            const name = "@Html.Raw(ViewBag.DisplayName ?? "User")";
+            const typingSpeed = 200;
+            const prefixElement = document.getElementById("typing-prefix");
+            const nameElement = document.getElementById("typing-name");
+            let charIndex = 0;
+
+            function typePrefix() {
+                if (charIndex < prefix.length) {
+                    if(prefixElement) prefixElement.textContent += prefix.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typePrefix, typingSpeed);
+                } else {
+                    charIndex = 0;
+                    typeName();
+                }
+            }
+
+            function typeName() {
+                if (charIndex < name.length) {
+                    if(nameElement) nameElement.textContent += name.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeName, typingSpeed);
+                }
+            }
+            
+            if(prefixElement && nameElement) {
+                setTimeout(typePrefix, 500);
+            }
+        });
+    </script>
 </body>
 </html>

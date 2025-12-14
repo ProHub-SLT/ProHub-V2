@@ -335,6 +335,14 @@
 
         <form asp-action="Create" method="post" id="createActivityForm">
             <div class="form-body">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
                 <div class="field-description">
                     <i class="bi bi-info-circle me-2"></i>
                     Fields marked with <span class="text-danger fw-bold">*</span> are required.
@@ -397,10 +405,11 @@
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-person-circle"></i>
-                            <select asp-for="CreatedBy" class="form-control-modern"
+                            <select asp-for="CreatedBy" class="form-control-modern" disabled
                                     asp-items="@(ViewBag.Employees != null ? new SelectList(ViewBag.Employees, "EmpId", "EmpName") : null)">
                                 <option value="">-- Select Employee --</option>
                             </select>
+                            <input type="hidden" asp-for="CreatedBy" id="CreatedByValue" />
                         </div>
                         <span asp-validation-for="CreatedBy" class="helper-text"></span>
                     </div>
@@ -484,6 +493,7 @@
     }
     <script>
         // --- FORM VALIDATION ---
+        // --- FORM VALIDATION ---
         document.getElementById('createActivityForm').addEventListener('submit', function (e) {
             let isValid = true;
             let firstInvalidField = null;
@@ -509,7 +519,7 @@
                 const errorSpan = platformId.parentElement.querySelector('.helper-text') ||
                                 platformId.closest('.form-group-modern').querySelector('.helper-text');
                 if (errorSpan) errorSpan.textContent = 'Platform is required.';
-                if (!firstInvalidField) firstInvalidField = platformId;
+                if (!firstInvalidField) firstInvalidField = platformId.closest('.form-group-modern'); // target container
             }
 
             // Validate Solution
@@ -522,12 +532,15 @@
             }
 
             // Validate Created By
-            if (!createdBy.value) {
-                isValid = false;
-                createdBy.style.borderColor = '#dc3545';
-                const errorSpan = createdBy.closest('.form-group-modern').querySelector('.helper-text');
-                if (errorSpan) errorSpan.textContent = 'Created By is required.';
-                if (!firstInvalidField) firstInvalidField = createdBy;
+            if (createdBy && !createdBy.value) {
+                // If the select is empty (and potentially disabled), check if there's a hidden input with value
+                const hiddenCreatedBy = document.getElementById('CreatedByValue');
+                if (!hiddenCreatedBy || !hiddenCreatedBy.value) {
+                    isValid = false;
+                    const errorSpan = createdBy.closest('.form-group-modern').querySelector('.helper-text');
+                    if (errorSpan) errorSpan.textContent = 'Created By is required.';
+                    if (!firstInvalidField) firstInvalidField = createdBy.closest('.form-group-modern');
+                }
             }
 
             // Validate Target Date
@@ -552,7 +565,12 @@
                 e.preventDefault();
                 if (firstInvalidField) {
                     firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstInvalidField.focus();
+                    // Only focus if it's an input/select and NOT disabled
+                    if (firstInvalidField.tagName && 
+                        (firstInvalidField.tagName === 'INPUT' || firstInvalidField.tagName === 'SELECT' || firstInvalidField.tagName === 'TEXTAREA') && 
+                        !firstInvalidField.disabled) {
+                        firstInvalidField.focus();
+                    }
                 }
             }
         });

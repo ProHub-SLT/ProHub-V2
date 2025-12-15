@@ -25,7 +25,16 @@ namespace PROHUB.Controllers
             try
             {
 
-                var allActivities = await _activityService.GetAllAsync(search, sortColumn, sortOrder);
+                // Find "Internal Solutions" platform ID
+                int? internalSolutionId = null;
+                var platforms = await _activityService.GetMainPlatformsAsync();
+                var platform = platforms.FirstOrDefault(p => p.Platforms != null && p.Platforms.Contains("Internal", StringComparison.OrdinalIgnoreCase));
+                if (platform != null)
+                {
+                    internalSolutionId = platform.ID;
+                }
+
+                var allActivities = await _activityService.GetAllAsync(search, sortColumn, sortOrder, filterPlatformId: internalSolutionId);
 
                 // Pagination Logic
                 var totalItemCount = allActivities.Count;
@@ -128,10 +137,24 @@ namespace PROHUB.Controllers
                 // Logic: Auto-select "Internal Solutions" platform if it exists
                 if (ViewBag.Platforms is List<MainPlatform> platforms)
                 {
-                    var internalSolution = platforms.FirstOrDefault(p => p.Platforms == "Internal Solutions");
+                    var internalSolution = platforms.FirstOrDefault(p => p.Platforms != null && p.Platforms.Contains("Internal", StringComparison.OrdinalIgnoreCase));
                     if (internalSolution != null)
                     {
                         model.PlatformId = internalSolution.ID;
+                    }
+                }
+
+                // Logic: Auto-select current user for CreatedBy
+                if (User.Identity.IsAuthenticated)
+                {
+                    var email = User.FindFirst("preferred_username")?.Value ?? User.FindFirst("upn")?.Value;
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        var employee = await _activityService.GetEmployeeByEmailAsync(email);
+                        if (employee != null)
+                        {
+                            model.CreatedBy = employee.EmpId;
+                        }
                     }
                 }
 
@@ -153,6 +176,12 @@ namespace PROHUB.Controllers
             {
                 model.CreatedTime = DateTime.Now;
 
+                // Validate that PlatformId is valid (non-zero)
+                if (model.PlatformId == 0)
+                {
+                    ModelState.AddModelError("PlatformId", "Invalid Platform selected.");
+                }
+
                 if (ModelState.IsValid)
                 {
                     int newId = await _activityService.CreateAsync(model);
@@ -163,12 +192,14 @@ namespace PROHUB.Controllers
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Failed to create activity.";
+                        TempData["ErrorMessage"] = "Failed to create activity (Database returned 0).";
                     }
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Please check the form for errors.";
+                    // Aggregate errors for display
+                    var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                    TempData["ErrorMessage"] = "Please check the form for errors: " + errors;
                 }
             }
             catch (Exception ex)
@@ -195,6 +226,22 @@ namespace PROHUB.Controllers
                 }
 
                 await LoadDropdownDataAsync();
+
+                // Logic: Auto-select current user for UpdatedBy
+                if (User.Identity.IsAuthenticated)
+                {
+                    var email = User.FindFirst("preferred_username")?.Value ?? User.FindFirst("upn")?.Value;
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        var employee = await _activityService.GetEmployeeByEmailAsync(email);
+                        if (employee != null)
+                        {
+                            // Default the UpdatedBy dropdown to the current user
+                            activity.UpdatedBy = employee.EmpId;
+                        }
+                    }
+                }
+
                 return View(activity);
             }
             catch (Exception ex)
@@ -218,6 +265,11 @@ namespace PROHUB.Controllers
 
             try
             {
+                if (model.PlatformId == 0)
+                {
+                    ModelState.AddModelError("PlatformId", "Invalid Platform selected.");
+                }
+
                 if (ModelState.IsValid)
                 {
                     model.UpdatedDate = DateTime.Now;
@@ -240,6 +292,11 @@ namespace PROHUB.Controllers
                     {
                         TempData["ErrorMessage"] = "Failed to update activity.";
                     }
+                }
+                else
+                {
+                    var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                    TempData["ErrorMessage"] = "Please check the form for errors: " + errors;
                 }
             }
             catch (Exception ex)

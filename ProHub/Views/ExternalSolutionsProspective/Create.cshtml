@@ -30,7 +30,7 @@
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         overflow: hidden;
-        max-width: 1000px; /* Slightly wider for the many fields */
+        max-width: 1000px;
         margin: 0 auto;
     }
 
@@ -68,11 +68,6 @@
         margin-bottom: 0.5rem;
         font-size: 0.95rem;
     }
-
-        .form-label-modern .required {
-            color: #dc3545;
-            margin-left: 0.25rem;
-        }
 
     .form-control-modern {
         width: 100%;
@@ -178,16 +173,6 @@
         gap: 1.5rem;
     }
 
-    .field-description {
-        background: #f0f9ff;
-        border-left: 3px solid #007BFF;
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        margin-bottom: 2rem;
-        font-size: 0.9rem;
-        color: #2d3748;
-    }
-
     /* Success Popup */
     .success-popup {
         position: fixed;
@@ -263,37 +248,29 @@
         <form asp-action="Create" method="post" id="externalSolutionForm">
             @Html.AntiForgeryToken()
             <div class="form-body">
-                <div class="field-description">
-                    <i class="bi bi-info-circle me-2"></i>
-                    Fields marked with <span class="text-danger">*</span> are required
-                </div>
-
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="PlatformName" class="form-label-modern">
-                            <i class="bi bi-app-indicator me-1"></i> Application/Platform Name <span class="required">*</span>
+                            <i class="bi bi-app-indicator me-1"></i> Application/Platform Name
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-pc-display-horizontal"></i>
-                            <input asp-for="PlatformName" class="form-control-modern" placeholder="Enter name" required />
+                            <input asp-for="PlatformName" class="form-control-modern" placeholder="Enter name" />
                         </div>
-                        <span asp-validation-for="PlatformName" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
                         <label asp-for="CompanyId" class="form-label-modern">
-                            <i class="bi bi-building me-1"></i> Company/Customer <span class="required">*</span>
+                            <i class="bi bi-building me-1"></i> Company/Customer
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-building-fill"></i>
                             <select asp-for="CompanyId" class="form-control-modern"
-                                    asp-items="@(new SelectList(ViewBag.Companies ?? new List<ProHub.Models.Company>(), "Id", "CompanyName"))" required>
+                                    asp-items="@(new SelectList(ViewBag.Companies ?? new List<ProHub.Models.Company>(), "Id", "CompanyName"))">
                                 <option value="">Please select a company</option>
                             </select>
                         </div>
-                        <span asp-validation-for="CompanyId" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -309,7 +286,6 @@
                                 <option value="">Please select developer</option>
                             </select>
                         </div>
-                        <span asp-validation-for="DevelopedById" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -320,7 +296,6 @@
                             <i class="bi bi-people-fill"></i>
                             <input asp-for="DevelopedTeam" class="form-control-modern" placeholder="Enter team name" />
                         </div>
-                        <span asp-validation-for="DevelopedTeam" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -333,7 +308,6 @@
                             <i class="bi bi-calendar-plus"></i>
                             <input asp-for="StartDate" type="date" class="form-control-modern" />
                         </div>
-                        <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -344,7 +318,6 @@
                             <i class="bi bi-calendar-check-fill"></i>
                             <input asp-for="TargetDate" type="date" class="form-control-modern" />
                         </div>
-                        <span asp-validation-for="TargetDate" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -360,7 +333,6 @@
                                 <option value="">Please select stage</option>
                             </select>
                         </div>
-                        <span asp-validation-for="SDLCStageId" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -371,7 +343,6 @@
                             <i class="bi bi-pie-chart-fill"></i>
                             <input asp-for="PercentageDone" class="form-control-modern" placeholder="0-100" />
                         </div>
-                        <span asp-validation-for="PercentageDone" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -384,7 +355,6 @@
                             <i class="bi bi-github"></i>
                             <input asp-for="BITBucketRepo" class="form-control-modern" placeholder="Enter repository name" />
                         </div>
-                        <span asp-validation-for="BITBucketRepo" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -398,7 +368,6 @@
                                 <option value="">Please select team</option>
                             </select>
                         </div>
-                        <span asp-validation-for="SalesTeamId" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -411,7 +380,6 @@
                             <i class="bi bi-person-circle"></i>
                             <input asp-for="SalesAM" class="form-control-modern" placeholder="Enter account manager" />
                         </div>
-                        <span asp-validation-for="SalesAM" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -422,7 +390,6 @@
                             <i class="bi bi-person-check-fill"></i>
                             <input asp-for="SalesManager" class="form-control-modern" placeholder="Enter sales manager" />
                         </div>
-                        <span asp-validation-for="SalesManager" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -435,7 +402,6 @@
                             <i class="bi bi-wrench-adjustable"></i>
                             <input asp-for="SalesEngineer" class="form-control-modern" placeholder="Enter engineer name" />
                         </div>
-                        <span asp-validation-for="SalesEngineer" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -446,7 +412,6 @@
                             <i class="bi bi-calendar3"></i>
                             <input asp-for="UATDate" type="date" class="form-control-modern" />
                         </div>
-                        <span asp-validation-for="UATDate" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -459,7 +424,6 @@
                             <i class="bi bi-rocket-fill"></i>
                             <input asp-for="LaunchedDate" type="date" class="form-control-modern" />
                         </div>
-                        <span asp-validation-for="LaunchedDate" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -470,7 +434,6 @@
                             <i class="bi bi-cash-stack"></i>
                             <input asp-for="PlatformOTC" class="form-control-modern" placeholder="Enter amount" />
                         </div>
-                        <span asp-validation-for="PlatformOTC" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -483,7 +446,6 @@
                             <i class="bi bi-cash-coin"></i>
                             <input asp-for="PlatformMRC" class="form-control-modern" placeholder="Enter amount" />
                         </div>
-                        <span asp-validation-for="PlatformMRC" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -494,7 +456,6 @@
                             <i class="bi bi-graph-up-arrow"></i>
                             <input asp-for="SoftwareValue" class="form-control-modern" placeholder="Enter value" />
                         </div>
-                        <span asp-validation-for="SoftwareValue" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -507,7 +468,6 @@
                             <i class="bi bi-hourglass-split"></i>
                             <input asp-for="ContractPeriod" class="form-control-modern" placeholder="Enter years" />
                         </div>
-                        <span asp-validation-for="ContractPeriod" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -523,7 +483,6 @@
                                 <option value="8/5">8/5</option>
                             </select>
                         </div>
-                        <span asp-validation-for="SLA" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -536,7 +495,6 @@
                             <i class="bi bi-clipboard-check"></i>
                             <input asp-for="DPOHandoverDate" type="date" class="form-control-modern" />
                         </div>
-                        <span asp-validation-for="DPOHandoverDate" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -547,7 +505,6 @@
                             <i class="bi bi-chat-dots-fill"></i>
                             <input asp-for="DPOHandoverComment" class="form-control-modern" placeholder="Enter comments" />
                         </div>
-                        <span asp-validation-for="DPOHandoverComment" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -575,61 +532,15 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
     <script>
-        // 1. Validation Logic for Required fields
-        document.querySelector('form').addEventListener('submit', function (e) {
-            const requiredFields = this.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value) {
-                    isValid = false;
-                    field.style.borderColor = '#dc3545';
-                } else {
-                    field.style.borderColor = '#e2e8f0';
-                }
-            });
-
-            if (!isValid) {
-                // e.preventDefault(); // Optional: allow ASP.NET validation to also handle it
-                // alert('Please fill in all required fields marked with *');
-            }
-        });
-
-        // 2. Date Constraints Logic (From your original code)
-        document.addEventListener('DOMContentLoaded', function () {
-            const startDate = document.getElementById('StartDate');
-            const targetDate = document.getElementById('TargetDate');
-            const dateFields = ['StartDate', 'TargetDate', 'UATDate', 'LaunchedDate', 'DPOHandoverDate'];
-            const today = new Date().toISOString().split('T')[0];
-
-            // Set Min Date to Today
-            dateFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) {
-                    element.min = today;
-                }
-            });
-
-            // Logic: Target Date cannot be before Start Date
-            if (startDate && targetDate) {
-                startDate.addEventListener('change', function () {
-                    if (this.value) {
-                        targetDate.min = this.value;
-                    }
-                });
-            }
-        });
-
-        // 3. Popup Logic
+        // Popup Logic
         @if (TempData["SuccessMessage"] != null)
         {
-                        <text>
-                        window.addEventListener('DOMContentLoaded', () => {
-                            document.getElementById('successPopup').classList.remove('hidden');
-                        });
-                        </text>
+                    <text>
+                    window.addEventListener('DOMContentLoaded', () => {
+                        document.getElementById('successPopup').classList.remove('hidden');
+                    });
+                    </text>
         }
 
         document.getElementById('popupCloseBtn').addEventListener('click', function () {

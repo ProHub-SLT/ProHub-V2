@@ -407,14 +407,11 @@ namespace PROHUB.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        // ------------------ Export Action ------------------
-
         public async Task<IActionResult> ExportToExcel(
-     string tab = "operational",
-     string sortColumn = "AppName",
-     string sortOrder = "asc",
-     string search = "")
+            string tab = "operational",
+            string sortColumn = "AppName",
+            string sortOrder = "asc",
+            string search = "")
         {
             try
             {
@@ -426,7 +423,7 @@ namespace PROHUB.Controllers
                 IEnumerable<InternalPlatform> filtered = all;
 
                 // --- FILTERING LOGIC ---
-                string fileNamePrefix = "InternalSolutions"; // Default name
+                string fileNamePrefix = "InternalSolutions";
 
                 if (tab == "operational")
                 {
@@ -442,7 +439,7 @@ namespace PROHUB.Controllers
                     fileNamePrefix = "Operational_Solutions_NoCR";
                 }
 
-                // --- SEARCH LOGIC (Preserve search if needed) ---
+                // --- SEARCH LOGIC ---
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     filtered = filtered.Where(x =>
@@ -462,6 +459,7 @@ namespace PROHUB.Controllers
                     "DevelopedByName" => ascending ? filtered.OrderBy(x => x.DevelopedByName) : filtered.OrderByDescending(x => x.DevelopedByName),
                     "LaunchedDate" => ascending ? filtered.OrderBy(x => x.LaunchedDate) : filtered.OrderByDescending(x => x.LaunchedDate),
                     "VADate" => ascending ? filtered.OrderBy(x => x.VADate) : filtered.OrderByDescending(x => x.VADate),
+                    "StartDate" => ascending ? filtered.OrderBy(x => x.StartDate) : filtered.OrderByDescending(x => x.StartDate),
                     "Price" => ascending ? filtered.OrderBy(x => x.Price) : filtered.OrderByDescending(x => x.Price),
                     _ => ascending ? filtered.OrderBy(x => x.AppName) : filtered.OrderByDescending(x => x.AppName)
                 };
@@ -472,31 +470,81 @@ namespace PROHUB.Controllers
                 using (var workbook = new XLWorkbook())
                 {
                     var worksheet = workbook.Worksheets.Add("Solutions");
+                    int colIndex = 1;
 
-                    // HEADERS
-                    string[] headers = { "Group", "App Name", "Category", "Developed By", "Launched Date", "VA Date", "Price (Rs)", "Platform Owner", "Main App", "SDLC Phase" };
-                    for (int i = 0; i < headers.Length; i++) worksheet.Cell(1, i + 1).Value = headers[i];
+                    // --- A. DEFINE HEADERS BASED ON TAB ---
+                    List<string> headers;
 
-                    // STYLING
-                    var headerRange = worksheet.Range(1, 1, 1, headers.Length);
+                    if (tab == "withoutcr" || tab == "without_cr")
+                    {
+                        // Columns for "Operational without CR"
+                        headers = new List<string> {
+                    "Application Group", "Application Name", "Category", "Developed By",
+                    "SDLC Phase", "Start Date", "Target Date", "UD",
+                    "VA Date", "Price (Rs)", "Platform Owner", "Main App"
+                };
+                    }
+                    else
+                    {
+                        // Default Columns for "Operational"
+                        headers = new List<string> {
+                   "Application Group", "Application Name", "Category", "Developed By",
+                    "SDLC Phase", "Start Date", "Target Date", "UD",
+                    "VA Date", "Price (Rs)", "Platform Owner", "Main App"
+                };
+                    }
+
+                    // --- B. WRITE HEADERS ---
+                    foreach (var header in headers)
+                    {
+                        worksheet.Cell(1, colIndex).Value = header;
+                        colIndex++;
+                    }
+
+                    // --- C. STYLING HEADERS ---
+                    var headerRange = worksheet.Range(1, 1, 1, headers.Count);
                     headerRange.Style.Font.Bold = true;
                     headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#007BFF");
                     headerRange.Style.Font.FontColor = XLColor.White;
 
-                    // DATA ROWS
+                    // --- D. WRITE DATA ROWS ---
                     int row = 2;
                     foreach (var item in dataList)
                     {
-                        worksheet.Cell(row, 1).Value = item.ParentProjectGroupName;
-                        worksheet.Cell(row, 2).Value = item.AppName;
-                        worksheet.Cell(row, 3).Value = item.AppCategory;
-                        worksheet.Cell(row, 4).Value = item.DevelopedByName;
-                        worksheet.Cell(row, 5).Value = item.LaunchedDate; // ClosedXML handles DateTime automatically
-                        worksheet.Cell(row, 6).Value = item.VADate;
-                        worksheet.Cell(row, 7).Value = item.Price;
-                        worksheet.Cell(row, 8).Value = item.PlatformOwner;
-                        worksheet.Cell(row, 9).Value = item.MainAppName;
-                        worksheet.Cell(row, 10).Value = item.SDLCPhaseName;
+                        int col = 1; // Reset column counter for each row
+
+                        // 1. Common Columns
+                        worksheet.Cell(row, col++).Value = item.ParentProjectGroupName;
+                        worksheet.Cell(row, col++).Value = item.AppName;
+                        worksheet.Cell(row, col++).Value = item.AppCategory;
+                        worksheet.Cell(row, col++).Value = item.DevelopedByName;
+
+                        // 2. Tab Specific Columns
+                        if (tab == "withoutcr" || tab == "without_cr")
+                        {
+                            // Specific Data for Without CR (Matches headers defined above)
+                            worksheet.Cell(row, col++).Value = item.SDLCPhaseName;
+                            worksheet.Cell(row, col++).Value = item.StartDate;
+                            worksheet.Cell(row, col++).Value = item.TargetDate;
+                            worksheet.Cell(row, col++).Value = item.AppUsers;
+                            worksheet.Cell(row, col++).Value = item.VADate;
+                            worksheet.Cell(row, col++).Value = item.Price;
+                            worksheet.Cell(row, col++).Value = item.PlatformOwner;
+                            worksheet.Cell(row, col++).Value = item.MainAppName;
+                        }
+                        else
+                        {
+                            // Specific Data for Operational (Matches headers defined above)
+                            worksheet.Cell(row, col++).Value = item.SDLCPhaseName;
+                            worksheet.Cell(row, col++).Value = item.StartDate;
+                            worksheet.Cell(row, col++).Value = item.TargetDate;
+                            worksheet.Cell(row, col++).Value = item.AppUsers;
+                            worksheet.Cell(row, col++).Value = item.VADate;
+                            worksheet.Cell(row, col++).Value = item.Price;
+                            worksheet.Cell(row, col++).Value = item.PlatformOwner;
+                            worksheet.Cell(row, col++).Value = item.MainAppName;
+                        }
+
                         row++;
                     }
 
@@ -513,7 +561,7 @@ namespace PROHUB.Controllers
             }
             catch (Exception ex)
             {
-                // _logger.LogError(ex, "Export failed");
+                _logger.LogError(ex, "Export failed");
                 TempData["ErrorMessage"] = "Failed to export data.";
                 return RedirectToAction(nameof(Index), new { tab = tab });
             }

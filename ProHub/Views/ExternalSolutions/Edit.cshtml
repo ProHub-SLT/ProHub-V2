@@ -1,6 +1,6 @@
 ﻿@model ProHub.Models.ExternalPlatform
 @{
-    ViewData["Title"] = "Create External Solution";
+    ViewData["Title"] = "Edit External Solution";
 }
 
 <style>
@@ -256,12 +256,15 @@
 <div class="container-fluid mt-4">
     <div class="form-container">
         <div class="form-header">
-            <h2><i class="bi bi-folder-plus me-2"></i>@ViewData["Title"]</h2>
-            <p>Create a new external solution to organize your projects</p>
+            <h2><i class="bi bi-pencil-square me-2"></i>@ViewData["Title"]</h2>
+            <p>Update details for <strong>@Model.PlatformName</strong></p>
         </div>
 
-        <form asp-action="Create" method="post" id="externalSolutionForm">
+        <form asp-action="Edit" method="post" id="externalSolutionForm">
             @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Id" />
+
             <div class="form-body">
                 <div class="field-description">
                     <i class="bi bi-info-circle me-2"></i>
@@ -323,6 +326,39 @@
                         <span asp-validation-for="DevelopedTeam" class="text-danger"></span>
                     </div>
                 </div>
+
+                @if (ViewData.ContainsKey("Employees"))
+                {
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label asp-for="BackupOfficer1Id" class="form-label-modern">
+                                <i class="bi bi-person-check me-1"></i> Backup Person (Primary)
+                            </label>
+                            <div class="input-icon-wrapper">
+                                <i class="bi bi-person-check-fill"></i>
+                                <select asp-for="BackupOfficer1Id" class="form-control-modern"
+                                        asp-items="@(new SelectList(ViewBag.Employees, "EmpId", "EmpName"))">
+                                    <option value="">Please select Backup Person</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="BackupOfficer1Id" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label asp-for="BackupOfficer2Id" class="form-label-modern">
+                                <i class="bi bi-person-plus me-1"></i> Backup Person (Secondary)
+                            </label>
+                            <div class="input-icon-wrapper">
+                                <i class="bi bi-person-plus-fill"></i>
+                                <select asp-for="BackupOfficer2Id" class="form-control-modern"
+                                        asp-items="@(new SelectList(ViewBag.Employees, "EmpId", "EmpName"))">
+                                    <option value="">Please select Backup Person</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="BackupOfficer2Id" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
 
                 <div class="form-row">
                     <div class="form-group-modern">
@@ -463,6 +499,19 @@
                     </div>
 
                     <div class="form-group-modern">
+                        <label asp-for="BillingDate" class="form-label-modern">
+                            <i class="bi bi-calendar-check me-1"></i> Billed Date
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-calendar-check-fill"></i>
+                            <input asp-for="BillingDate" type="date" class="form-control-modern" />
+                        </div>
+                        <span asp-validation-for="BillingDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
                         <label asp-for="PlatformOTC" class="form-label-modern">
                             <i class="bi bi-currency-dollar me-1"></i> One-Time Charge (OTC)
                         </label>
@@ -472,9 +521,7 @@
                         </div>
                         <span asp-validation-for="PlatformOTC" class="text-danger"></span>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="PlatformMRC" class="form-label-modern">
                             <i class="bi bi-arrow-repeat me-1"></i> Monthly Recurrent Charge (MRC)
@@ -485,7 +532,9 @@
                         </div>
                         <span asp-validation-for="PlatformMRC" class="text-danger"></span>
                     </div>
+                </div>
 
+                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="SoftwareValue" class="form-label-modern">
                             <i class="bi bi-graph-up me-1"></i> Value of the Software (Out of Total Solution Value)
@@ -496,9 +545,7 @@
                         </div>
                         <span asp-validation-for="SoftwareValue" class="text-danger"></span>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="ContractPeriod" class="form-label-modern">
                             <i class="bi bi-calendar-range me-1"></i> Contract Period (Years)
@@ -508,6 +555,47 @@
                             <input asp-for="ContractPeriod" class="form-control-modern" placeholder="Enter years" />
                         </div>
                         <span asp-validation-for="ContractPeriod" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="IncentiveEarned" class="form-label-modern">
+                            <i class="bi bi-cash-coin me-1"></i> Incentive Amount Earned
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-currency-dollar"></i>
+                            <input asp-for="IncentiveEarned" class="form-control-modern" placeholder="Enter amount" />
+                        </div>
+                        <span asp-validation-for="IncentiveEarned" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label asp-for="IncentiveShare" class="form-label-modern">
+                            <i class="bi bi-share-fill me-1"></i> Incentive Shared With
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-pie-chart-fill"></i>
+                            <input asp-for="IncentiveShare" class="form-control-modern" placeholder="Enter share amount" />
+                        </div>
+                        <span asp-validation-for="IncentiveShare" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-modern">
+                        <label asp-for="ProposalUploaded" class="form-label-modern">
+                            <i class="bi bi-file-earmark-arrow-up-fill me-1"></i> Proposal Uploaded
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-cloud-upload-fill"></i>
+                            <select asp-for="ProposalUploaded" class="form-control-modern">
+                                <option value="">Please select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="ProposalUploaded" class="text-danger"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -558,7 +646,7 @@
                     <i class="bi bi-arrow-left"></i> Back to List
                 </a>
                 <button type="submit" class="btn-modern-primary">
-                    <i class="bi bi-check-circle"></i> Create Solution
+                    <i class="bi bi-save"></i> Save Changes
                 </button>
             </div>
         </form>
@@ -568,8 +656,8 @@
 <div id="successPopup" class="success-popup hidden">
     <div class="success-popup-content">
         <i class="bi bi-check-circle-fill"></i>
-        <h4>External Solution Created!</h4>
-        <p>The new external solution has been successfully saved to the system.</p>
+        <h4>Update Successful!</h4>
+        <p>The external solution details have been successfully updated.</p>
         <button id="popupCloseBtn">OK</button>
     </div>
 </div>
@@ -577,7 +665,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // 1. Validation Logic for Required fields
+        // 1. Validation Logic
         document.querySelector('form').addEventListener('submit', function (e) {
             const requiredFields = this.querySelectorAll('[required]');
             let isValid = true;
@@ -590,30 +678,18 @@
                     field.style.borderColor = '#e2e8f0';
                 }
             });
-
-            if (!isValid) {
-                // e.preventDefault(); // Optional: allow ASP.NET validation to also handle it
-                // alert('Please fill in all required fields marked with *');
-            }
         });
 
-        // 2. Date Constraints Logic (From your original code)
+        // 2. Date Constraints Logic (Target Date cannot be before Start Date)
         document.addEventListener('DOMContentLoaded', function () {
             const startDate = document.getElementById('StartDate');
             const targetDate = document.getElementById('TargetDate');
-            const dateFields = ['StartDate', 'TargetDate', 'UATDate', 'LaunchedDate', 'DPOHandoverDate'];
-            const today = new Date().toISOString().split('T')[0];
 
-            // Set Min Date to Today
-            dateFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) {
-                    element.min = today;
-                }
-            });
-
-            // Logic: Target Date cannot be before Start Date
             if (startDate && targetDate) {
+                if (startDate.value) {
+                    targetDate.min = startDate.value;
+                }
+
                 startDate.addEventListener('change', function () {
                     if (this.value) {
                         targetDate.min = this.value;
@@ -625,11 +701,11 @@
         // 3. Popup Logic
         @if (TempData["SuccessMessage"] != null)
         {
-                        <text>
-                        window.addEventListener('DOMContentLoaded', () => {
-                            document.getElementById('successPopup').classList.remove('hidden');
-                        });
-                        </text>
+                    <text>
+                    window.addEventListener('DOMContentLoaded', () => {
+                        document.getElementById('successPopup').classList.remove('hidden');
+                    });
+                    </text>
         }
 
         document.getElementById('popupCloseBtn').addEventListener('click', function () {

@@ -47,10 +47,11 @@ namespace PROHUB.Data
                     st.Sales_Team_Name AS SalesTeamName,
                     sdlc.Phase AS SdlcPhaseName
                 FROM external_platforms ex
-                LEFT JOIN Employee emp ON ex.Developed_By = emp.Emp_ID     
-                LEFT JOIN Company c ON ex.Company_ID = c.ID            
-                LEFT JOIN Sales_Team st ON ex.Sales_Team_ID = st.ID   
-                LEFT JOIN SDLCPhas sdlc ON ex.SDLCstage = sdlc.ID        
+                LEFT JOIN Employee emp ON ex.Developed_By = emp.Emp_ID      
+                LEFT JOIN Company c ON ex.Company_ID = c.ID              
+                LEFT JOIN Sales_Team st ON ex.Sales_Team_ID = st.ID    
+                LEFT JOIN SDLCPhas sdlc ON ex.SDLCstage = sdlc.ID
+                WHERE sdlc.Phase LIKE '%Maintenance%'
                 ORDER BY ex.ID DESC";
 
             using var command = new MySqlCommand(query, connection);
@@ -78,7 +79,7 @@ namespace PROHUB.Data
                     sdlc.Phase AS SdlcPhaseName
                 FROM external_platforms ex
                 LEFT JOIN Employee emp ON ex.Developed_By = emp.Emp_ID    
-                LEFT JOIN Company c ON ex.Company_ID = c.ID            
+                LEFT JOIN Company c ON ex.Company_ID = c.ID             
                 LEFT JOIN Sales_Team st ON ex.Sales_Team_ID = st.ID    
                 LEFT JOIN SDLCPhas sdlc ON ex.SDLCstage = sdlc.ID        
                 WHERE ex.ID = @Id";
@@ -103,13 +104,13 @@ namespace PROHUB.Data
                     SDLCstage, PercentageDone, BIT_bucket_repo, Sales_Team_ID, Sales_AM, Sales_Manager,
                     Sales_Enginneer, UATDate, LaunchedDate, Platform_OTC, Platform_MRC, Software_Value,
                     Contract_Period, SLA, DPO_Handover_Date, DPO_Handover_Comment,
-                    SSLCertificateExpDate, BillingDate, Proposal_Upload
+                    SSLCertificateExpDate, BillingDate, Proposal_Upload, Incentive_Earned, Incentive_Share
                 ) VALUES (
                     @PlatformName, @CompanyId, @DevelopedBy, @DevelopedTeam, @StartDate, @TargetDate,
                     @SDLCStage, @PercentageDone, @BITBucketRepo, @SalesTeamId, @SalesAM, @SalesManager,
                     @SalesEngineer, @UATDate, @LaunchedDate, @PlatformOTC, @PlatformMRC, @SoftwareValue,
                     @ContractPeriod, @SLA, @DPOHandoverDate, @DPOHandoverComment,
-                    @SSLCertificateExpDate, @BillingDate, @ProposalUploaded
+                    @SSLCertificateExpDate, @BillingDate, @ProposalUploaded, @IncentiveEarned, @IncentiveShare
                 );
                 SELECT LAST_INSERT_ID();";
 
@@ -144,7 +145,6 @@ namespace PROHUB.Data
                     Sales_Manager = @SalesManager,
                     Sales_Enginneer = @SalesEngineer,
                     UATDate = @UATDate,
-                    VADate = @VADate,
                     LaunchedDate = @LaunchedDate,
                     Platform_OTC = @PlatformOTC,
                     Platform_MRC = @PlatformMRC,
@@ -155,9 +155,9 @@ namespace PROHUB.Data
                     DPO_Handover_Comment = @DPOHandoverComment,
                     SSLCertificateExpDate = @SSLCertificateExpDate,
                     BillingDate = @BillingDate,
-                    Proposal_Uploaded = @ProposalUploaded,
-                    IncentiveEarned = @IncentiveEarned,
-                    IncentiveShare = @IncentiveShare
+                    Proposal_Upload = @ProposalUploaded,
+                    Incentive_Earned = @IncentiveEarned,
+                    Incentive_Share = @IncentiveShare
                 WHERE ID = @Id";
 
             using var command = new MySqlCommand(query, connection);
@@ -286,6 +286,8 @@ namespace PROHUB.Data
                 TargetDate = GetNullableDateTime(reader, "TargetDate"),
                 SDLCStageId = GetNullableInt32(reader, "SDLCstage"),
                 PercentageDone = GetNullableDecimal(reader, "PercentageDone"),
+
+                // Uses updated GetNullableString to handle potential Int->String casts
                 BitBucket = GetNullableString(reader, "BitBucket") ?? GetNullableString(reader, "Bit_Bucket") ?? string.Empty,
                 BITBucketRepo = GetNullableString(reader, "BIT_bucket_repo") ?? GetNullableString(reader, "BITBucketRepo") ?? string.Empty,
                 SalesTeamId = GetNullableInt32(reader, "Sales_Team_ID"),
@@ -300,10 +302,10 @@ namespace PROHUB.Data
                 PlatformOTC = GetNullableDecimal(reader, "Platform_OTC"),
                 PlatformMRC = GetNullableDecimal(reader, "Platform_MRC"),
                 ContractPeriod = GetNullableString(reader, "Contract_Period"),
-                IncentiveEarned = GetNullableDecimal(reader, "IncentiveEarned"),
-                IncentiveShare = GetNullableDecimal(reader, "IncentiveShare"),
+                IncentiveEarned = GetNullableDecimal(reader, "IncentiveEarned") ?? GetNullableDecimal(reader, "Incentive_Earned"),
+                IncentiveShare = GetNullableDecimal(reader, "IncentiveShare") ?? GetNullableDecimal(reader, "Incentive_Share"),
                 BillingDate = GetNullableDateTime(reader, "BillingDate"),
-                ProposalUploaded = GetNullableString(reader, "Proposal_Uploaded"),
+                ProposalUploaded = GetNullableString(reader, "Proposal_Upload") ?? GetNullableString(reader, "Proposal_Uploaded"),
                 SLA = GetNullableString(reader, "SLA"),
                 SoftwareValue = GetNullableDecimal(reader, "Software_Value"),
                 SSLCertificateExpDate = GetNullableDateTime(reader, "SSLCertificateExpDate"),
@@ -393,20 +395,28 @@ namespace PROHUB.Data
             }
         }
 
+
         private static string? GetNullableString(IDataReader reader, string columnName)
         {
             try
             {
                 var ordinal = reader.GetOrdinal(columnName);
-                return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
+                if (reader.IsDBNull(ordinal)) return null;
+
+                // Safely convert any type (Int, Decimal, etc.) to String
+                var value = reader.GetValue(ordinal);
+                return value?.ToString();
             }
             catch (IndexOutOfRangeException)
             {
+                // Fallback check
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
                     if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
                     {
-                        return reader.IsDBNull(i) ? null : reader.GetString(i);
+                        if (reader.IsDBNull(i)) return null;
+                        var value = reader.GetValue(i);
+                        return value?.ToString();
                     }
                 }
                 return null;
@@ -442,7 +452,6 @@ namespace PROHUB.Data
             command.Parameters.Add("@SalesManager", MySqlDbType.VarChar).Value = (object?)model.SalesManager ?? DBNull.Value;
             command.Parameters.Add("@SalesEngineer", MySqlDbType.VarChar).Value = (object?)model.SalesEngineer ?? DBNull.Value;
             command.Parameters.Add("@UATDate", MySqlDbType.DateTime).Value = (object?)model.UATDate ?? DBNull.Value;
-            command.Parameters.Add("@VADate", MySqlDbType.DateTime).Value = (object?)model.VADate ?? DBNull.Value;
             command.Parameters.Add("@LaunchedDate", MySqlDbType.DateTime).Value = (object?)model.LaunchedDate ?? DBNull.Value;
             command.Parameters.Add("@PlatformOTC", MySqlDbType.Decimal).Value = (object?)model.PlatformOTC ?? DBNull.Value;
             command.Parameters.Add("@PlatformMRC", MySqlDbType.Decimal).Value = (object?)model.PlatformMRC ?? DBNull.Value;
@@ -451,9 +460,6 @@ namespace PROHUB.Data
             command.Parameters.Add("@SLA", MySqlDbType.VarChar).Value = (object?)model.SLA ?? DBNull.Value;
             command.Parameters.Add("@DPOHandoverDate", MySqlDbType.DateTime).Value = (object?)model.DPOHandoverDate ?? DBNull.Value;
             command.Parameters.Add("@DPOHandoverComment", MySqlDbType.VarChar).Value = (object?)model.DPOHandoverComment ?? DBNull.Value;
-
-            // Note: removed BackupOfficer1Id / BackupOfficer2Id parameter bindings since DB doesn't have those columns
-
             command.Parameters.Add("@SSLCertificateExpDate", MySqlDbType.DateTime).Value = (object?)model.SSLCertificateExpDate ?? DBNull.Value;
             command.Parameters.Add("@BillingDate", MySqlDbType.DateTime).Value = (object?)model.BillingDate ?? DBNull.Value;
             command.Parameters.Add("@ProposalUploaded", MySqlDbType.VarChar).Value = (object?)model.ProposalUploaded ?? DBNull.Value;

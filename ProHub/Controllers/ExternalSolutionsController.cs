@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using OfficeOpenXml;
 using ProHub.Models;
 using PROHUB.Data;
 using System;
@@ -22,12 +24,49 @@ namespace PROHUB.Controllers
 
         // GET: /ExternalSolutions
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search = "", string sortColumn = "PlatformName", string sortOrder = "asc", int page = 1, int pageSize = 10)
         {
             try
             {
-                var solutions = await _externalSolutionService.GetAllAsync();
-                return View(solutions ?? new List<ExternalPlatform>());
+                var allSolutions = await _externalSolutionService.GetAllAsync();
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(search))
+                {
+                    allSolutions = allSolutions.Where(s =>
+                        (s.PlatformName != null && s.PlatformName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                        (s.DevelopedByName != null && s.DevelopedByName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                        (s.CompanyName != null && s.CompanyName.Contains(search, StringComparison.OrdinalIgnoreCase))
+                    ).ToList();
+                }
+
+                // Apply sorting
+                allSolutions = sortColumn switch
+                {
+                    "PlatformName" => sortOrder == "asc" ? allSolutions.OrderBy(s => s.PlatformName).ToList() : allSolutions.OrderByDescending(s => s.PlatformName).ToList(),
+                    "DevelopedByName" => sortOrder == "asc" ? allSolutions.OrderBy(s => s.DevelopedByName).ToList() : allSolutions.OrderByDescending(s => s.DevelopedByName).ToList(),
+                    "ContractPeriod" => sortOrder == "asc" ? allSolutions.OrderBy(s => s.ContractPeriod).ToList() : allSolutions.OrderByDescending(s => s.ContractPeriod).ToList(),
+                    "Billed" => sortOrder == "asc" ? allSolutions.OrderBy(s => s.ContractPeriod).ToList() : allSolutions.OrderByDescending(s => s.ContractPeriod).ToList(),
+                    "DPOHandoverDate" => sortOrder == "asc" ? allSolutions.OrderBy(s => s.DPOHandoverDate).ToList() : allSolutions.OrderByDescending(s => s.DPOHandoverDate).ToList(),
+                    _ => allSolutions.OrderBy(s => s.PlatformName).ToList()
+                };
+
+                // Apply pagination
+                var totalRecords = allSolutions.Count;
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                page = Math.Max(1, Math.Min(page, totalPages > 0 ? totalPages : 1));
+                var pagedSolutions = allSolutions.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+                // Set ViewBag values for the view
+                ViewBag.PageSize = pageSize;
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalRecords = totalRecords;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.SortColumn = sortColumn;
+                ViewBag.SortOrder = sortOrder;
+                ViewBag.SearchTerm = search;
+
+                return View(pagedSolutions);
             }
             catch (Exception ex)
             {
@@ -50,7 +89,6 @@ namespace PROHUB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ExternalPlatform externalSolution)
         {
-            // populate dropdowns (so view can re-render)
             await PopulateDropdowns();
 
             if (externalSolution == null)
@@ -59,13 +97,9 @@ namespace PROHUB.Controllers
                 return View(new ExternalPlatform());
             }
 
-            // set defaults for string properties that might be null and would otherwise cause issues
             DefaultMissingProperties(externalSolution);
-
-            // Remove modelstate keys that are not provided by the create form and are OK to be left null/empty
             RemoveDbOnlyModelStateKeys();
 
-            // If modelstate still invalid, log and return to view
             if (!ModelState.IsValid)
             {
                 LogModelStateErrors("Create", externalSolution);
@@ -79,19 +113,11 @@ namespace PROHUB.Controllers
                 var newId = await _externalSolutionService.CreateAsync(externalSolution);
                 if (newId > 0)
                 {
-                    // Keep user on the Create page and show a success popup via TempData
                     TempData["SuccessMessage"] = $"External Solution Created.";
-
-                    // clear ModelState so the form appears fresh/empty
                     ModelState.Clear();
-
-                    // return a fresh model to the view
                     var freshModel = new ExternalPlatform();
-
-                    // re-populate dropdowns (PopulateDropdowns uses service calls)
                     await PopulateDropdowns();
-
-                    return View(freshModel);
+                    return RedirectToAction(nameof(Index));
                 }
 
                 _logger.LogWarning("Create returned non-positive id ({NewId}) for model {@Model}", newId, externalSolution);
@@ -102,8 +128,8 @@ namespace PROHUB.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating ExternalPlatform. Model: {@Model}", externalSolution);
-                ModelState.AddModelError(string.Empty, $"An error occurred while creating the external solution: {GetInnermostMessage(ex)}");
-                TempData["ErrorMessage"] = "An internal error occurred while creating the external solution. Check server logs for details.";
+                ModelState.AddModelError(string.Empty, $"An error occurred while creating: {GetInnermostMessage(ex)}");
+                TempData["ErrorMessage"] = "An internal error occurred.";
                 return View(externalSolution);
             }
         }
@@ -176,7 +202,7 @@ namespace PROHUB.Controllers
             {
                 _logger.LogError(ex, "Error updating ExternalPlatform. Model: {@Model}", externalSolution);
                 ModelState.AddModelError(string.Empty, $"An error occurred while updating: {GetInnermostMessage(ex)}");
-                TempData["ErrorMessage"] = "An error occurred while updating. See server logs.";
+                TempData["ErrorMessage"] = "An error occurred while updating.";
                 return View(externalSolution);
             }
         }
@@ -221,10 +247,118 @@ namespace PROHUB.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting ExternalPlatform id {Id}", id);
-                TempData["ErrorMessage"] = "An error occurred while deleting. See logs.";
+                TempData["ErrorMessage"] = "An error occurred while deleting.";
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /ExternalSolutions/ExportToExcel
+        [HttpGet]
+        public async Task<IActionResult> ExportToExcel(string search = "", string sortColumn = "PlatformName", string sortOrder = "asc")
+        {
+            try
+            {
+                // 1. Fetch Data
+                var allSolutions = await _externalSolutionService.GetAllAsync();
+
+                // 2. Filter Logic (In-Memory)
+                if (!string.IsNullOrEmpty(search))
+                {
+                    allSolutions = allSolutions.Where(s =>
+                        (s.PlatformName != null && s.PlatformName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                        (s.DevelopedByName != null && s.DevelopedByName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                        (s.CompanyName != null && s.CompanyName.Contains(search, StringComparison.OrdinalIgnoreCase))
+                    ).ToList();
+                }
+
+                // 3. Sort Logic
+                allSolutions = sortColumn switch
+                {
+                    "PlatformName" => sortOrder == "asc" ? allSolutions.OrderBy(s => s.PlatformName).ToList() : allSolutions.OrderByDescending(s => s.PlatformName).ToList(),
+                    "DevelopedByName" => sortOrder == "asc" ? allSolutions.OrderBy(s => s.DevelopedByName).ToList() : allSolutions.OrderByDescending(s => s.DevelopedByName).ToList(),
+                    _ => allSolutions.OrderBy(s => s.PlatformName).ToList()
+                };
+
+                // 4. Create Excel File using ClosedXML
+                using (var workbook = new XLWorkbook())
+                {
+                    var worksheet = workbook.Worksheets.Add("External Solutions");
+
+                    // --- Header Row ---
+                    var headers = new[]
+                    {
+                "Platform Name", "Developed By", "Company", "Launched Date",
+                "Billed Date", "OTC", "MRC", "Contract Period",
+                "Revenue", "Software Value", "Billed Status", "DPO Handover Date"
+            };
+
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        var cell = worksheet.Cell(1, i + 1);
+                        cell.Value = headers[i];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    }
+
+                    // --- Data Rows ---
+                    for (int i = 0; i < allSolutions.Count; i++)
+                    {
+                        var solution = allSolutions[i];
+                        int row = i + 2;
+
+                        worksheet.Cell(row, 1).Value = solution.PlatformName ?? "";
+                        worksheet.Cell(row, 2).Value = solution.DevelopedByName ?? "";
+                        worksheet.Cell(row, 3).Value = solution.CompanyName ?? "";
+                        worksheet.Cell(row, 4).Value = solution.LaunchedDate?.ToString("yyyy-MM-dd") ?? "";
+                        worksheet.Cell(row, 5).Value = solution.BillingDate?.ToString("yyyy-MM-dd") ?? "";
+
+                        // Numeric values stored as numbers for Excel math
+                        worksheet.Cell(row, 6).Value = solution.PlatformOTC ?? 0;
+                        worksheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0.00";
+
+                        worksheet.Cell(row, 7).Value = solution.PlatformMRC ?? 0;
+                        worksheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0.00";
+
+                        worksheet.Cell(row, 8).Value = solution.ContractPeriod ?? "";
+
+                        worksheet.Cell(row, 9).Value = solution.IncentiveEarned ?? 0;
+                        worksheet.Cell(row, 9).Style.NumberFormat.Format = "#,##0.00";
+
+                        worksheet.Cell(row, 10).Value = solution.SoftwareValue ?? 0;
+                        worksheet.Cell(row, 10).Style.NumberFormat.Format = "#,##0.00";
+
+                        worksheet.Cell(row, 11).Value = solution.BillingDate.HasValue ? "Yes" : "No";
+
+                        // Color code the "No" status for better visibility
+                        if (!solution.BillingDate.HasValue)
+                        {
+                            worksheet.Cell(row, 11).Style.Font.FontColor = XLColor.Red;
+                            worksheet.Cell(row, 11).Style.Font.Bold = true;
+                        }
+
+                        worksheet.Cell(row, 12).Value = solution.DPOHandoverDate?.ToString("yyyy-MM-dd") ?? "";
+                    }
+
+                    // --- Final Formatting ---
+                    worksheet.Columns().AdjustToContents(); // Auto-fit columns
+
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        var content = stream.ToArray();
+                        var fileName = $"External_Solutions_Operational_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // _logger.LogError(ex, "Error exporting external solutions to Excel."); // Uncomment if you have logger
+                TempData["ErrorMessage"] = "Error exporting to Excel. Please check server logs.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // ---------- Helpers ----------
@@ -257,7 +391,6 @@ namespace PROHUB.Controllers
         {
             if (model == null) return;
 
-            // Strings that your DB or later logic may expect non-null
             model.PlatformType = model.PlatformType ?? string.Empty;
             model.PlatformName = model.PlatformName ?? string.Empty;
             model.BitBucket = model.BitBucket ?? string.Empty;
@@ -275,8 +408,6 @@ namespace PROHUB.Controllers
             model.IntegratedApps = model.IntegratedApps ?? string.Empty;
             model.DR = model.DR ?? string.Empty;
             model.Status = model.Status ?? string.Empty;
-
-            // numeric/foreign keys: keep as-is (nullable)
         }
 
         private void RemoveDbOnlyModelStateKeys()
@@ -294,17 +425,15 @@ namespace PROHUB.Controllers
                 nameof(ExternalPlatform.BillingDate),
                 nameof(ExternalPlatform.SSLCertificateExpDate),
                 nameof(ExternalPlatform.SoftwareValue),
-
-                // The fields you reported as causing validation errors:
-                nameof(ExternalPlatform.DevelopedById),    // DevelopedBy
-                nameof(ExternalPlatform.SDLCStageId),      // SDLCStage
-                nameof(ExternalPlatform.Status),           // Status (string)
-                nameof(ExternalPlatform.IntegratedApps),   // IntegratedApps
-                nameof(ExternalPlatform.DR),               // DR
-                nameof(ExternalPlatform.CompanyId),        // Company
-                nameof(ExternalPlatform.SalesTeamId),      // SalesTeam
-                nameof(ExternalPlatform.BackupOfficer1Id), // BackupOfficer1 (may not exist in DB)
-                nameof(ExternalPlatform.BackupOfficer2Id)  // BackupOfficer2 (may not exist in DB)
+                nameof(ExternalPlatform.DevelopedById),
+                nameof(ExternalPlatform.SDLCStageId),
+                nameof(ExternalPlatform.Status),
+                nameof(ExternalPlatform.IntegratedApps),
+                nameof(ExternalPlatform.DR),
+                nameof(ExternalPlatform.CompanyId),
+                nameof(ExternalPlatform.SalesTeamId),
+                nameof(ExternalPlatform.BackupOfficer1Id),
+                nameof(ExternalPlatform.BackupOfficer2Id)
             };
 
             foreach (var k in keysToIgnore)

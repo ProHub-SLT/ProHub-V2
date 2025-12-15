@@ -1,6 +1,6 @@
 ﻿@model ProHub.Models.InternalPlatform
 @{
-    ViewData["Title"] = "Edit Internal Solution";
+    ViewData["Title"] = "Add Internal Solution";
 }
 
 <style>
@@ -263,18 +263,16 @@
 <div class="container-fluid mt-4">
     <div class="form-container">
         <div class="form-header">
-            <h2><i class="bi bi-pencil-square me-2"></i>@ViewData["Title"]</h2>
-            <p>Update details for <strong>@Model.AppName</strong></p>
+            <h2><i class="bi bi-folder-plus me-2"></i>@ViewData["Title"]</h2>
+            <p>Create a New Internal Solution to organize your projects</p>
         </div>
 
-        <form asp-action="Edit" method="post" id="solutionForm">
+        <form asp-action="Create" method="post" id="solutionForm">
             @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="Id" />
-
             <div class="form-body">
                 <div class="field-description">
                     <i class="bi bi-info-circle me-2"></i>
-                    Modify the fields below. Fields marked with <span class="text-danger">*</span> are required.
+                    Fields marked with <span class="text-danger">*</span> are required
                 </div>
 
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -301,7 +299,7 @@
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-diagram-2-fill"></i>
-                            <select asp-for="MainAppID" asp-items="ViewBag.MainApplications" class="form-control-modern" id="mainAppDropdown">
+                            <select asp-for="MainAppID" asp-items="@(new SelectList(ViewBag.MainApplications, "Id", "AppName"))" class="form-control-modern" id="mainAppDropdown" disabled>
                                 <option value="">Please select</option>
                             </select>
                         </div>
@@ -316,7 +314,7 @@
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-layers"></i>
-                            <select asp-for="ParentProjectID" asp-items="ViewBag.ParentProjects" class="form-control-modern" id="ParentProjectID">
+                            <select asp-for="ParentProjectID" asp-items="@(new SelectList(ViewBag.ParentProjects, "ParentProjectID", "ParentProjectGroup"))" class="form-control-modern">
                                 <option value="">Please select group</option>
                             </select>
                         </div>
@@ -367,47 +365,6 @@
                         <span asp-validation-for="DevelopedTeam" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group-modern">
-                        <label asp-for="BackupOfficer1Id" class="form-label-modern">
-                            <i class="bi bi-person-check me-1"></i> Backup Person (Primary)
-                        </label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-person-check-fill"></i>
-                            <select asp-for="BackupOfficer1Id" class="form-control-modern">
-                                <option value="">Please select Backup Person</option>
-                                @if (ViewBag.Employees != null)
-                                {
-                                    foreach (var employee in ViewBag.Employees)
-                                    {
-                                        <option value="@employee.EmpId">@employee.EmpName</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <span asp-validation-for="BackupOfficer1Id" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group-modern">
-                        <label asp-for="BackupOfficer2Id" class="form-label-modern">
-                            <i class="bi bi-person-plus me-1"></i> Backup Person (Secondary)
-                        </label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-person-plus-fill"></i>
-                            <select asp-for="BackupOfficer2Id" class="form-control-modern">
-                                <option value="">Please select Backup Person</option>
-                                @if (ViewBag.Employees != null)
-                                {
-                                    foreach (var employee in ViewBag.Employees)
-                                    {
-                                        <option value="@employee.EmpId">@employee.EmpName</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <span asp-validation-for="BackupOfficer2Id" class="text-danger"></span>
-                    </div>
-                </div>
 
                 <div class="form-row">
                     <div class="form-group-modern">
@@ -455,23 +412,6 @@
                     </div>
 
                     <div class="form-group-modern">
-                        <label asp-for="Status" class="form-label-modern">
-                            <i class="bi bi-flag me-1"></i> Priority Level
-                        </label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-flag-fill"></i>
-                            <select asp-for="Status" class="form-control-modern" id="StatusDropdown">
-                                <option value="">Please select</option>
-                                <option value="Level 1">Level 1</option>
-                                <option value="Level 2">Level 2</option>
-                            </select>
-
-                            <input type="hidden" asp-for="StatusDate" id="StatusDateInput" />
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group-modern">
                         <label asp-for="PercentageDone" class="form-label-modern">
                             <i class="bi bi-percent me-1"></i> Percentage Done
                         </label>
@@ -481,6 +421,9 @@
                         </div>
                         <span asp-validation-for="PercentageDone" class="text-danger"></span>
                     </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="IntegratedApps" class="form-label-modern">
                             <i class="bi bi-link-45deg me-1"></i> Integrated Applications
@@ -491,9 +434,6 @@
                         </div>
                         <span asp-validation-for="IntegratedApps" class="text-danger"></span>
                     </div>
-                </div>
-
-                <div class="form-row">
 
                     <div class="form-group-modern">
                         <label asp-for="BitBucketRepo" class="form-label-modern">
@@ -505,7 +445,9 @@
                         </div>
                         <span asp-validation-for="BitBucketRepo" class="text-danger"></span>
                     </div>
+                </div>
 
+                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="AppIP" class="form-label-modern">
                             <i class="bi bi-server me-1"></i> Hosted Server IP/Name
@@ -516,10 +458,6 @@
                         </div>
                         <span asp-validation-for="AppIP" class="text-danger"></span>
                     </div>
-                </div>
-
-                <div class="form-row">
-
 
                     <div class="form-group-modern">
                         <label asp-for="AppURL" class="form-label-modern">
@@ -531,7 +469,9 @@
                         </div>
                         <span asp-validation-for="AppURL" class="text-danger"></span>
                     </div>
+                </div>
 
+                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="BusOwner" class="form-label-modern">
                             <i class="bi bi-briefcase me-1"></i> Business Owner
@@ -542,9 +482,7 @@
                         </div>
                         <span asp-validation-for="BusOwner" class="text-danger"></span>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="DR" class="form-label-modern">
                             <i class="bi bi-shield-check me-1"></i> DR Availability
@@ -559,6 +497,9 @@
                         </div>
                         <span asp-validation-for="DR" class="text-danger"></span>
                     </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="EndUserTypeId" class="form-label-modern">
                             <i class="bi bi-people-fill me-1"></i> Application End Users
@@ -578,9 +519,7 @@
                         </div>
                         <span asp-validation-for="EndUserTypeId" class="text-danger"></span>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="AppUsers" class="form-label-modern">
                             <i class="bi bi-building me-1"></i> User Specific Section/Division/Group
@@ -591,6 +530,10 @@
                         </div>
                         <span asp-validation-for="AppUsers" class="text-danger"></span>
                     </div>
+                </div>
+
+                <div class="form-row" style="grid-template-columns: repeat(3, 1fr);">
+
                     <div class="form-group-modern">
                         <label asp-for="UATDate" class="form-label-modern">
                             <i class="bi bi-calendar-check me-1"></i> UAT Date
@@ -601,9 +544,7 @@
                         </div>
                         <span asp-validation-for="UATDate" class="text-danger"></span>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="VADate" class="form-label-modern">
                             <i class="bi bi-calendar-check me-1"></i> VA Date
@@ -625,6 +566,7 @@
                         </div>
                         <span asp-validation-for="LaunchedDate" class="text-danger"></span>
                     </div>
+
                 </div>
 
 
@@ -675,26 +617,14 @@
 
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group-modern" style="grid-column: span 2;">
-                        <label asp-for="Comment" class="form-label-modern">
-                            <i class="bi bi-chat-left-text me-1"></i> Comment
-                        </label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-pencil" style="top: 20px; transform: none;"></i>
-                            <textarea asp-for="Comment" class="form-control-modern" rows="4" placeholder="Enter comments here..."></textarea>
-                        </div>
-                        <span asp-validation-for="Comment" class="text-danger"></span>
-                    </div>
-                </div>
             </div>
 
             <div class="form-footer">
                 <a asp-controller="InternalSolution" asp-action="Index" class="btn-modern-secondary">
-                    <i class="bi bi-arrow-left"></i> Cancel & Back
+                    <i class="bi bi-arrow-left"></i> Back to List
                 </a>
                 <button type="submit" class="btn-modern-primary">
-                    <i class="bi bi-save"></i> Save Changes
+                    <i class="bi bi-check-circle"></i> Create Solution
                 </button>
             </div>
         </form>
@@ -704,8 +634,8 @@
 <div id="successPopup" class="success-popup hidden">
     <div class="success-popup-content">
         <i class="bi bi-check-circle-fill"></i>
-        <h4>Update Successful!</h4>
-        <p>The solution details have been successfully updated.</p>
+        <h4>Internal Solution Created!</h4>
+        <p>The new internal solution has been successfully saved to the system.</p>
         <button id="popupCloseBtn">OK</button>
     </div>
 </div>
@@ -722,13 +652,21 @@
 
             // --- 1. Form Submit Logic  ---
             form.addEventListener('submit', function (e) {
-                // Ensure disabled fields are re-enabled before submit so model binding works
+
+
                 if (parentProjectDropdown.disabled) {
                     parentProjectDropdown.disabled = false;
                 }
-                if (mainAppDropdown.disabled) {
-                    mainAppDropdown.disabled = false;
-                }
+
+                // Validation Highlight Logic
+                const requiredFields = this.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!field.value) {
+                        field.style.borderColor = '#dc3545';
+                    } else {
+                        field.style.borderColor = '#e2e8f0';
+                    }
+                });
             });
 
             // --- 2. Dropdown Logic  ---
@@ -740,7 +678,7 @@
                         mainAppDropdown.disabled = false;
                         parentProjectDropdown.disabled = true;
                         parentProjectDropdown.style.backgroundColor = "#e9ecef";
-                    } else if (appCategoryDropdown.value === 'Main Application') {
+                    } else {
                         // Main Application
                         mainAppDropdown.disabled = true;
                         mainAppDropdown.value = '';
@@ -750,14 +688,13 @@
                     }
                 }
 
-                // Event Listener
+                //when Change the Category
                 appCategoryDropdown.addEventListener('change', toggleFields);
 
-                // Run immediately on load to set initial state based on existing model data
+
                 toggleFields();
 
                 // --- 3. Auto-populate Logic ---
-                // Only trigger fetch on explicit change, not on page load (unless you want to override existing data)
                 mainAppDropdown.addEventListener('change', function () {
                     const selectedId = this.value;
 
@@ -767,6 +704,7 @@
                             .then(data => {
                                 if (data.parentProjectId) {
                                     parentProjectDropdown.value = data.parentProjectId;
+
                                     // Visual Feedback
                                     parentProjectDropdown.style.borderColor = '#28a745';
                                     setTimeout(() => {
@@ -782,20 +720,15 @@
             // --- 4. Date Logic ---
             const startDate = document.getElementById('StartDate');
             const targetDate = document.getElementById('TargetDate');
-
-            // NOTE: For Edit view, we typically remove the "min = today" constraint
-            // because you might be editing a historical record.
-            // If you still want to enforce future dates for UPDATES, uncomment below:
-            /*
             const dateFields = ['StartDate', 'TargetDate', 'UATDate', 'VADate', 'LaunchedDate'];
             const today = new Date().toISOString().split('T')[0];
+
             dateFields.forEach(field => {
                 const element = document.getElementById(field);
-                if (element && !element.value) { // Only set min if empty
+                if (element) {
                     element.min = today;
                 }
             });
-            */
 
             if (startDate && targetDate) {
                 startDate.addEventListener('change', function () {
@@ -808,43 +741,15 @@
             // --- 5. Popup Logic ---
             @if (TempData["SuccessMessage"] != null)
             {
-                        <text>
-                        document.getElementById('successPopup').classList.remove('hidden');
-                        </text>
+                            <text>
+                            document.getElementById('successPopup').classList.remove('hidden');
+                            </text>
             }
 
             document.getElementById('popupCloseBtn').addEventListener('click', function () {
                 document.getElementById('successPopup').classList.add('hidden');
                 window.location.href = '@Url.Action("OperationalList", "InternalSolution")';
             });
-
-                    // --- 6. Auto Update Status Date Logic ---
-        const statusDropdown = document.getElementById('StatusDropdown');
-        const statusDateInput = document.getElementById('StatusDateInput');
-
-        if (statusDropdown && statusDateInput) {
-            statusDropdown.addEventListener('change', function () {
-                // Status ???? ???? ?????? ????? ???? update ?????
-                if (this.value !== "") {
-                    const today = new Date();
-
-                    // ???? YYYY-MM-DD format ??? ???? ?????
-                    const year = today.getFullYear();
-                    const month = String(today.getMonth() + 1).padStart(2, '0');
-                    const day = String(today.getDate()).padStart(2, '0');
-
-                    const formattedDate = `${year}-${month}-${day}`;
-
-                    // StatusDate input ??? ???? ??? ??? ???
-                    statusDateInput.value = formattedDate;
-
-                    console.log("Status changed. Date updated to: " + formattedDate); // Testing purpose
-                } else {
-                    // Status ?? clear ????? ?????? clear ???????? ??? ????? ?????? ?????
-                    statusDateInput.value = "";
-                }
-            });
-        }
         });
     </script>
 }

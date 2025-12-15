@@ -1,6 +1,6 @@
 ﻿@model ProHub.Models.InternalPlatform
 @{
-    ViewData["Title"] = "Edit Internal Solution";
+    ViewData["Title"] = "Edit Internal Solutions - In-Progress";
 }
 
 <style>
@@ -301,7 +301,7 @@
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-diagram-2-fill"></i>
-                            <select asp-for="MainAppID" asp-items="ViewBag.MainApplications" class="form-control-modern" id="mainAppDropdown">
+                            <select asp-for="MainAppID" asp-items="@(new SelectList(ViewBag.MainApplications, "Id", "AppName"))" class="form-control-modern" id="mainAppDropdown">
                                 <option value="">Please select</option>
                             </select>
                         </div>
@@ -316,7 +316,7 @@
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-layers"></i>
-                            <select asp-for="ParentProjectID" asp-items="ViewBag.ParentProjects" class="form-control-modern" id="ParentProjectID">
+                            <select asp-for="ParentProjectID" asp-items="@(new SelectList(ViewBag.ParentProjects, "ParentProjectID", "ParentProjectGroup"))" class="form-control-modern" id="ParentProjectID">
                                 <option value="">Please select group</option>
                             </select>
                         </div>
@@ -808,9 +808,9 @@
             // --- 5. Popup Logic ---
             @if (TempData["SuccessMessage"] != null)
             {
-                        <text>
-                        document.getElementById('successPopup').classList.remove('hidden');
-                        </text>
+                            <text>
+                            document.getElementById('successPopup').classList.remove('hidden');
+                            </text>
             }
 
             document.getElementById('popupCloseBtn').addEventListener('click', function () {
@@ -818,33 +818,32 @@
                 window.location.href = '@Url.Action("OperationalList", "InternalSolution")';
             });
 
-                    // --- 6. Auto Update Status Date Logic ---
-        const statusDropdown = document.getElementById('StatusDropdown');
-        const statusDateInput = document.getElementById('StatusDateInput');
 
-        if (statusDropdown && statusDateInput) {
-            statusDropdown.addEventListener('change', function () {
-                // Status ???? ???? ?????? ????? ???? update ?????
-                if (this.value !== "") {
-                    const today = new Date();
+                      // --- 6. Auto Update Status Date Logic  ---
+            const statusDropdown = document.getElementById('StatusDropdown');
+            const statusDateInput = document.getElementById('StatusDateInput');
 
-                    // ???? YYYY-MM-DD format ??? ???? ?????
-                    const year = today.getFullYear();
-                    const month = String(today.getMonth() + 1).padStart(2, '0');
-                    const day = String(today.getDate()).padStart(2, '0');
+            if (statusDropdown && statusDateInput) {
+                statusDropdown.addEventListener('change', function () {
+                    if (this.value !== "") {
+                        const today = new Date();
 
-                    const formattedDate = `${year}-${month}-${day}`;
+                       
+                        const year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(2, '0');
+                        const day = String(today.getDate()).padStart(2, '0');
 
-                    // StatusDate input ??? ???? ??? ??? ???
-                    statusDateInput.value = formattedDate;
+                        const formattedDate = `${year}-${month}-${day}`;
 
-                    console.log("Status changed. Date updated to: " + formattedDate); // Testing purpose
-                } else {
-                    // Status ?? clear ????? ?????? clear ???????? ??? ????? ?????? ?????
-                    statusDateInput.value = "";
-                }
-            });
-        }
+                        
+                        statusDateInput.value = formattedDate;
+
+                        console.log("Date Auto-Updated to: " + formattedDate);
+                    } else {
+                        
+                    }
+                });
+            }
         });
     </script>
 }

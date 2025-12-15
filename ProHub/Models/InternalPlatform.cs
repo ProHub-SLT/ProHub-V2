@@ -1,4 +1,6 @@
 ﻿// Models/InternalPlatform.cs
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ProHub.Models
 {
     public class InternalPlatform
@@ -89,5 +91,9 @@ namespace ProHub.Models
         public string? ParentProjectGroupName { get; set; }
 
         public string? Comment { get; set; }
+
+
+        [NotMapped]
+        public int CommentCount { get; set; }
     }
 }

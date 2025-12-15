@@ -112,6 +112,8 @@ builder.Services.AddScoped<IInternalSolutionsActivitiesService, InternalSolution
 builder.Services.AddScoped<IExternalSolutionsActivitiesService, ExternalSolutionsActivitiesDataAccess>();
 builder.Services.AddScoped<ITraineeService, TraineeDataAccess>();
 builder.Services.AddScoped<IEmployeePermissionRepository, EmployeePermissionRepository>();
+builder.Services.AddScoped<IInternalSolutionInprogressService, InternalSolutionInprogressDataAccess>();
+
 
 
 

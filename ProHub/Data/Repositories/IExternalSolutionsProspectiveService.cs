@@ -59,7 +59,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             string filterClause = type == "Prospective"
-                ? "(LOWER(TRIM(sp.Phase)) LIKE 'prospective%' OR LOWER(TRIM(ep.Status)) LIKE 'prospective%' OR ep.SDLCStage = 10)"
+                 ? "LOWER(TRIM(sp.Phase)) LIKE 'prospective%'"
                 : "(LOWER(TRIM(sp.Phase)) NOT LIKE '%maintenance%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%retired%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%abandoned%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%prospective%')";
 
             string query = $@"

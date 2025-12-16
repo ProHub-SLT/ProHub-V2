@@ -808,9 +808,9 @@
             // --- 5. Popup Logic ---
             @if (TempData["SuccessMessage"] != null)
             {
-                            <text>
-                            document.getElementById('successPopup').classList.remove('hidden');
-                            </text>
+                                <text>
+                                document.getElementById('successPopup').classList.remove('hidden');
+                                </text>
             }
 
             document.getElementById('popupCloseBtn').addEventListener('click', function () {
@@ -828,19 +828,19 @@
                     if (this.value !== "") {
                         const today = new Date();
 
-                       
+
                         const year = today.getFullYear();
                         const month = String(today.getMonth() + 1).padStart(2, '0');
                         const day = String(today.getDate()).padStart(2, '0');
 
                         const formattedDate = `${year}-${month}-${day}`;
 
-                        
+
                         statusDateInput.value = formattedDate;
 
                         console.log("Date Auto-Updated to: " + formattedDate);
                     } else {
-                        
+
                     }
                 });
             }

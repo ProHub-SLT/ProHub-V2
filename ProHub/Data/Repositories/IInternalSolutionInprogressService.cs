@@ -12,7 +12,6 @@ namespace PROHUB.Data
     // --- Interface ---
     public interface IInternalSolutionInprogressService
     {
-
         Task<List<InternalPlatform>> GetInProgressSolutionsAsync(string searchTerm, string tabFilter);
         Task<InternalPlatform?> GetByIdAsync(int id);
         Task<int> CreateAsync(InternalPlatform platform);
@@ -40,24 +39,26 @@ namespace PROHUB.Data
         private MySqlConnection GetConnection() => new MySqlConnection(_connectionString);
 
         // 1. Get List
-
         public async Task<List<InternalPlatform>> GetInProgressSolutionsAsync(string searchTerm, string tabFilter)
         {
             var list = new List<InternalPlatform>();
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            // SQL Query setup
+            // --- SQL Query Updated ---
+            // MainAppName එක ලබා ගැනීමට පහත JOIN එක සහ Column එක එකතු කළා
             string query = @"
         SELECT ip.*, 
                e.Emp_Name AS DevelopedByName, 
                sp.Phase AS SDLCPhaseName, 
                pr.ParentProjectGroup AS ParentProjectName,
+               parent.App_Name AS MainAppName,  -- <--- අලුතෙන් එකතු කළ කොටස (For CR Name)
                (SELECT COUNT(*) FROM Internal_Project_Comments WHERE Solution_ID = ip.ID) AS CommentCount
         FROM internal_platforms ip
         LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
         LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
         LEFT JOIN parentproject pr ON ip.ParentProjectID = pr.ParentProjectID
+        LEFT JOIN internal_platforms parent ON ip.MainAppID = parent.ID 
         WHERE sp.Phase NOT IN ('Maintenance', 'Retired', 'Abandoned')";
 
             // --- TAB FILTER LOGIC ---
@@ -76,7 +77,6 @@ namespace PROHUB.Data
             // --- SEARCH LOGIC ---
             if (!string.IsNullOrEmpty(searchTerm))
             {
-
                 query += " AND (ip.App_Name LIKE @SearchTerm OR e.Emp_Name LIKE @SearchTerm OR ip.Bus_Owner LIKE @SearchTerm OR pr.ParentProjectGroup LIKE @SearchTerm)";
             }
 
@@ -104,12 +104,18 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             // Step A: Get Main Solution Data
+            // මෙතනත් MainAppName එක ගන්න ඕන, නැත්නම් MapReaderToModel එකේදී Error එකක් එන්න පුළුවන්
             const string query = @"
-                SELECT ip.*, e.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName, pr.ParentProjectGroup AS ParentProjectName
+                SELECT ip.*, 
+                       e.Emp_Name AS DevelopedByName, 
+                       sp.Phase AS SDLCPhaseName, 
+                       pr.ParentProjectGroup AS ParentProjectName,
+                       parent.App_Name AS MainAppName -- <--- අලුතෙන් එකතු කළ කොටස
                 FROM internal_platforms ip
                 LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
                 LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
                 LEFT JOIN parentproject pr ON ip.ParentProjectID = pr.ParentProjectID
+                LEFT JOIN internal_platforms parent ON ip.MainAppID = parent.ID -- <--- අලුතෙන් එකතු කළ කොටස
                 WHERE ip.ID = @Id";
 
             using (var command = new MySqlCommand(query, connection))
@@ -301,6 +307,7 @@ namespace PROHUB.Data
             {
                 Id = GetInt32(r, "ID"),
                 AppName = GetNullableString(r, "App_Name"),
+                MainAppName = GetNullableString(r, "MainAppName"), // <--- අලුතෙන් එකතු කළ කොටස (Assigning to Model)
                 DevelopedById = GetNullableInt32(r, "Developed_By"),
                 DevelopedTeam = GetNullableString(r, "Developed_Team"),
                 StartDate = GetNullableDateTime(r, "StartDate"),

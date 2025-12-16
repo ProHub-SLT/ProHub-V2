@@ -154,6 +154,8 @@ builder.Services.AddScoped<ITraineeService, TraineeDataAccess>();
 builder.Services.AddScoped<IEmployeePermissionRepository, EmployeePermissionRepository>();
 builder.Services.AddScoped<IInternalSolutionInprogressService, InternalSolutionInprogressDataAccess>();
 builder.Services.AddScoped<IExternalSolutionsProspectiveService, ExternalSolutionsProspectiveDataAccess>();
+builder.Services.AddScoped<ProHub.Data.CompanyRepository>();
+
 
 
 

@@ -1,0 +1,40 @@
+﻿@model IEnumerable<ProHub.Models.CustomerContact>
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Designation</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var contact in Model)
+                {
+                    <tr>
+                        <td><strong>@contact.Contact_Name</strong></td>
+                        <td>@contact.Contact_Designation</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(contact.Contact_Email))
+                            {
+                                <a href="mailto:@contact.Contact_Email">@contact.Contact_Email</a>
+                            }
+                        </td>
+                        <td>@contact.Contact_Phone1</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="text-center py-4">
+        <i class="bi bi-person-x text-muted" style="font-size: 2rem;"></i>
+        <p class="text-muted mt-2">No contacts found for this company.</p>
+    </div>
+}

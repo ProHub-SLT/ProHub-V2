@@ -334,12 +334,12 @@
                 <div class="form-row">
                     <div class="form-group-modern">
                         <label asp-for="ReportedBy" class="form-label-modern">
-                            <i class="bi bi-person-badge me-1"></i> Reported By
+                            <i class="bi bi-person-badge me-1"></i> Reported By (Customer Contact Person)
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-person-circle"></i>
                             <select asp-for="ReportedBy" class="form-control-modern">
-                                <option value="">Select Contact</option>
+                                <option value="">Select Customer Contact</option>
                                 @if (ViewBag.CustomerContacts != null)
                                 {
                                     foreach (var contact in (List<CustomerContact>)ViewBag.CustomerContacts)

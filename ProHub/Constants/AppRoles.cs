@@ -7,8 +7,11 @@ namespace ProHub.Constants // or just ProHub if you prefer
         public const string Developer = "Developer";
         public const string ViewOnly = "ViewOnly";
 
-        // You can add more tomorrow in 2 seconds
-        // public const string Manager   = "Manager";
-        // public const string Auditor   = "Auditor";
+        public const string DPO = "DPO";           // Data Protection Officer
+        public const string Ishamp = "Ishamp";        // Ishamp Users
+        public const string Restricted = "Restricted";    // Non Developer, etc.
+
+        // Blocked completely
+        public const string Inactive = "Inactive";
     }
 }

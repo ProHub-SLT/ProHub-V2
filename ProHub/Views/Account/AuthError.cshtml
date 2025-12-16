@@ -1,0 +1,363 @@
+﻿@{
+    ViewData["Title"] = "Authentication Error";
+    Layout = null;
+    var errorReason = ViewBag.ErrorReason as string ?? "unknown";
+    
+    string title = "Authentication Failed";
+    string message = "We couldn't sign you in.";
+    string details = "";
+    string lottieUrl = "https://lottie.host/8c0db8a9-97d3-4831-8178-d93e3e6b794a/B4KspSV0ek.json";
+    string actionText = "Please contact your system administrator for assistance.";
+    
+    switch(errorReason.ToLower())
+    {
+        case "email_not_found":
+            title = "Email Not Found";
+            message = "We couldn't find your email in the authentication token.";
+            details = "Your Azure AD account may not have an email address configured. Please ensure your account has a valid email address set in Azure Active Directory.";
+            lottieUrl = "https://lottie.host/c9b6c0e8-5c4a-4b5e-9e3e-8f7a9c5b3d2e/xKl4mNpQrS.json";
+            break;
+            
+        case "user_not_in_employee_table":
+            title = "Access Denied";
+            message = "You don't have access to this application.";
+            details = "Your account is not registered in the ProHub System. You need to be added to the system before you can access ProHub.";
+            lottieUrl = "https://lottie.host/69b1c179-7f37-4550-8550-5f14ed13fe2b/2bYcuOWqS1.json";
+            actionText = "Please contact HR or your system administrator to request access.";
+            break;
+
+
+        case "inactive":
+            title = "Access Denied";
+            message = "You don't have access to this application.";
+            details = "Your account is in Inactive Stage. You need to be Active youc account to the access ProHub.";
+            lottieUrl = "https://lottie.host/69b1c179-7f37-4550-8550-5f14ed13fe2b/2bYcuOWqS1.json";
+            actionText = "Please contact HR or your system administrator to request access.";
+            break;
+        
+
+            
+        case "unknown":
+        default:
+            title = "Authentication Error";
+            message = "Something went wrong during sign-in.";
+            details = "An unexpected error occurred while trying to authenticate your account.";
+            lottieUrl = "https://lottie.host/8c0db8a9-97d3-4831-8178-d93e3e6b794a/B4KspSV0ek.json";
+            break;
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ProHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <script src="https://unpkg.com/@@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lottie-player@1.7.2/dist/lottie-player.js"></script>
+
+
+    
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+        }
+
+        .auth-error-wrapper {
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Left side - Lottie Animation */
+        .auth-error-left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e6f2ff;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-error-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @@keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .auth-error-left lottie-player {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
+        }
+
+        /* Right side - Content */
+        .auth-error-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px 80px;
+            background-color: #ffffff;
+            overflow-y: auto;
+        }
+
+        .error-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+
+        .error-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .error-message {
+            font-size: 20px;
+            color: #4a5568;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .error-details-box {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-left: 4px solid #667eea;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .error-details-box p {
+            margin: 0;
+            color: #2d3748;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .error-details-box strong {
+            color: #1a202c;
+            font-weight: 600;
+        }
+
+        .action-info {
+            display: flex;
+            align-items: flex-start;
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-bottom: 35px;
+        }
+
+        .action-info i {
+            color: #f56565;
+            font-size: 24px;
+            margin-right: 15px;
+            margin-top: 2px;
+        }
+
+        .action-info p {
+            margin: 0;
+            color: #742a2a;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 14px 35px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .error-code {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #718096;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 992px) {
+            .auth-error-wrapper {
+                flex-direction: column;
+            }
+
+            .auth-error-left {
+                flex: unset;
+                width: 100%;
+                min-height: 40vh;
+                padding: 40px 30px;
+            }
+
+            .auth-error-left lottie-player {
+                max-width: 350px;
+            }
+
+            .auth-error-right {
+                flex: unset;
+                width: 100%;
+                padding: 40px 30px;
+            }
+
+            .error-title {
+                font-size: 36px;
+            }
+
+            .error-message {
+                font-size: 18px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-primary-custom {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .auth-error-right {
+                padding: 30px 20px;
+            }
+
+            .error-title {
+                font-size: 28px;
+            }
+
+            .error-message {
+                font-size: 16px;
+            }
+
+            .error-details-box {
+                padding: 20px;
+            }
+
+            .action-info {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-error-wrapper">
+        
+        <!-- Left side: Lottie animation -->
+        <div class="auth-error-left">
+            <lottie-player 
+                src="@lottieUrl"
+                background="transparent"
+                speed="1"
+                loop
+                autoplay>
+            </lottie-player>
+
+
+        </div>
+
+        <!-- Right side: content -->
+        <div class="auth-error-right">
+            <div class="error-badge">
+                <i class="bi bi-shield-x"></i> Authentication Error
+            </div>
+            
+            <h1 class="error-title">@title</h1>
+            
+            <p class="error-message">@message</p>
+            
+            @if (!string.IsNullOrEmpty(details))
+            {
+                <div class="error-details-box">
+                    <p><strong>Details:</strong><br />@details</p>
+                </div>
+            }
+            
+            <div class="action-info">
+                <i class="bi bi-info-circle-fill"></i>
+                <p>@actionText</p>
+            </div>
+            
+            <div class="button-group">
+                <form asp-action="SignOut" asp-controller="Account" method="post" style="margin: 0;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-primary-custom">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Sign Out & Try Again</span>
+                    </button>
+                </form>
+            </div>
+            
+            <div>
+                <span class="error-code">
+                    Error Code: AUTH_@errorReason.ToUpper()
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>

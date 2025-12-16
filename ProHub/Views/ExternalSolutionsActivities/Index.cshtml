@@ -1,4 +1,6 @@
 ﻿@model List<PROHUB.Models.ProjectActivity>
+@using ProHub.Constants
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
 
@@ -114,6 +116,53 @@
             color: white;
         }
 
+    /* --- Permission Styling (from Documents module) --- */
+    .permission-restricted {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: 1px solid #f5c2c7;
+        border-radius: 8px;
+        color: #842029;
+        font-weight: 500;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 6px rgba(132, 32, 41, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .permission-restricted:hover {
+            box-shadow: 0 3px 10px rgba(132, 32, 41, 0.15);
+        }
+
+        .permission-restricted i {
+            font-size: 1rem;
+            color: #842029;
+        }
+
+    .permission-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #0056b3;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
+
     /* --- Table Styling --- */
     .data-table-wrapper {
         background: white;
@@ -180,7 +229,7 @@
             overflow: visible;
         }
 
-    /* --- Status Badges (UPDATED COLORS) --- */
+    /* --- Status Badges --- */
     .status-badge {
         padding: 0.35rem 0.75rem;
         border-radius: 20px;
@@ -193,35 +242,30 @@
         text-align: center;
     }
 
-    /* Open - Blue */
     .status-badge-open {
         background-color: #e3f2fd;
         color: #0d47a1;
         border: 1px solid #bbdefb;
     }
 
-    /* In Progress - Yellow/Gold */
     .status-badge-progress {
         background-color: #fffde7;
         color: #f57f17;
         border: 1px solid #fff9c4;
     }
 
-    /* On Hold - Orange */
     .status-badge-hold {
         background-color: #fff3e0;
         color: #e65100;
         border: 1px solid #ffe0b2;
     }
 
-    /* Close - Red */
     .status-badge-close {
         background-color: #ffebee;
         color: #b71c1c;
         border: 1px solid #ffcdd2;
     }
 
-    /* Completed - Green (Optional extra) */
     .status-badge-completed {
         background-color: #e8f5e8;
         color: #1b5e20;
@@ -413,7 +457,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
         }
-
 </style>
 
 <div class="container-fluid mt-4">
@@ -422,10 +465,20 @@
     <div class="toolbar-wrapper mb-4">
         <div class="row g-3 align-items-center">
             <div class="col-lg-3 col-md-4 col-sm-6">
-                <a asp-action="Create" class="btn-create-new">
-                    <i class="bi bi-plus-circle"></i>
-                    <span>Create New</span>
-                </a>
+                @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer))
+                {
+                    <a asp-action="Create" class="btn-create-new">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Create New</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="permission-restricted">
+                        <i class="bi bi-lock-fill"></i>
+                        View-only access
+                    </span>
+                }
             </div>
 
             <div class="col-lg-5 col-md-6">
@@ -472,25 +525,20 @@
                                 <i class="bi @(sortColumn == "Solution" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
-
                         <th style="width:9%">Created Time </th>
-
                         <th style="width:10%">
                             <a href="@BuildUrl(1, "CreatedBy", ToggleSortOrder("CreatedBy"))">
                                 Created By
                                 <i class="bi @(sortColumn == "CreatedBy" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
-
                         <th style="width:9%">Target Date</th>
-
                         <th style="width:11%">
                             <a href="@BuildUrl(1, "AssignedTo", ToggleSortOrder("AssignedTo"))">
                                 Assigned To
                                 <i class="bi @(sortColumn == "AssignedTo" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
-
                         <th style="width:12%">Description</th>
                         <th style="width:12%">
                             <a href="@BuildUrl(1, "Status", ToggleSortOrder("Status"))">
@@ -514,6 +562,10 @@
                     {
                         foreach (var item in Model)
                         {
+                            // Permission logic: Check if user is owner or admin
+                            var isOwner = User.FindFirst("EmployeeId")?.Value == item.CreatedBy?.ToString();
+                            var canEditDelete = User.IsInRole(AppRoles.Admin) || isOwner;
+
                             <tr>
                                 <td title="@item.SolutionName">
                                     <span class="fw-semibold">@item.SolutionName </span>
@@ -559,13 +611,36 @@
                                     @(item.LatestComment ?? "-")
                                 </td>
                                 <td class="text-center">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil"></i></a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye"></i></a>
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <!-- VIEW - Always visible -->
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
 
-                                    <button type="button" class="btn btn-sm btn-outline-danger me-1"
-                                            onclick="showDeleteModal(@item.Id, 'Activity ID: @item.Id')" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                        <!-- EDIT - Only owner or admin -->
+                                        @if (canEditDelete)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        }
+
+                                        <!-- DELETE - Only owner or admin -->
+                                        @if (canEditDelete)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    onclick="showDeleteModal(@item.Id, 'Activity ID: @item.Id')" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <!-- Styled lock icon badge for permission restriction -->
+                                            <span class="permission-badge" title="Only owner or admin can edit/delete">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -632,6 +707,7 @@
         </div>
     </div>
 </div>
+
 
 <div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

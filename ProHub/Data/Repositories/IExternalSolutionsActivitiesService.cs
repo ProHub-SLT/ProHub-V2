@@ -27,6 +27,7 @@ namespace PROHUB.Data
         Task<List<Employee>> GetEmployeesAsync();
         Task<List<MainPlatform>> GetMainPlatformsAsync();
         Task<List<ExternalPlatform>> GetExternalSolutionsAsync();
+        Task<Employee?> GetEmployeeByEmailAsync(string email);
     }
 
     // ---------------------------------------------------------
@@ -300,6 +301,29 @@ namespace PROHUB.Data
                 throw;
             }
             return list;
+        }
+
+        public async Task<Employee?> GetEmployeeByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return null;
+
+            using var connection = GetConnection();
+            await connection.OpenAsync();
+            const string query = "SELECT * FROM Employee WHERE Emp_Email = @Email LIMIT 1";
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@Email", email);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return new Employee
+                {
+                    EmpId = reader.GetInt32(reader.GetOrdinal("Emp_ID")),
+                    EmpName = reader.GetString(reader.GetOrdinal("Emp_Name")),
+                    EmpEmail = reader.GetString(reader.GetOrdinal("Emp_Email"))
+                };
+            }
+            return null;
         }
 
         // --- MAPPERS & HELPERS ---

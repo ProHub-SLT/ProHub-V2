@@ -9,6 +9,7 @@ using ProHub.Data;
 using ProHub.Data.Interfaces;
 using ProHub.Data.Repositories;
 using System.Security.Claims;
+using ProHub.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,7 @@ builder.Services.AddAuthentication(options =>
 
 // Add Razor Views + Azure Identity UI
 builder.Services.AddControllersWithViews();
-                //.AddMicrosoftIdentityUI();
+//.AddMicrosoftIdentityUI();
 
 // ===============================
 // OPENID CONNECT EVENTS (FIXED)
@@ -39,7 +40,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.Configure<OpenIdConnectOptions>(
     OpenIdConnectDefaults.AuthenticationScheme, options =>
     {
-        options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role; 
+        options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+
         options.TokenValidationParameters.NameClaimType = ClaimTypes.Email;
 
         options.Events.OnRedirectToIdentityProvider = context =>
@@ -56,7 +58,9 @@ builder.Services.Configure<OpenIdConnectOptions>(
 
             if (string.IsNullOrEmpty(email))
             {
-                context.Fail("Email not found in Azure token.");
+                // Redirect to custom error page with specific reason
+                context.Response.Redirect("/Account/AuthError?reason=email_not_found");
+                context.HandleResponse(); // Stop the authentication process
                 return;
             }
 
@@ -65,7 +69,8 @@ builder.Services.Configure<OpenIdConnectOptions>(
 
             if (employee == null)
             {
-                context.Fail("Access Denied: User not in Employee table.");
+                context.Response.Redirect("/Account/AuthError?reason=user_not_in_employee_table");
+                context.HandleResponse(); // Stop the authentication process
                 return;
             }
 
@@ -75,23 +80,58 @@ builder.Services.Configure<OpenIdConnectOptions>(
                 .Select(c => c.Value)
                 .ToList();
 
+
+
+            // BLOCK INACTIVE USERS
+            if (azureRoles.Contains(AppRoles.Inactive, StringComparer.OrdinalIgnoreCase))
+            {
+                context.Response.Redirect("/Account/AuthError?reason=inactive");
+                context.HandleResponse();
+                return;
+            }
+
+
             string appRole = ProHub.Constants.AppRoles.ViewOnly;
-            if (azureRoles.Any(r => r.Contains("admin", StringComparison.OrdinalIgnoreCase)))
-                appRole = ProHub.Constants.AppRoles.Admin;
-            else if (azureRoles.Any(r => r.Contains("developer", StringComparison.OrdinalIgnoreCase)))
-                appRole = ProHub.Constants.AppRoles.Developer;
+
+            if (azureRoles.Any(r => r.Contains("Administrator", StringComparison.OrdinalIgnoreCase)))
+                appRole = AppRoles.Admin;
+            else if (azureRoles.Any(r => r.Contains("Developer", StringComparison.OrdinalIgnoreCase)))
+                appRole = AppRoles.Developer;
+            else if (azureRoles.Contains("DPOUser", StringComparer.OrdinalIgnoreCase))
+                appRole = AppRoles.DPO;
+            else if (azureRoles.Contains("IshampUser", StringComparer.OrdinalIgnoreCase))
+                appRole = AppRoles.Ishamp;
+            else if (azureRoles.Contains("Non Developer", StringComparer.OrdinalIgnoreCase))
+                appRole = AppRoles.Restricted;
+
 
             // FIXED: do NOT use ClaimTypes.Role
             var customClaims = new List<Claim>
             {
                 new Claim("EmployeeId", employee.EmpId.ToString()),
-                new Claim("AppRole", appRole)
+               
+
+                // 🔑 Used by ASP.NET authorization
+                new Claim(ClaimTypes.Role, appRole),
+
+                // 🎨 Used ONLY for profile UI
+                new Claim("app_role", appRole)
             };
 
             var identity = new ClaimsIdentity(customClaims);
             context.Principal.AddIdentity(identity);
         };
+
+        // OnRemoteFailure event for generic errors
+        options.Events.OnRemoteFailure = context =>
+        {
+            context.Response.Redirect("/Account/AuthError?reason=unknown");
+            context.HandleResponse();
+            return Task.CompletedTask;
+        };
     });
+
+
 
 // ===============================
 // REPOSITORIES
@@ -112,9 +152,6 @@ builder.Services.AddScoped<IInternalSolutionsActivitiesService, InternalSolution
 builder.Services.AddScoped<IExternalSolutionsActivitiesService, ExternalSolutionsActivitiesDataAccess>();
 builder.Services.AddScoped<ITraineeService, TraineeDataAccess>();
 builder.Services.AddScoped<IEmployeePermissionRepository, EmployeePermissionRepository>();
-builder.Services.AddScoped<IInternalSolutionInprogressService, InternalSolutionInprogressDataAccess>();
-builder.Services.AddScoped<IExternalSolutionsProspectiveService, ExternalSolutionsProspectiveDataAccess>();
-
 
 
 

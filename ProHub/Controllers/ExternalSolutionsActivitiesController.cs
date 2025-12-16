@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProHub.Constants;
 using ProHub.Models;
 using PROHUB.Data;
 using PROHUB.Models;
@@ -9,279 +11,250 @@ using System.Threading.Tasks;
 
 namespace PROHUB.Controllers
 {
+    [Authorize] // 🔐 Everyone must be logged in
     public class ExternalSolutionsActivitiesController : Controller
     {
         private readonly IExternalSolutionsActivitiesService _activityService;
 
-        public ExternalSolutionsActivitiesController(IExternalSolutionsActivitiesService activityService)
+        public ExternalSolutionsActivitiesController(
+            IExternalSolutionsActivitiesService activityService)
         {
             _activityService = activityService;
         }
 
-        // ✅ GET: ExternalSolutionsActivities/Index
-
+        // =============================================
+        // 1️⃣ INDEX – Everyone can view
+        // =============================================
         [HttpGet]
-        public async Task<IActionResult> Index(string search, string sortColumn = "CreatedTime", string sortOrder = "desc", int page = 1, int pageSize = 10)
-        {
-
-            var allActivities = await _activityService.GetAllAsync(search, sortColumn, sortOrder, filterPlatformId: 2);
-
-            Console.WriteLine($"Found {allActivities.Count} records.");
-
-            var totalItemCount = allActivities.Count;
-            var totalPages = (int)Math.Ceiling(totalItemCount / (double)pageSize);
-
-            if (totalItemCount > 0)
-            {
-                page = Math.Max(1, Math.Min(page, totalPages));
-            }
-            else
-            {
-                page = 1;
-            }
-
-            var pagedActivities = allActivities.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-            ViewData["Search"] = search;
-            ViewData["SortColumn"] = sortColumn;
-            ViewData["SortOrder"] = sortOrder;
-            ViewData["PageSize"] = pageSize;
-            ViewData["CurrentPage"] = page;
-            ViewData["TotalPages"] = totalPages;
-            ViewData["TotalEntries"] = totalItemCount;
-
-            return View(pagedActivities);
-        }
-        // ✅ POST: ExternalSolutionsActivities/AddComment
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(int Activity_ID, string Comment)
+        public async Task<IActionResult> Index(
+            string search,
+            string sortColumn = "CreatedTime",
+            string sortOrder = "desc",
+            int page = 1,
+            int pageSize = 10)
         {
             try
             {
-                if (Activity_ID > 0 && !string.IsNullOrWhiteSpace(Comment))
-                {
-                    // You might want to get the actual logged-in user ID here
-                    int? currentUserId = 1;
-                    await _activityService.AddCommentAsync(Activity_ID, Comment, currentUserId);
-                    TempData["SuccessMessage"] = "Comment added successfully!";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Invalid comment data.";
-                }
+                // External platform ID = 2 (as per your design)
+                var allActivities = await _activityService.GetAllAsync(
+                    search,
+                    sortColumn,
+                    sortOrder,
+                    filterPlatformId: 2);
+
+                int totalCount = allActivities.Count;
+                int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+                page = totalCount == 0 ? 1 : Math.Clamp(page, 1, totalPages);
+
+                var paged = allActivities
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                ViewData["Search"] = search;
+                ViewData["SortColumn"] = sortColumn;
+                ViewData["SortOrder"] = sortOrder;
+                ViewData["PageSize"] = pageSize;
+                ViewData["CurrentPage"] = page;
+                ViewData["TotalPages"] = totalPages;
+                ViewData["TotalEntries"] = totalCount;
+
+                return View(paged);
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error adding comment: {ex.Message}");
-                TempData["ErrorMessage"] = "Error saving comment.";
+                TempData["ErrorMessage"] = "Error loading activities.";
+                return View(new List<ProjectActivity>());
             }
-            return RedirectToAction(nameof(Index));
         }
 
-        // ✅ GET: ExternalSolutionsActivities/Details/5
+        // =============================================
+        // 2️⃣ DETAILS – Everyone can view
+        // =============================================
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            try
+            var activity = await _activityService.GetByIdAsync(id);
+            if (activity == null)
             {
-                var activity = await _activityService.GetByIdAsync(id);
-                if (activity == null)
-                {
-                    TempData["ErrorMessage"] = "Activity not found.";
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(activity);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading details for {id}: {ex.Message}");
-                TempData["ErrorMessage"] = "Error loading activity details.";
+                TempData["ErrorMessage"] = "Activity not found.";
                 return RedirectToAction(nameof(Index));
             }
+            return View(activity);
         }
 
-        // ✅ GET: ExternalSolutionsActivities/Create
+        // =============================================
+        // 3️⃣ CREATE – Admin + Developer only
+        // =============================================
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            try
+            await LoadDropdownDataAsync();
+
+            var model = new ProjectActivity
             {
-                await LoadDropdownDataAsync();
+                CreatedTime = DateTime.Now
+            };
 
-                var model = new ProjectActivity
-                {
-                    CreatedTime = DateTime.Now
-                };
+            AutoSelectExternalPlatform(model);
+            SetCurrentUser(model, isCreate: true);
 
-                if (ViewBag.Platforms is List<MainPlatform> platforms)
-                {
-                    var externalSolution = platforms.FirstOrDefault(p => p.Platforms == "External Solutions");
-                    if (externalSolution != null)
-                    {
-                        model.PlatformId = externalSolution.ID;
-                    }
-                }
-
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading form: {ex.Message}");
-                TempData["ErrorMessage"] = $"Error loading form: {ex.Message}";
-                return RedirectToAction(nameof(Index));
-            }
+            return View(model);
         }
 
-        // ✅ POST: ExternalSolutionsActivities/Create
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProjectActivity model)
         {
-            try
-            {
-                model.CreatedTime = DateTime.Now;
+            model.CreatedTime = DateTime.Now;
+            SetCurrentUser(model, isCreate: true);
 
-                if (ModelState.IsValid)
-                {
-                    int newId = await _activityService.CreateAsync(model);
-                    if (newId > 0)
-                    {
-                        TempData["SuccessMessage"] = "Activity created successfully!";
-                        return RedirectToAction(nameof(Index));
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = "Failed to create activity.";
-                    }
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Please check the form for errors.";
-                }
-            }
-            catch (Exception ex)
+            if (model.PlatformId == 0)
+                ModelState.AddModelError("PlatformId", "Invalid platform selected.");
+
+            if (ModelState.IsValid)
             {
-                Console.WriteLine($"Error creating activity: {ex.Message}");
-                TempData["ErrorMessage"] = "An error occurred while saving.";
+                await _activityService.CreateAsync(model);
+                TempData["SuccessMessage"] = "Activity created successfully!";
+                return RedirectToAction(nameof(Index));
             }
 
             await LoadDropdownDataAsync();
             return View(model);
         }
 
-        // ✅ GET: ExternalSolutionsActivities/Edit/5
+        // =============================================
+        // 4️⃣ EDIT – Admin OR Owner
+        // =============================================
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            try
-            {
-                var activity = await _activityService.GetByIdAsync(id);
-                if (activity == null)
-                {
-                    TempData["ErrorMessage"] = "Activity not found.";
-                    return RedirectToAction(nameof(Index));
-                }
+            var activity = await _activityService.GetByIdAsync(id);
+            if (activity == null)
+                return NotFound();
 
-                await LoadDropdownDataAsync();
-                return View(activity);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading edit for {id}: {ex.Message}");
-                TempData["ErrorMessage"] = "Error loading activity.";
-                return RedirectToAction(nameof(Index));
-            }
+            if (!IsOwnerOrAdmin(activity.CreatedBy))
+                return Forbid(); // 🔒 SECURITY
+
+            await LoadDropdownDataAsync();
+            SetCurrentUser(activity, isCreate: false);
+
+            return View(activity);
         }
 
-        // ✅ POST: ExternalSolutionsActivities/Edit/5
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ProjectActivity model)
         {
-            if (id != model.Id)
-            {
-                TempData["ErrorMessage"] = "ID Mismatch.";
-                return RedirectToAction(nameof(Index));
-            }
+            var existing = await _activityService.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound();
 
-            try
+            if (!IsOwnerOrAdmin(existing.CreatedBy))
+                return Forbid(); // 🔒 SECURITY
+
+            model.UpdatedDate = DateTime.Now;
+
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                await _activityService.UpdateAsync(model);
+
+                if (!string.IsNullOrWhiteSpace(model.LatestComment))
                 {
-                    model.UpdatedDate = DateTime.Now;
-
-                    bool success = await _activityService.UpdateAsync(model);
-
-                    if (success && !string.IsNullOrWhiteSpace(model.LatestComment))
-                    {
-                        await _activityService.AddCommentAsync(model.Id, model.LatestComment, model.UpdatedBy);
-                    }
-
-                    if (success)
-                    {
-                        TempData["SuccessMessage"] = "Activity updated successfully!";
-                        return RedirectToAction(nameof(Index));
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = "Failed to update activity.";
-                    }
+                    await _activityService.AddCommentAsync(
+                        model.Id,
+                        model.LatestComment,
+                        model.UpdatedBy);
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error updating activity {id}: {ex.Message}");
-                TempData["ErrorMessage"] = "An error occurred while updating.";
+
+                TempData["SuccessMessage"] = "Activity updated successfully!";
+                return RedirectToAction(nameof(Index));
             }
 
             await LoadDropdownDataAsync();
             return View(model);
         }
 
-        // ✅ POST: ExternalSolutionsActivities/Delete/5
+        // =============================================
+        // 5️⃣ DELETE – Admin OR Owner
+        // =============================================
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                bool success = await _activityService.DeleteAsync(id);
-                if (success)
-                {
-                    TempData["SuccessMessage"] = "Activity deleted successfully.";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Failed to delete activity.";
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting activity {id}: {ex.Message}");
-                TempData["ErrorMessage"] = "Error deleting record.";
-            }
+            var activity = await _activityService.GetByIdAsync(id);
+            if (activity == null)
+                return NotFound();
+
+            if (!IsOwnerOrAdmin(activity.CreatedBy))
+                return Forbid(); // 🔒 SECURITY
+
+            await _activityService.DeleteAsync(id);
+            TempData["SuccessMessage"] = "Activity deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ Helper: Load Dropdowns
+        // =============================================
+        // 🔧 HELPERS
+        // =============================================
         private async Task LoadDropdownDataAsync()
         {
-            try
-            {
-                ViewBag.Platforms = await _activityService.GetMainPlatformsAsync();
-                ViewBag.Employees = await _activityService.GetEmployeesAsync();
-                ViewBag.ExternalSolutions = await _activityService.GetExternalSolutionsAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading dropdowns: {ex.Message}");
-                ViewBag.Platforms = new List<MainPlatform>();
-                ViewBag.Employees = new List<Employee>();
-                ViewBag.ExternalSolutions = new List<ExternalPlatform>();
+            ViewBag.Platforms = await _activityService.GetMainPlatformsAsync();
+            ViewBag.Employees = await _activityService.GetEmployeesAsync();
+            ViewBag.ExternalSolutions = await _activityService.GetExternalSolutionsAsync();
+        }
 
-                TempData["ErrorMessage"] = "Error loading dropdown data. Some options may not be available.";
+        private void AutoSelectExternalPlatform(ProjectActivity model)
+        {
+            if (ViewBag.Platforms is List<MainPlatform> platforms)
+            {
+                var externalPlatform = platforms.FirstOrDefault(p =>
+                    p.Platforms != null &&
+                    p.Platforms.Contains("External", StringComparison.OrdinalIgnoreCase));
+
+                if (externalPlatform != null)
+                    model.PlatformId = externalPlatform.ID;
             }
+        }
+
+        private void SetCurrentUser(ProjectActivity model, bool isCreate)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return;
+
+            var email = User.FindFirst("preferred_username")?.Value
+                        ?? User.FindFirst("upn")?.Value;
+
+            if (string.IsNullOrEmpty(email))
+                return;
+
+            var employee = _activityService.GetEmployeeByEmailAsync(email).Result;
+            if (employee == null)
+                return;
+
+            if (isCreate)
+                model.CreatedBy = employee.EmpId;
+            else
+                model.UpdatedBy = employee.EmpId;
+        }
+
+        private bool IsOwnerOrAdmin(int? ownerId)
+        {
+            if (!ownerId.HasValue)
+                return false;
+
+            if (User.IsInRole(AppRoles.Admin))
+                return true;
+
+            if (!int.TryParse(User.FindFirst("EmployeeId")?.Value, out int currentUserId))
+                return false;
+
+            return ownerId.Value == currentUserId;
         }
     }
 }

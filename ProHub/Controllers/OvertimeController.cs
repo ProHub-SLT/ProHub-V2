@@ -1,5 +1,7 @@
-﻿﻿// File: Controllers/OvertimeController.cs
+﻿// File: Controllers/OvertimeController.cs
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProHub.Constants;
 using ProHub.Data;
 using ProHub.Models;
 using System;
@@ -8,17 +10,23 @@ using System.Linq;
 
 namespace ProHub.Controllers
 {
+    [Authorize] // 🔐 All actions require login
     public class OvertimeController : Controller
     {
         private readonly OvertimeRepository _otRepo;
         private readonly EmployeeRepository _empRepo;
 
-        public OvertimeController(OvertimeRepository otRepo, EmployeeRepository empRepo)
+        public OvertimeController(
+            OvertimeRepository otRepo,
+            EmployeeRepository empRepo)
         {
             _otRepo = otRepo;
             _empRepo = empRepo;
         }
 
+        // =============================================
+        // 1️⃣ INDEX – Everyone can view
+        // =============================================
         public IActionResult Index(string search = "", int page = 1, int pageSize = 10)
         {
             var data = _otRepo.GetAll(search, page, pageSize);
@@ -33,23 +41,32 @@ namespace ProHub.Controllers
             return View(data);
         }
 
+        // =============================================
+        // 2️⃣ DETAILS – Everyone can view
+        // =============================================
+        public IActionResult Details(int id)
+        {
+            var overtime = _otRepo.GetById(id);
+            if (overtime == null)
+                return NotFound();
+
+            return View(overtime);
+        }
+
+        // =============================================
+        // 3️⃣ CREATE – Admin + Developer
+        // =============================================
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         public IActionResult Create()
         {
-            // Set the created by name
             ViewBag.CreatedByName = GetAuthenticatedEmployeeName();
             ViewBag.AuthenticatedEmployeeId = GetAuthenticatedEmployeeId();
-
-            // Use existing methods to get all employees
-            var employeeIds = _empRepo.GetAllEmployeeIds();
-            var employeeNames = _empRepo.GetNamesByIds(employeeIds);
-
-            // Convert to a format compatible with the view
-            var employees = employeeNames.Select(kvp => new { Emp_ID = kvp.Key, Emp_Name = kvp.Value }).ToList();
-            ViewBag.Employees = employees;
+            LoadEmployeesDropdown();
 
             return View(new OvertimeRequest());
         }
 
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(OvertimeRequest model)
@@ -60,165 +77,123 @@ namespace ProHub.Controllers
                 model.Created_Date = DateTime.Now;
 
                 _otRepo.Insert(model);
-                TempData["Success"] = "Overtime request created!";
-                return RedirectToAction("Index");
+                TempData["Success"] = "Overtime request created successfully!";
+                return RedirectToAction(nameof(Index));
             }
 
-            // Set the created by name
             ViewBag.CreatedByName = GetAuthenticatedEmployeeName();
-
-            // Use existing methods to get all employees
-            var employeeIds = _empRepo.GetAllEmployeeIds();
-            var employeeNames = _empRepo.GetNamesByIds(employeeIds);
-
-            // Convert to a format compatible with the view
-            var employees = employeeNames.Select(kvp => new { Emp_ID = kvp.Key, Emp_Name = kvp.Value }).ToList();
-            ViewBag.Employees = employees;
-
+            LoadEmployeesDropdown();
             return View(model);
         }
 
-        public IActionResult Details(int id)
-        {
-            var overtime = _otRepo.GetById(id);
-            if (overtime == null)
-            {
-                return NotFound();
-            }
-            return View(overtime);
-        }
-
+        // =============================================
+        // 4️⃣ EDIT – Admin OR Owner
+        // =============================================
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         public IActionResult Edit(int id)
         {
             var overtime = _otRepo.GetById(id);
             if (overtime == null)
-            {
                 return NotFound();
-            }
 
-            // Use existing methods to get all employees
-            var employeeIds = _empRepo.GetAllEmployeeIds();
-            var employeeNames = _empRepo.GetNamesByIds(employeeIds);
+            if (!IsOwnerOrAdmin(overtime.Created_By))
+                return Forbid(); // 🔒 critical security
 
-            // Convert to a format compatible with the view
-            var employees = employeeNames.Select(kvp => new { Emp_ID = kvp.Key, Emp_Name = kvp.Value }).ToList();
-            ViewBag.Employees = employees;
-
+            LoadEmployeesDropdown();
             return View(overtime);
         }
 
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(OvertimeRequest model)
         {
+            var existing = _otRepo.GetById(model.ID);
+            if (existing == null)
+                return NotFound();
+
+            if (!IsOwnerOrAdmin(existing.Created_By))
+                return Forbid(); // 🔒 critical security
+
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _otRepo.Update(model);
-                    TempData["Success"] = "Overtime request updated successfully!";
-                    return RedirectToAction("Index");
-                }
-                catch (Exception ex)
-                {
-                    TempData["Error"] = "An error occurred while updating the overtime request: " + ex.Message;
-                }
+                _otRepo.Update(model);
+                TempData["Success"] = "Overtime request updated successfully!";
+                return RedirectToAction(nameof(Index));
             }
 
-            // Repopulate employees list for the view
-            var employeeIds = _empRepo.GetAllEmployeeIds();
-            var employeeNames = _empRepo.GetNamesByIds(employeeIds);
-            var employees = employeeNames.Select(kvp => new { Emp_ID = kvp.Key, Emp_Name = kvp.Value }).ToList();
-            ViewBag.Employees = employees;
-
+            LoadEmployeesDropdown();
             return View(model);
         }
 
+        // =============================================
+        // 5️⃣ DELETE – Admin OR Owner
+        // =============================================
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            try
-            {
-                _otRepo.Delete(id);
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            var overtime = _otRepo.GetById(id);
+            if (overtime == null)
+                return Json(new { success = false, message = "Record not found" });
+
+            if (!IsOwnerOrAdmin(overtime.Created_By))
+                return Json(new { success = false, message = "Unauthorized" });
+
+            _otRepo.Delete(id);
+            return Json(new { success = true });
         }
-        
-        /// <summary>
-        /// Gets the authenticated employee name from the database using email from claims
-        /// </summary>
-        /// <returns>Employee name from database or fallback name</returns>
+
+        // =============================================
+        // 🔧 HELPERS
+        // =============================================
+
+        private void LoadEmployeesDropdown()
+        {
+            var employeeIds = _empRepo.GetAllEmployeeIds();
+            var employeeNames = _empRepo.GetNamesByIds(employeeIds);
+
+            ViewBag.Employees = employeeNames
+                .Select(e => new { Emp_ID = e.Key, Emp_Name = e.Value })
+                .ToList();
+        }
+
+        private bool IsOwnerOrAdmin(int? ownerId)
+        {
+            if (!ownerId.HasValue)
+                return false;
+
+            if (User.IsInRole(AppRoles.Admin))
+                return true;
+
+            if (!int.TryParse(User.FindFirst("EmployeeId")?.Value, out int currentUserId))
+                return false;
+
+            return ownerId.Value == currentUserId;
+        }
+
         private string GetAuthenticatedEmployeeName()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                // Get user email from claims
-                var email = User.FindFirst("preferred_username")?.Value
-                           ?? User.FindFirst("upn")?.Value
-                           ?? "Unknown";
-                
-                // Get employee name from database using email
-                try
-                {
-                    var empName = _empRepo.GetEmployeeNameByEmail(email);
-                    return empName;
-                }
-                catch
-                {
-                    // Fallback to using name claim if database lookup fails
-                    var displayName = User.FindFirst("name")?.Value ?? "Unknown";
-                    return displayName;
-                }
-            }
-            else
-            {
+            if (!User.Identity.IsAuthenticated)
                 return "Unknown User";
-            }
+
+            var email = User.FindFirst("preferred_username")?.Value
+                        ?? User.FindFirst("upn")?.Value;
+
+            return _empRepo.GetEmployeeNameByEmail(email) ?? "Unknown User";
         }
-        
-        /// <summary>
-        /// Gets the authenticated employee ID from the database using email from claims
-        /// </summary>
-        /// <returns>Employee ID from database or fallback ID</returns>
+
         private int? GetAuthenticatedEmployeeId()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                // Get user email from claims
-                var email = User.FindFirst("preferred_username")?.Value
-                           ?? User.FindFirst("upn")?.Value
-                           ?? "Unknown";
-                
-                // Get employee ID from database using email
-                try
-                {
-                    var empId = _empRepo.GetEmployeeIdByEmail(email);
-                    return empId > 0 ? empId : (int?)null;
-                }
-                catch
-                {
-                    // Fallback to using name claim if database lookup fails
-                    var displayName = User.FindFirst("name")?.Value ?? "Unknown";
-                    try
-                    {
-                        var empId = _empRepo.GetIdByName(displayName);
-                        return empId > 0 ? empId : (int?)null;
-                    }
-                    catch
-                    {
-                        return null;
-                    }
-                }
-            }
-            else
-            {
+            if (!User.Identity.IsAuthenticated)
                 return null;
-            }
+
+            var email = User.FindFirst("preferred_username")?.Value
+                        ?? User.FindFirst("upn")?.Value;
+
+            int empId = _empRepo.GetEmployeeIdByEmail(email);
+            return empId > 0 ? empId : (int?)null;
         }
     }
 }

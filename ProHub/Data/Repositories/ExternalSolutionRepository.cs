@@ -362,11 +362,12 @@ namespace ProHub.Data
         }
 
         // Get the ID of the "external" platform from Main_Platforms table
+        // Made more robust to handle variations like "external solution"
         public int? GetExternalPlatformId()
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID FROM Main_Platforms WHERE LOWER(Platforms) = 'external' LIMIT 1", conn);
+            using var cmd = new MySqlCommand("SELECT ID FROM Main_Platforms WHERE LOWER(Platforms) LIKE '%external%' LIMIT 1", conn);
             using var r = cmd.ExecuteReader();
             if (r.Read())
                 return r.GetInt32(0);

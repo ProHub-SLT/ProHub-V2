@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.OpenIdConnect
 @using Microsoft.Identity.Web
+@using System.Security.Claims
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1058,9 +1059,13 @@
                                 initials = (parts[0][0].ToString() + parts[1][0].ToString()).ToUpper();
                         }
                         var rolesList = User.Claims
-                        .Where(c => c.Type.EndsWith("/role") || c.Type == "roles")
+                        .Where(c => c.Type == "app_role")
                         .Select(c => c.Value)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
                         .ToList();
+
+
+
                     }
                     @if (User.Identity.IsAuthenticated)
                     {

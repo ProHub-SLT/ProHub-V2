@@ -59,14 +59,22 @@ namespace ProHub.Controllers
             return View();
         }
 
+        // Authentication error handler
+        public IActionResult AuthError(string reason = null)
+        {
+            ViewBag.ErrorReason = reason ?? "unknown";
+            return View();
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult SignOut()
         {
+            var callbackUrl = Url.Action(nameof(Index), "Account", values: null, protocol: Request.Scheme);
             return SignOut(
-                new AuthenticationProperties { RedirectUri = Url.Action("Index", "Account") },
-                OpenIdConnectDefaults.AuthenticationScheme,
-                CookieAuthenticationDefaults.AuthenticationScheme);
+                new AuthenticationProperties { RedirectUri = callbackUrl },
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                OpenIdConnectDefaults.AuthenticationScheme);
         }
     }
 }

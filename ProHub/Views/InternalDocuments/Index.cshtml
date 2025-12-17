@@ -248,6 +248,28 @@
             box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
             transform: translateY(-1px);
         }
+
+    .permission-badge2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #842029;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge2:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
 </style>
 
 <div class="container-fluid mt-4">
@@ -360,7 +382,11 @@
                                         else
                                         {
                                             <!-- <CHANGE> Styled lock icon badge for permission restriction -->
-                                            <span class="permission-badge" title="Only owner or admin can edit/delete">
+                                            <span class="permission-badge" title="Only owner or admin can edit">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+
+                                            <span class="permission-badge2" title="Only owner or admin can delete">
                                                 <i class="bi bi-lock-fill"></i>
                                             </span>
                                         }

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using ProHub.Constants;
 using ProHub.Data;
 using ProHub.Models;
 using System.Collections.Generic;
@@ -53,6 +55,7 @@ namespace ProHub.Controllers
         }
 
         // ✅ CREATE: GET
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         public IActionResult Create()
         {
             ViewBag.Titles = new List<string> { "Mr.", "Mrs.", "Ms.", "Dr.", "Prof." };
@@ -60,6 +63,7 @@ namespace ProHub.Controllers
         }
 
         // ✅ CREATE: POST
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Partner partner)

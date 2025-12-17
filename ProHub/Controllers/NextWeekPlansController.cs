@@ -348,31 +348,46 @@ namespace ProHub.Controllers
 
         public IActionResult DownloadBackupMatrix()
         {
-            var platforms = _intRepo.GetInternalPlatformsByBackupOfficer(5);
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-            using var package = new ExcelPackage();
-            var ws = package.Workbook.Worksheets.Add("Backup Matrix");
-
-            ws.Cells[1, 1].Value = "Application Name";
-            ws.Cells[1, 2].Value = "Developed By";
-            ws.Cells[1, 3].Value = "Backup Person 1";
-            ws.Cells[1, 4].Value = "Backup Person 2";
-
-            int row = 2;
-            foreach (var p in platforms)
+            try
             {
-                ws.Cells[row, 1].Value = p.AppName;
-                ws.Cells[row, 2].Value = p.DevelopedBy?.EmpName ?? "";
-                ws.Cells[row, 3].Value = p.BackupOfficer1?.EmpName ?? "";
-                ws.Cells[row, 4].Value = p.BackupOfficer2?.EmpName ?? "";
-                row++;
-            }
+                var email = User.FindFirst("preferred_username")?.Value ?? User.FindFirst("upn")?.Value;
+                if (string.IsNullOrEmpty(email))
+                    return BadRequest("User email not found.");
 
-            ws.Cells.AutoFitColumns();
-            var stream = new MemoryStream(package.GetAsByteArray());
-            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"Backup_Matrix_{DateTime.Now:yyyy-MM-dd}.xlsx");
+                var empId = _empRepo.GetEmployeeIdByEmail(email);
+                if (empId == 0)
+                    return BadRequest("Employee record not found.");
+
+                var platforms = _intRepo.GetInternalPlatformsByBackupOfficer(empId);
+                ExcelPackage.License.SetNonCommercialPersonal("ProHub");
+
+                using var package = new ExcelPackage();
+                var ws = package.Workbook.Worksheets.Add("Backup Matrix");
+
+                ws.Cells[1, 1].Value = "Application Name";
+                ws.Cells[1, 2].Value = "Developed By";
+                ws.Cells[1, 3].Value = "Backup Person 1";
+                ws.Cells[1, 4].Value = "Backup Person 2";
+
+                int row = 2;
+                foreach (var p in platforms)
+                {
+                    ws.Cells[row, 1].Value = p.AppName;
+                    ws.Cells[row, 2].Value = p.DevelopedBy?.EmpName ?? "";
+                    ws.Cells[row, 3].Value = p.BackupOfficer1?.EmpName ?? "";
+                    ws.Cells[row, 4].Value = p.BackupOfficer2?.EmpName ?? "";
+                    row++;
+                }
+
+                ws.Cells.AutoFitColumns();
+                var stream = new MemoryStream(package.GetAsByteArray());
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"Backup_Matrix_{DateTime.Now:yyyy-MM-dd}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error generating file: {ex.Message}");
+            }
         }
 
         // ================================

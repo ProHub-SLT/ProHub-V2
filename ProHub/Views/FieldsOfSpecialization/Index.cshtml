@@ -1,4 +1,5 @@
 ﻿@model List<ProHub.Models.FieldsOfSpecialization>
+@using ProHub.Constants
 
 @{
     ViewData["Title"] = "Fields of Specialization";
@@ -429,6 +430,76 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
     }
+
+    /* === PERMISSION STYLES (ADDED) === */
+    .permission-restricted {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: 1px solid #f5c2c7;
+        border-radius: 8px;
+        color: #842029;
+        font-weight: 500;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 6px rgba(132, 32, 41, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .permission-restricted:hover {
+            box-shadow: 0 3px 10px rgba(132, 32, 41, 0.15);
+        }
+
+        .permission-restricted i {
+            font-size: 1rem;
+            color: #842029;
+        }
+
+    .permission-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #0056b3;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
+
+
+    .permission-badge2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #dc3545;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge2:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
 </style>
 
 <div class="container-fluid mt-4">
@@ -436,13 +507,28 @@
 
     <!-- Inline Toolbar -->
     <div class="toolbar-wrapper mb-4">
+        
         <div class="row g-3 align-items-center">
-            <div class="col-lg-3 col-md-4 col-sm-6">
-                <a asp-action="Create" class="btn-create-new">
-                    <i class="bi bi-plus-circle"></i>
-                    <span>Create New</span>
-                </a>
-            </div>
+            @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer))
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <a asp-action="Create" class="btn-create-new">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Create New</span>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <span class="permission-restricted">
+                        <i class="bi bi-lock-fill"></i>
+                        View-only access
+                    </span>
+                </div>
+            }
+            
+
 
             <div class="col-lg-5 col-md-6">
                 <form method="get" asp-action="Index" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
@@ -483,31 +569,72 @@
                     <tr>
                         <th class="sortable" data-column="FieldOfSpecName">
                             Field Name
-                            <i class="bi sort-icon @(sortColumn == "FieldOfSpecName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up")"></i>
+                            <i class="bi sort-icon @(sortColumn == "FieldOfSpecName"
+                    ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down")
+                    : "bi-arrow-down-up")"></i>
                         </th>
-                        <th  data-column="Desc">
+                        <th data-column="Desc">
                             Description
-                            
                         </th>
                         <th>Action</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @if (Model != null && Model.Any())
                     {
                         foreach (var item in Model)
                         {
+                            // === PERMISSION LOGIC (CONSISTENT) ===
+                            var canEditDelete =
+                            User.IsInRole(AppRoles.Admin) ||
+                            User.IsInRole(AppRoles.Developer);
+
                             <tr>
-                                <td title="@item.FieldOfSpecName"><strong>@item.FieldOfSpecName</strong></td>
+                                <td title="@item.FieldOfSpecName">
+                                    <strong>@item.FieldOfSpecName</strong>
+                                </td>
+
                                 <td title="@item.Desc">@item.Desc</td>
+
                                 <td class="text-center">
-                                    <a asp-action="Edit" asp-route-id="@item.FieldOfSpecId" class="btn btn-sm btn-outline-primary me-1" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger"
-                                            onclick="showDeleteModal(@item.FieldOfSpecId, '@item.FieldOfSpecName')" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                    <div class="d-flex justify-content-center gap-1">
+
+                                        <!-- EDIT -->
+                                        @if (canEditDelete)
+                                        {
+                                            <a asp-action="Edit"
+                                               asp-route-id="@item.FieldOfSpecId"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="permission-badge" title="No permission to edit">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                        }
+
+                                        <!-- DELETE -->
+                                        @if (canEditDelete)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    onclick="showDeleteModal(@item.FieldOfSpecId, '@item.FieldOfSpecName')"
+                                                    title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="permission-badge2" title="No permission to delete">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                        }
+
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -523,6 +650,7 @@
                     }
                 </tbody>
             </table>
+
         </div>
     </div>
 

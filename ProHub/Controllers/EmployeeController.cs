@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using ProHub.Constants;
 using ProHub.Models;
 using System.Collections.Generic;
 using System.Data;
@@ -46,6 +48,8 @@ public class EmployeeController : Controller
     // -------------------------------------------------------
     // CREATE: GET
     // -------------------------------------------------------
+    [Authorize(Roles = $"{AppRoles.Admin}")]
+
     public IActionResult Create()
     {
         ViewBag.Groups = GetGroups();
@@ -55,6 +59,7 @@ public class EmployeeController : Controller
     // -------------------------------------------------------
     // CREATE: POST
     // -------------------------------------------------------
+    [Authorize(Roles = $"{AppRoles.Admin}")]
     [HttpPost]
     public IActionResult Create(Employee emp)
     {
@@ -223,6 +228,7 @@ public class EmployeeController : Controller
     // -------------------------------------------------------
     // EDIT: GET
     // -------------------------------------------------------
+    [Authorize(Roles = $"{AppRoles.Admin}")]
     public IActionResult Edit(int id)
     {
         Employee emp = new Employee();
@@ -264,6 +270,7 @@ public class EmployeeController : Controller
     // -------------------------------------------------------
     // EDIT: POST – UPDATE EMPLOYEE
     // -------------------------------------------------------
+    [Authorize(Roles = $"{AppRoles.Admin}")]
     [HttpPost]
     public IActionResult Edit(Employee emp)
     {

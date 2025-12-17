@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProHub.Constants;
 using ProHub.Data;
 using ProHub.Models;
 using System;
@@ -37,12 +39,16 @@ namespace ProHub.Controllers
         }
 
         // GET: /Companies/Create
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: /Companies/Create
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Company company)
@@ -67,6 +73,8 @@ namespace ProHub.Controllers
         }
 
         // GET: /Companies/Edit/5
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         public IActionResult Edit(int id)
         {
             var company = _repo.GetCompanyById(id);
@@ -78,6 +86,8 @@ namespace ProHub.Controllers
         }
 
         // POST: /Companies/Edit/5
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Company company)
@@ -107,6 +117,8 @@ namespace ProHub.Controllers
         }
 
         // POST: /Companies/Delete/5
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)

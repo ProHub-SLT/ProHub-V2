@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using ProHub.Constants;
 using ProHub.Models;
 using System;
 using System.Collections.Generic;
@@ -77,6 +79,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ CREATE (GET)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpGet]
         public IActionResult Create()
         {
@@ -84,6 +88,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ CREATE (POST)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(FieldsOfSpecialization field)
@@ -112,6 +118,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ EDIT (GET)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -147,6 +155,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ EDIT (POST)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(FieldsOfSpecialization field)
@@ -173,6 +183,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ DELETE
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         public IActionResult Delete(int id)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection");

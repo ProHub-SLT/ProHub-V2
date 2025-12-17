@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using ProHub.Constants;
 using ProHub.Models;
 using System;
 using System.Collections.Generic;
@@ -77,6 +79,8 @@ namespace ProHub.Controllers
         }
 
         //  GET: Create
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpGet]
         public IActionResult Create()
         {
@@ -84,6 +88,8 @@ namespace ProHub.Controllers
         }
 
         //  POST: Create
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(ParentProject project)
@@ -117,6 +123,8 @@ namespace ProHub.Controllers
 
 
         //  GET: Edit
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -152,6 +160,8 @@ namespace ProHub.Controllers
         }
 
         //  POST: Edit
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost]
         public IActionResult Edit(ParentProject project)
         {

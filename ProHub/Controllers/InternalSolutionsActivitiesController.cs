@@ -93,9 +93,9 @@ namespace PROHUB.Controllers
         }
 
         // =============================================
-        // 3️⃣ CREATE – Admin + Developer only
+        // 3️⃣ CREATE – Admin, Developer, NonDeveloper
         // =============================================
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -112,7 +112,7 @@ namespace PROHUB.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProjectActivity model)
@@ -135,9 +135,9 @@ namespace PROHUB.Controllers
         }
 
         // =============================================
-        // 4️⃣ EDIT – Admin OR Owner
+        // 4️⃣ EDIT – Admin, Developer, NonDeveloper
         // =============================================
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -145,16 +145,13 @@ namespace PROHUB.Controllers
             if (activity == null)
                 return NotFound();
 
-            if (!IsOwnerOrAdmin(activity.CreatedBy))
-                return Forbid(); // 🔒 SECURITY
-
             await LoadDropdownDataAsync();
             SetCurrentUser(activity, isCreate: false);
 
             return View(activity);
         }
 
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ProjectActivity model)
@@ -162,9 +159,6 @@ namespace PROHUB.Controllers
             var existing = await _activityService.GetByIdAsync(id);
             if (existing == null)
                 return NotFound();
-
-            if (!IsOwnerOrAdmin(existing.CreatedBy))
-                return Forbid(); // 🔒 SECURITY
 
             model.UpdatedDate = DateTime.Now;
 
@@ -189,9 +183,9 @@ namespace PROHUB.Controllers
         }
 
         // =============================================
-        // 5️⃣ DELETE – Admin OR Owner
+        // 5️⃣ DELETE – Admin, Developer, NonDeveloper
         // =============================================
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -199,9 +193,6 @@ namespace PROHUB.Controllers
             var activity = await _activityService.GetByIdAsync(id);
             if (activity == null)
                 return NotFound();
-
-            if (!IsOwnerOrAdmin(activity.CreatedBy))
-                return Forbid(); // 🔒 SECURITY
 
             await _activityService.DeleteAsync(id);
             TempData["SuccessMessage"] = "Activity deleted successfully.";
@@ -211,7 +202,6 @@ namespace PROHUB.Controllers
         // =============================================
         // 🔧 HELPERS
         // =============================================
-
         private async Task LoadDropdownDataAsync()
         {
             ViewBag.Platforms = await _activityService.GetMainPlatformsAsync();
@@ -251,20 +241,6 @@ namespace PROHUB.Controllers
                 model.CreatedBy = employee.EmpId;
             else
                 model.UpdatedBy = employee.EmpId;
-        }
-
-        private bool IsOwnerOrAdmin(int? ownerId)
-        {
-            if (!ownerId.HasValue)
-                return false;
-
-            if (User.IsInRole(AppRoles.Admin))
-                return true;
-
-            if (!int.TryParse(User.FindFirst("EmployeeId")?.Value, out int currentUserId))
-                return false;
-
-            return ownerId.Value == currentUserId;
         }
     }
 }

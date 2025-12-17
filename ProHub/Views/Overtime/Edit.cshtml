@@ -251,7 +251,7 @@
                     <div class="col-12">
                         <div class="form-field">
                             <label asp-for="Approved_By" class="form-label">Approved By</label>
-                            <select asp-for="Approved_By" class="form-select" asp-items="@(new SelectList(ViewBag.Employees, "Emp_ID", "Emp_Name"))" disabled>
+                            <select asp-for="Approved_By" class="form-select" asp-items="@(new SelectList(ViewBag.Employees, "Emp_ID", "Emp_Name"))">
                                 <option value="">Select Employee</option>
                             </select>
                         </div>

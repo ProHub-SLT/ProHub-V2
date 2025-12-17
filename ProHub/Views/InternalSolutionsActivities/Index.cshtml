@@ -160,6 +160,28 @@
             transform: translateY(-1px);
         }
 
+
+    .permission-badge2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #dc3545;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge2:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
     /* --- Table Styling --- */
     .data-table-wrapper {
         background: white;
@@ -462,7 +484,7 @@
     <div class="toolbar-wrapper mb-4">
         <div class="row g-3 align-items-center">
             <div class="col-lg-3 col-md-4 col-sm-6">
-                @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer))
+                @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer) || User.IsInRole(AppRoles.NonDeveloper))
                 {
                     <a asp-action="Create" class="btn-create-new">
                         <i class="bi bi-plus-circle"></i>
@@ -560,8 +582,10 @@
                         foreach (var item in Model)
                         {
                             // Permission logic: Check if user is owner or admin
-                            var isOwner = User.FindFirst("EmployeeId")?.Value == item.CreatedBy?.ToString();
-                            var canEditDelete = User.IsInRole(AppRoles.Admin) || isOwner;
+                            var canEditDelete = User.IsInRole(AppRoles.Admin)
+                            || User.IsInRole(AppRoles.Developer)
+                            || User.IsInRole(AppRoles.NonDeveloper);
+
 
                             <tr>
                                 <td title="@item.SolutionName">
@@ -614,17 +638,13 @@
                                             <i class="bi bi-eye"></i>
                                         </a>
 
-                                        <!-- EDIT - Only owner or admin -->
+                                        <!-- EDIT - Admin, Developer, NonDeveloper -->
                                         @if (canEditDelete)
                                         {
                                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                        }
 
-                                        <!-- DELETE - Only owner or admin -->
-                                        @if (canEditDelete)
-                                        {
                                             <button type="button" class="btn btn-sm btn-outline-danger"
                                                     onclick="showDeleteModal(@item.Id, 'Activity ID: @item.Id')" title="Delete">
                                                 <i class="bi bi-trash"></i>
@@ -633,12 +653,16 @@
                                         else
                                         {
                                             <!-- Styled lock icon badge for permission restriction -->
-                                            <span class="permission-badge" title="Only owner or admin can edit/delete">
+                                            <span class="permission-badge" title="You do not have permission to edit">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                            <span class="permission-badge2" title="You do not have permission to delete">
                                                 <i class="bi bi-lock-fill"></i>
                                             </span>
                                         }
                                     </div>
                                 </td>
+
                             </tr>
                         }
                     }

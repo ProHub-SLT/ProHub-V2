@@ -1,8 +1,10 @@
 ﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using ProHub.Constants;
 using ProHub.Models;
 using PROHUB.Data;
 using PROHUB.Models;
@@ -447,6 +449,7 @@ namespace PROHUB.Controllers
             return View(trainee);
         }
 
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -455,6 +458,7 @@ namespace PROHUB.Controllers
             return View();
         }
 
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Trainees trainee)
@@ -472,6 +476,8 @@ namespace PROHUB.Controllers
             return View(trainee);
         }
 
+
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -484,6 +490,8 @@ namespace PROHUB.Controllers
             return View(trainee);
         }
 
+
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Trainees trainee)
@@ -505,6 +513,8 @@ namespace PROHUB.Controllers
             return View(trainee);
         }
 
+
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProHub.Constants;
 using PROHUB.Models;
 using PROHUB.Services;
 using System;
@@ -100,6 +102,7 @@ namespace PROHUB.Controllers
         }
 
         // Edit (GET)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         public async Task<IActionResult> Edit(int freelancerId)
         {
             var freelancer = await _freelancerService.GetFreelancerByIdAsync(freelancerId);
@@ -108,6 +111,7 @@ namespace PROHUB.Controllers
         }
 
         // Edit (POST)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Freelancer model)
@@ -126,12 +130,14 @@ namespace PROHUB.Controllers
         }
 
         // Create (GET)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         public IActionResult Create()
         {
             return View(new Freelancer());
         }
 
         // Create (POST)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Freelancer model)
@@ -162,6 +168,7 @@ namespace PROHUB.Controllers
         }
 
         // DELETE - supports both normal POST and AJAX (X-Requested-With header)
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int freelancerId)

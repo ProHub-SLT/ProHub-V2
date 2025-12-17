@@ -54,9 +54,9 @@ namespace ProHub.Controllers
         }
 
         // =============================================
-        // 3️⃣ CREATE – Admin + Developer
+        // 3️⃣ CREATE – Admin, Developer, NonDeveloper
         // =============================================
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         public IActionResult Create()
         {
             ViewBag.CreatedByName = GetAuthenticatedEmployeeName();
@@ -66,7 +66,7 @@ namespace ProHub.Controllers
             return View(new OvertimeRequest());
         }
 
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(OvertimeRequest model)
@@ -87,23 +87,20 @@ namespace ProHub.Controllers
         }
 
         // =============================================
-        // 4️⃣ EDIT – Admin OR Owner
+        // 4️⃣ EDIT – Admin, Developer, NonDeveloper
         // =============================================
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         public IActionResult Edit(int id)
         {
             var overtime = _otRepo.GetById(id);
             if (overtime == null)
                 return NotFound();
 
-            if (!IsOwnerOrAdmin(overtime.Created_By))
-                return Forbid(); // 🔒 critical security
-
             LoadEmployeesDropdown();
             return View(overtime);
         }
 
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(OvertimeRequest model)
@@ -111,9 +108,6 @@ namespace ProHub.Controllers
             var existing = _otRepo.GetById(model.ID);
             if (existing == null)
                 return NotFound();
-
-            if (!IsOwnerOrAdmin(existing.Created_By))
-                return Forbid(); // 🔒 critical security
 
             if (ModelState.IsValid)
             {
@@ -127,9 +121,9 @@ namespace ProHub.Controllers
         }
 
         // =============================================
-        // 5️⃣ DELETE – Admin OR Owner
+        // 5️⃣ DELETE – Admin, Developer, NonDeveloper
         // =============================================
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
@@ -138,9 +132,6 @@ namespace ProHub.Controllers
             if (overtime == null)
                 return Json(new { success = false, message = "Record not found" });
 
-            if (!IsOwnerOrAdmin(overtime.Created_By))
-                return Json(new { success = false, message = "Unauthorized" });
-
             _otRepo.Delete(id);
             return Json(new { success = true });
         }
@@ -148,7 +139,6 @@ namespace ProHub.Controllers
         // =============================================
         // 🔧 HELPERS
         // =============================================
-
         private void LoadEmployeesDropdown()
         {
             var employeeIds = _empRepo.GetAllEmployeeIds();
@@ -157,20 +147,6 @@ namespace ProHub.Controllers
             ViewBag.Employees = employeeNames
                 .Select(e => new { Emp_ID = e.Key, Emp_Name = e.Value })
                 .ToList();
-        }
-
-        private bool IsOwnerOrAdmin(int? ownerId)
-        {
-            if (!ownerId.HasValue)
-                return false;
-
-            if (User.IsInRole(AppRoles.Admin))
-                return true;
-
-            if (!int.TryParse(User.FindFirst("EmployeeId")?.Value, out int currentUserId))
-                return false;
-
-            return ownerId.Value == currentUserId;
         }
 
         private string GetAuthenticatedEmployeeName()

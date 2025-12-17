@@ -4,6 +4,26 @@
 }
 
 <style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute; /* changed from fixed */
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%; /* ensures it stretches with content */
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
     /* Styles copied from ParentProjects/Edit.cshtml */
     .form-container {
         background: white;

@@ -1,4 +1,5 @@
 ﻿@model List<ProHub.Models.Partner>
+@using ProHub.Constants
 
 @{
     ViewData["Title"] = "Partners";
@@ -260,6 +261,30 @@
         margin-bottom: 1rem;
         animation: iconPulse 1.5s ease-in-out infinite;
     }
+    /* --- Permission Styling (from Documents module) --- */
+    .permission-restricted {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: 1px solid #f5c2c7;
+        border-radius: 8px;
+        color: #842029;
+        font-weight: 500;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 6px rgba(132, 32, 41, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .permission-restricted:hover {
+            box-shadow: 0 3px 10px rgba(132, 32, 41, 0.15);
+        }
+
+        .permission-restricted i {
+            font-size: 1rem;
+            color: #842029;
+        }
 
     @@keyframes iconPulse {
         0%, 100% {
@@ -655,10 +680,21 @@
     <div class="toolbar-wrapper mb-4">
         <div class="row g-3 align-items-center">
             <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-                <a asp-action="Create" class="btn-create-new">
-                    <i class="bi bi-plus-circle"></i>
-                    <span>Add Partner</span>
-                </a>
+                @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer) || User.IsInRole(AppRoles.NonDeveloper))
+                {
+                    <a asp-action="Create" class="btn-create-new">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Add Partner</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="permission-restricted">
+                        <i class="bi bi-lock-fill"></i>
+                        View-only access
+                    </span>
+                }
+               
             </div>
 
             <div class="col-lg-5 col-md-6 col-12">

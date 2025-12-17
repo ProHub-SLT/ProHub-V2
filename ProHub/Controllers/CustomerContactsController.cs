@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using ProHub.Constants;
 using ProHub.Data;
 using ProHub.Models;
 using System.Collections.Generic;
@@ -67,6 +69,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ GET: Create Form
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         public IActionResult Create()
         {
             LoadDropdownData();
@@ -74,6 +78,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ POST: Create
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(CustomerContact contact)
@@ -113,6 +119,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ GET: Edit
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         public IActionResult Edit(int id)
         {
             if (id <= 0)
@@ -128,6 +136,8 @@ namespace ProHub.Controllers
         }
 
         // ✅ POST: Edit
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, CustomerContact contact)
@@ -233,6 +243,8 @@ namespace ProHub.Controllers
 
 
         // ✅ DELETE
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+
         public IActionResult Delete(int id)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection");

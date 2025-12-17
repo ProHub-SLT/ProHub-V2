@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<ProHub.Models.Company>
+
 @{
     ViewData["Title"] = "Companies / Customers";
     var pageSize = ViewBag.PageSize ?? 10;
@@ -10,6 +11,8 @@
     string sortColumn = "CompanyName";
     string sortOrder = "asc";
     string searchTerm = ViewBag.SearchTerm ?? "";
+    @using ProHub.Constants
+
 }
 
 <style>
@@ -186,6 +189,78 @@
         padding: 0.3rem;
         border: 1px solid #e2e8f0;
     }
+
+
+    /* === PERMISSION STYLES (ADDED) === */
+    .permission-restricted {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: 1px solid #f5c2c7;
+        border-radius: 8px;
+        color: #842029;
+        font-weight: 500;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 6px rgba(132, 32, 41, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .permission-restricted:hover {
+            box-shadow: 0 3px 10px rgba(132, 32, 41, 0.15);
+        }
+
+        .permission-restricted i {
+            font-size: 1rem;
+            color: #842029;
+        }
+
+    .permission-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #0056b3;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
+
+
+    .permission-badge2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #dc3545;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge2:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
+
 </style>
 
 <div class="container-fluid mt-4">
@@ -195,12 +270,26 @@
         <form method="get" asp-action="Index" id="filterForm">
             <div class="row g-3 align-items-center">
 
-                <div class="col-xl-3 col-lg-4 col-md-12 d-flex gap-2">
-                    <a asp-action="Create" class="btn-create-new">
-                        <i class="bi bi-plus-circle"></i>
-                        <span>Create New Company</span>
-                    </a>
-                </div>
+                @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer))
+                {
+                    <div class="col-xl-3 col-lg-4 col-md-12 d-flex gap-2">
+                        <a asp-action="Create" class="btn-create-new">
+                            <i class="bi bi-plus-circle"></i>
+                            <span>Create New Company</span>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <span class="permission-restricted">
+                            <i class="bi bi-lock-fill"></i>
+                            View-only access
+                        </span>
+                    </div>
+                }
+                
+               
 
                 <div class="col-xl-6 col-lg-5 col-md-6">
                     <div class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
@@ -248,34 +337,73 @@
                     {
                         foreach (var item in Model)
                         {
+                            // === PERMISSION LOGIC (NO CHANGE) ===
+                            var canEditDelete =
+                            User.IsInRole(AppRoles.Admin) ||
+                            User.IsInRole(AppRoles.Developer);
+
                             <tr>
-                                <td title="@item.CompanyName"><strong>@item.CompanyName</strong></td>
+                                <td title="@item.CompanyName">
+                                    <strong>@item.CompanyName</strong>
+                                </td>
+
                                 <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
 
-                                   
+                                        <!-- DETAILS: Everyone -->
+                                        <a asp-action="Details" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-secondary"
+                                           title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
 
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                        <!-- EDIT -->
+                                        @if (canEditDelete)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="permission-badge" title="No permission to edit">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                        }
 
+                                        <!-- DELETE -->
+                                        @if (canEditDelete)
+                                        {
+                                            <form asp-action="Delete"
+                                                  asp-route-id="@item.Id"
+                                                  method="post"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Are you sure you want to delete this company? This may affect existing records.');">
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="permission-badge2" title="No permission to delete">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                        }
 
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1" title="View Details">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-
-                                   
-                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
-                                          onsubmit="return confirm('Are you sure you want to delete this company? This may affect existing records.');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                            <i class="bi bi-trash"></i>
+                                        <!-- VIEW CONTACTS: Everyone -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-info"
+                                                onclick="loadContacts(@item.Id, '@item.CompanyName')"
+                                                title="View Customer Contacts">
+                                            <i class="bi bi-people-fill"></i>
                                         </button>
-                                    </form>
 
-                                    <button type="button" class="btn btn-sm btn-outline-info me-1"
-                                            onclick="loadContacts(@item.Id, '@item.CompanyName')"
-                                            title="View Customer Contacts">
-                                        <i class="bi bi-people-fill"></i>
-                                    </button>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -291,6 +419,7 @@
                     }
                 </tbody>
             </table>
+
         </div>
     </div>
 

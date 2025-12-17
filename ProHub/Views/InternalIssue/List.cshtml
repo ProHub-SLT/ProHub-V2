@@ -276,6 +276,27 @@
             transform: translateY(-1px);
         }
 
+    .permission-badge2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #dc3545;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge2:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
     /* Delete Modal Styles */
     .delete-modal-overlay {
         position: fixed;
@@ -502,7 +523,12 @@
     <div class="toolbar-wrapper mb-4">
         <div class="row g-3 align-items-center">
             <!-- LEFT SIDE: Create New Button with Permission Check -->
-            @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer))
+            @if (User.IsInRole(AppRoles.Admin)
+            || User.IsInRole(AppRoles.Developer)
+            || User.IsInRole(AppRoles.NonDeveloper)
+            || User.IsInRole(AppRoles.DPO)
+            || User.IsInRole(AppRoles.Ishamp))
+
             {
                 <div class="col-lg-3 col-md-4 col-sm-6">
                     <a asp-action="Create" class="btn-create-new">
@@ -594,8 +620,17 @@
                         foreach (var item in Model)
                         {
                             // === PERMISSION LOGIC ===
+                            
                             var isOwner = User.FindFirst("EmployeeId")?.Value == item.EnteredBy?.ToString();
-                            var canEditDelete = User.IsInRole(AppRoles.Admin) || isOwner;
+
+                            var canEditDelete =
+                            User.IsInRole(AppRoles.Admin)
+                            || (isOwner && (
+                            User.IsInRole(AppRoles.Developer)
+                            || User.IsInRole(AppRoles.DPO)
+                            || User.IsInRole(AppRoles.Ishamp)
+                            || User.IsInRole(AppRoles.NonDeveloper)
+                            ));
 
                             <tr>
                                 <td class="fw-semibold">@(item.FormattedId ?? "N/A")</td>
@@ -624,6 +659,14 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
+
+                                        <!-- DETAILS: Everyone -->
+                                        <a asp-action="Details" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-info" title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        
+                                        
                                         <!-- EDIT: Only Admin or Owner -->
                                         @if (canEditDelete)
                                         {
@@ -633,11 +676,7 @@
                                             </a>
                                         }
 
-                                        <!-- DETAILS: Everyone -->
-                                        <a asp-action="Details" asp-route-id="@item.Id" 
-                                           class="btn btn-sm btn-outline-info" title="Details">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
+                                   
 
                                         <!-- DELETE: Only Admin or Owner -->
                                         @if (canEditDelete)
@@ -652,7 +691,11 @@
                                         else
                                         {
                                             <!-- Permission Badge for Restricted Users -->
-                                            <span class="permission-badge" title="Only owner or admin can edit/delete">
+                                            <span class="permission-badge" title="Only owner or admin can edit">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+
+                                            <span class="permission-badge2" title="Only owner or admin can delete">
                                                 <i class="bi bi-lock-fill"></i>
                                             </span>
                                         }

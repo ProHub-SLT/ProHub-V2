@@ -9,7 +9,7 @@ namespace ProHub.Constants // or just ProHub if you prefer
 
         public const string DPO = "DPO";           // Data Protection Officer
         public const string Ishamp = "Ishamp";        // Ishamp Users
-        public const string Restricted = "Restricted";    // Non Developer, etc.
+        public const string NonDeveloper = "Non Developer";    // Non Developer, etc.
 
         // Blocked completely
         public const string Inactive = "Inactive";

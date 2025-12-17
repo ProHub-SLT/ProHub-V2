@@ -95,14 +95,15 @@ builder.Services.Configure<OpenIdConnectOptions>(
 
             if (azureRoles.Any(r => r.Contains("Administrator", StringComparison.OrdinalIgnoreCase)))
                 appRole = AppRoles.Admin;
+            else if (azureRoles.Contains("NonDeveloper", StringComparer.OrdinalIgnoreCase))
+                appRole = AppRoles.NonDeveloper;
             else if (azureRoles.Any(r => r.Contains("Developer", StringComparison.OrdinalIgnoreCase)))
                 appRole = AppRoles.Developer;
             else if (azureRoles.Contains("DPOUser", StringComparer.OrdinalIgnoreCase))
                 appRole = AppRoles.DPO;
             else if (azureRoles.Contains("IshampUser", StringComparer.OrdinalIgnoreCase))
                 appRole = AppRoles.Ishamp;
-            else if (azureRoles.Contains("Non Developer", StringComparer.OrdinalIgnoreCase))
-                appRole = AppRoles.Restricted;
+            
 
 
             // FIXED: do NOT use ClaimTypes.Role

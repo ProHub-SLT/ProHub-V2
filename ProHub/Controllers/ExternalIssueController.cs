@@ -1,7 +1,7 @@
 ﻿// Controllers/ExternalIssueController.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProHub.Constants;                    // AppRoles.Admin, AppRoles.Developer
+using ProHub.Constants;
 using ProHub.Data;
 using PROHUB.Data;
 using PROHUB.Models;
@@ -15,15 +15,17 @@ namespace PROHUB.Controllers
         private readonly IExternalIssueService _externalIssueService;
         private readonly EmployeeRepository _empRepo;
 
-        public ExternalIssueController(IExternalIssueService externalIssueService, EmployeeRepository empRepo)
+        public ExternalIssueController(
+            IExternalIssueService externalIssueService,
+            EmployeeRepository empRepo)
         {
             _externalIssueService = externalIssueService;
             _empRepo = empRepo;
         }
 
-        // ===================================================================
-        // INDEX + LIST – Everyone can view (with search & pagination)
-        // ===================================================================
+        // ================================================================
+        // INDEX + LIST – Everyone can view
+        // ================================================================
         [HttpGet]
         public async Task<IActionResult> Index(string search, int page = 1, int pageSize = 10)
             => await LoadIssuesAsync(search, page, pageSize);
@@ -33,70 +35,64 @@ namespace PROHUB.Controllers
 
         private async Task<IActionResult> LoadIssuesAsync(string search, int page, int pageSize)
         {
-            try
-            {
-                IEnumerable<ExternalIssue> allIssues = string.IsNullOrEmpty(search)
-                    ? await _externalIssueService.GetAllAsync()
-                    : await _externalIssueService.SearchAsync(search);
+            IEnumerable<ExternalIssue> allIssues = string.IsNullOrWhiteSpace(search)
+                ? await _externalIssueService.GetAllAsync()
+                : await _externalIssueService.SearchAsync(search);
 
-                ViewData["SearchTerm"] = search ?? "";
+            ViewData["SearchTerm"] = search ?? "";
 
-                var totalCount = allIssues.Count();
-                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-                page = Math.Max(1, Math.Min(page, totalPages > 0 ? totalPages : 1));
+            var totalCount = allIssues.Count();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            page = Math.Clamp(page, 1, totalPages == 0 ? 1 : totalPages);
 
-                var pagedIssues = allIssues
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+            var pagedIssues = allIssues
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-                ViewData["CurrentPage"] = page;
-                ViewData["TotalPages"] = totalPages;
-                ViewData["PageSize"] = pageSize;
-                ViewData["TotalEntries"] = totalCount;
+            ViewData["CurrentPage"] = page;
+            ViewData["TotalPages"] = totalPages;
+            ViewData["PageSize"] = pageSize;
+            ViewData["TotalEntries"] = totalCount;
 
-                return View("List", pagedIssues);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "Failed to load external issues.";
-                return View("List", new List<ExternalIssue>());
-            }
+            return View("List", pagedIssues);
         }
 
-        // ===================================================================
+        // ================================================================
         // DETAILS – Everyone
-        // ===================================================================
+        // ================================================================
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (!id.HasValue) return NotFound();
+
             var issue = await _externalIssueService.GetByIdAsync(id.Value);
             return issue == null ? NotFound() : View(issue);
         }
 
-        // ===================================================================
-        // CREATE – Only Admin + Developer
-        // ===================================================================
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        // ================================================================
+        // CREATE – Admin, Developer, DPO, Ishamp
+        // ================================================================
+        [Authorize(Roles =
+            $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO},{AppRoles.Ishamp},{AppRoles.NonDeveloper}")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
             await LoadDropdownDataAsync();
-            var model = new ExternalIssue
+
+            return View(new ExternalIssue
             {
                 EnteredTime = DateTime.Now,
-                EnteredBy = GetCurrentEmployeeId() // Auto-fill owner
-            };
-            return View(model);
+                EnteredBy = GetCurrentEmployeeId()
+            });
         }
 
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles =
+            $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO},{AppRoles.Ishamp},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ExternalIssue model)
         {
-            // Force the creator to be the current user
             model.EnteredBy = GetCurrentEmployeeId();
 
             if (ModelState.IsValid)
@@ -114,10 +110,11 @@ namespace PROHUB.Controllers
             return View(model);
         }
 
-        // ===================================================================
-        // EDIT – Only Admin OR the person who entered it (Entered_By)
-        // ===================================================================
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        // ================================================================
+        // EDIT – Admin OR Owner (Dev / DPO / Ishamp)
+        // ================================================================
+        [Authorize(Roles =
+            $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO},{AppRoles.Ishamp},{AppRoles.NonDeveloper}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -127,13 +124,14 @@ namespace PROHUB.Controllers
             if (issue == null) return NotFound();
 
             if (!IsOwnerOrAdmin(issue.EnteredBy))
-                return Forbid(); // 403 – not allowed
+                return Forbid();
 
             await LoadDropdownDataAsync();
             return View(issue);
         }
 
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
+        [Authorize(Roles =
+            $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO},{AppRoles.Ishamp},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ExternalIssue model)
@@ -161,12 +159,13 @@ namespace PROHUB.Controllers
             return View(model);
         }
 
-        // ===================================================================
-        // DELETE – Only Admin OR Owner
-        // ===================================================================
+        // ================================================================
+        // DELETE – Admin OR Owner
+        // ================================================================
+        [Authorize(Roles =
+            $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO},{AppRoles.Ishamp},{AppRoles.NonDeveloper}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]
         public async Task<IActionResult> Delete(int id)
         {
             var issue = await _externalIssueService.GetByIdAsync(id);
@@ -186,9 +185,9 @@ namespace PROHUB.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ===================================================================
-        // HELPER METHODS
-        // ===================================================================
+        // ================================================================
+        // HELPERS
+        // ================================================================
         private async Task LoadDropdownDataAsync()
         {
             ViewBag.Platforms = await _externalIssueService.GetExternalPlatformsAsync();
@@ -199,13 +198,15 @@ namespace PROHUB.Controllers
         private int? GetCurrentEmployeeId()
         {
             var idStr = User.FindFirst("EmployeeId")?.Value;
-            return int.TryParse(idStr, out int id) ? id : null;
+            return int.TryParse(idStr, out var id) ? id : null;
         }
 
         private bool IsOwnerOrAdmin(int? recordOwnerId)
         {
             if (!recordOwnerId.HasValue) return false;
-            if (User.IsInRole(AppRoles.Admin)) return true;
+
+            if (User.IsInRole(AppRoles.Admin))
+                return true;
 
             var currentId = GetCurrentEmployeeId();
             return currentId.HasValue && currentId.Value == recordOwnerId.Value;

@@ -12,19 +12,18 @@
         position: relative;
     }
 
-        /* Blur overlay */
         body::before {
             content: "";
-            position: absolute; /* changed from fixed */
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            min-height: 100%; /* ensures it stretches with content */
+            min-height: 100%;
             background: inherit;
             filter: blur(1px);
             z-index: -1;
         }
-    /* Styles copied from ParentProjects/Create.cshtml */
+
     .form-container {
         background: white;
         border-radius: 12px;
@@ -40,54 +39,32 @@
         color: white;
     }
 
-        .form-header h2 {
-            margin: 0;
-            font-size: 1.75rem;
-            font-weight: 600;
-        }
-
-        .form-header p {
-            margin: 0.5rem 0 0 0;
-            opacity: 0.9;
-            font-size: 0.95rem;
-        }
-
     .form-body {
         padding: 2.5rem;
     }
 
-    .form-group-modern {
-        margin-bottom: 1.75rem;
+    .form-footer {
+        background-color: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
     }
-
-    .form-label-modern {
-        display: block;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
-    }
-
-        .form-label-modern .required {
-            color: #dc3545;
-            margin-left: 0.25rem;
-        }
 
     .form-control-modern {
         width: 100%;
-        padding: 0.75rem 1rem;
+        padding: 0.75rem 1rem 0.75rem 2.75rem;
         border: 2px solid #e2e8f0;
         border-radius: 8px;
-        font-size: 0.95rem;
         transition: all 0.3s ease;
         background-color: #f8f9fa;
     }
 
         .form-control-modern:focus {
-            outline: none;
             border-color: #28A745;
             background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+            outline: none;
         }
 
     .input-icon-wrapper {
@@ -100,168 +77,43 @@
             top: 50%;
             transform: translateY(-50%);
             color: #718096;
-            font-size: 1rem;
             z-index: 2;
         }
 
-        .input-icon-wrapper .form-control-modern {
-            padding-left: 2.75rem;
-        }
-
-    .form-footer {
-        background-color: #f8f9fa;
-        padding: 1.5rem 2.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-top: 1px solid #e2e8f0;
-    }
-
     .btn-modern-primary {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 2rem;
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: #fff;
-        font-weight: 600;
-        font-size: 0.95rem;
+        color: white;
         border: none;
+        padding: 0.75rem 2rem;
         border-radius: 8px;
+        font-weight: 600;
         text-decoration: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
-        cursor: pointer;
     }
-
-        .btn-modern-primary:hover {
-            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
-        }
 
     .btn-modern-secondary {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
         background: white;
         color: #495057;
-        font-weight: 500;
-        font-size: 0.95rem;
         border: 2px solid #dee2e6;
+        padding: 0.75rem 1.5rem;
         border-radius: 8px;
+        font-weight: 500;
         text-decoration: none;
-        transition: all 0.3s ease;
-        cursor: pointer;
     }
-
-        .btn-modern-secondary:hover {
-            background: #f8f9fa;
-            border-color: #adb5bd;
-            color: #212529;
-            transform: translateY(-1px);
-        }
 
     .field-description {
         background: #f0f9ff;
         border-left: 3px solid #007BFF;
         padding: 0.75rem 1rem;
-        border-radius: 4px;
         margin-bottom: 2rem;
-        font-size: 0.9rem;
-        color: #2d3748;
-    }
-
-    .validation-error {
-        color: #dc3545;
-        font-size: 0.85rem;
-        margin-top: 0.375rem;
-        display: block;
-    }
-
-    .validation-summary {
-        background: #fff5f5;
-        border-left: 3px solid #dc3545;
-        padding: 1rem;
         border-radius: 4px;
-        margin-bottom: 1.5rem;
     }
-
-        .validation-summary p {
-            color: #dc3545;
-            margin: 0.25rem 0;
-            font-size: 0.9rem;
-        }
-
-    .success-popup {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.45);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        transition: all 0.3s ease;
-    }
-
-        .success-popup.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-    .success-popup-content {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem 3rem;
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        max-width: 420px;
-        border-top: 6px solid #28a745;
-    }
-
-        .success-popup-content i {
-            font-size: 3rem;
-            color: #28a745;
-            margin-bottom: 1rem;
-        }
-
-        .success-popup-content h4 {
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-
-        .success-popup-content p {
-            font-size: 0.95rem;
-            color: #718096;
-            margin-bottom: 1.5rem;
-        }
-
-        .success-popup-content button {
-            padding: 0.6rem 1.5rem;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-            .success-popup-content button:hover {
-                background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
-            }
 </style>
 
 <div class="container-fluid mt-4">
     <div class="form-container">
         <div class="form-header">
-            <h2><i class="bi bi-building-fill-add me-2"></i>@ViewData["Title"]</h2>
-            <p>Add a new Company or Customer to the system</p>
+            <h2 class="m-0"><i class="bi bi-building-fill-add me-2"></i>@ViewData["Title"]</h2>
+            <p class="m-0 mt-2 opacity-75">Add a new Company or Customer to the system</p>
         </div>
 
         <form asp-action="Create" method="post">
@@ -275,21 +127,20 @@
 
                 @if (!ViewData.ModelState.IsValid)
                 {
-                    <div class="validation-summary">
-                        <p><strong><i class="bi bi-exclamation-triangle me-2"></i>Please fix the following errors:</strong></p>
-                        <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="alert alert-danger">
+                        <strong><i class="bi bi-exclamation-triangle me-2"></i>Please fix the following errors:</strong>
+                        <div asp-validation-summary="All" class="mt-2 mb-0"></div>
                     </div>
                 }
 
-                <div class="form-group-modern">
-                    <label asp-for="CompanyName" class="form-label-modern">Company Name <span class="required">*</span></label>
+                <div class="mb-4">
+                    <label asp-for="CompanyName" class="fw-bold mb-2">Company Name <span class="text-danger">*</span></label>
                     <div class="input-icon-wrapper">
                         <i class="bi bi-building"></i>
                         <input asp-for="CompanyName" class="form-control-modern" placeholder="Enter company name" required />
                     </div>
-                    <span asp-validation-for="CompanyName" class="validation-error"></span>
+                    <span asp-validation-for="CompanyName" class="text-danger small mt-1 d-block"></span>
                 </div>
-
             </div>
 
             <div class="form-footer">
@@ -297,38 +148,25 @@
                     <i class="bi bi-arrow-left"></i> Back to List
                 </a>
                 <button type="submit" class="btn-modern-primary">
-                    <i class="bi bi-check-circle"></i> Create Company
+                    <i class="bi bi-check-circle me-2"></i> Create Company
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<div id="successPopup" class="success-popup hidden">
-    <div class="success-popup-content">
-        <i class="bi bi-check-circle-fill"></i>
-        <h4>Company Created Successfully!</h4>
-        <p>The new company has been saved to the system.</p>
-        <button id="popupCloseBtn">OK</button>
-    </div>
-</div>
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Client-side validation for required fields
+        // Simple client-side validation hook
         document.querySelector('form').addEventListener('submit', function (e) {
             const requiredFields = this.querySelectorAll('[required]');
             let isValid = true;
-            let firstInvalidField = null;
 
             requiredFields.forEach(field => {
                 if (!field.value || field.value.trim() === "") {
                     isValid = false;
                     field.style.borderColor = '#dc3545';
-                    if (!firstInvalidField) {
-                        firstInvalidField = field;
-                    }
                 } else {
                     field.style.borderColor = '#e2e8f0';
                 }
@@ -337,31 +175,7 @@
             if (!isValid) {
                 e.preventDefault();
                 alert('Please fill in all required fields marked with *');
-                if (firstInvalidField) {
-                    firstInvalidField.focus();
-                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
             }
         });
-
-        // Show popup if TempData exists
-        @if (TempData["SuccessMessage"] != null)
-        {
-                <text>
-                    window.addEventListener('DOMContentLoaded', () => {
-                        document.getElementById('successPopup').classList.remove('hidden');
-                    });
-                </text>
-        }
-
-        // Close popup and redirect to Index
-        const popupCloseBtn = document.getElementById('popupCloseBtn');
-        if (popupCloseBtn) {
-            popupCloseBtn.addEventListener('click', () => {
-                document.getElementById('successPopup').classList.add('hidden');
-                // On this page, we just reload the Create page
-                window.location.href = '@Url.Action("Create", "Companies")';
-            });
-        }
     </script>
 }

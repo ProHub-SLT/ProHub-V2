@@ -1,0 +1,229 @@
+﻿@model ProHub.Models.Company
+@{
+    ViewData["Title"] = "Company Details";
+}
+
+<style>
+    body {
+        margin: 0;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        background-color: #ffffff;
+        position: relative;
+    }
+
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
+
+    :root {
+        --primary: #1D9BF0;
+        --secondary: #536471;
+        --background: #FFFFFF;
+        --background-dark: #15202B;
+        --card-bg: #F7F9F9;
+        --card-bg-dark: #1E2A3C;
+        --text-primary: #0F1419;
+        --text-primary-dark: #E7E9EA;
+        --text-secondary: #536471;
+        --accent: #00BA7C;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --border-radius: 12px;
+        --transition: all 0.2s ease;
+    }
+
+    @@media (prefers-color-scheme: dark) {
+        :root {
+            --background: var(--background-dark);
+            --card-bg: var(--card-bg-dark);
+            --text-primary: var(--text-primary-dark);
+            --shadow: var(--shadow-dark);
+        }
+    }
+
+    .details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        min-height: 100vh;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            
+        }
+
+        .hero h2 {
+            font-size: 1rem;
+            font-weight: 500;
+         
+        }
+
+    .section-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .section-header {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+    }
+
+        .section-header i {
+            color: var(--accent);
+        }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 16px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    .back-btn {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+    .edit-btn {
+        background: var(--accent);
+        color: white;
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        border: none;
+    }
+
+        .edit-btn:hover {
+            filter: brightness(1.1);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 186, 124, 0.3);
+        }
+
+    @@media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="details-container">
+    <div class="hero">
+        <div class="d-flex justify-content-between flex-wrap align-items-center">
+            <div>
+                <h1>Company Profile</h1>
+                <h2>@Model.CompanyName</h2>
+               
+            </div>
+            <div class="text-end mt-3 mt-md-0">
+                <div class="opacity-100 small">
+                    <i class=""></i> ID: @Model.Id
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <i class="bi bi-info-circle-fill"></i> General Information
+        </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Official Company Name</div>
+                <div class="info-value">@Model.CompanyName</div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <a asp-action="Index" class="back-btn">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+        
+    </div>
+</div>

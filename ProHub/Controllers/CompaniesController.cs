@@ -18,22 +18,40 @@ namespace ProHub.Controllers
         }
 
         // GET: /Companies/
-        public IActionResult Index(string search = "", int page = 1, int pageSize = 10)
+        public IActionResult Index(string search = "", int page = 1, int pageSize = 10, string sortColumn = "CompanyName", string sortOrder = "asc")
         {
-            var companyList = _repo.GetCompanies(search);
+            // 1. Fetch Data 
+            var companyList = _repo.GetCompanies(search) ?? new List<Company>();
 
-            // Pagination
+            // 2. Sorting Logic 
+
+            switch (sortColumn)
+            {
+                case "CompanyName":
+                    companyList = sortOrder == "asc" ? companyList.OrderBy(c => c.CompanyName).ToList()
+                                                     : companyList.OrderByDescending(c => c.CompanyName).ToList();
+                    break;
+
+                default:
+                    companyList = companyList.OrderBy(c => c.CompanyName).ToList();
+                    break;
+            }
+
+            // 3. Pagination Logic
             var totalRecords = companyList.Count;
             var paginatedList = companyList
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
+            // 4. Set ViewBag 
             ViewBag.SearchTerm = search ?? "";
             ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalRecords = totalRecords;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+            ViewBag.TotalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            ViewBag.SortColumn = sortColumn;
+            ViewBag.SortOrder = sortOrder;
 
             return View(paginatedList);
         }
@@ -62,7 +80,7 @@ namespace ProHub.Controllers
             {
                 _repo.CreateCompany(company);
                 TempData["SuccessMessage"] = "Company Created Successfully!";
-                return RedirectToAction(nameof(Create));
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
@@ -105,8 +123,9 @@ namespace ProHub.Controllers
             try
             {
                 _repo.UpdateCompany(company);
+
                 TempData["SuccessMessage"] = "Company Updated Successfully!";
-                return RedirectToAction(nameof(Edit), new { id = company.Id });
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {

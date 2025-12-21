@@ -12,19 +12,19 @@
         position: relative;
     }
 
-    /* Blur overlay */
-    body::before {
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url('/images/bg.jpg') no-repeat center center fixed;
-        background-size: cover;
-        filter: blur(1px);
-        z-index: -1;
-    }
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/images/bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(1px);
+            z-index: -1;
+        }
 
     :root {
         --primary: #1D9BF0;
@@ -69,10 +69,10 @@
         transition: var(--transition);
     }
 
-    .section-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
 
     .section-header {
         font-size: 1.125rem;
@@ -86,10 +86,10 @@
         margin-bottom: 1rem;
     }
 
-    .section-header i {
-        color: var(--accent);
-        font-size: 1.125rem;
-    }
+        .section-header i {
+            color: var(--accent);
+            font-size: 1.125rem;
+        }
 
     .info-grid {
         display: grid;
@@ -136,24 +136,24 @@
         transition: var(--transition);
     }
 
-    .mini-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+        .mini-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-    .mini-card h4 {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--primary);
-        margin-bottom: 0.25rem;
-    }
+        .mini-card h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
 
-    .mini-card p {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        font-weight: 500;
-        text-transform: uppercase;
-    }
+        .mini-card p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+        }
 
     .team-member {
         display: flex;
@@ -166,9 +166,9 @@
         transition: var(--transition);
     }
 
-    .team-member:hover {
-        background: rgba(0, 0, 0, 0.05);
-    }
+        .team-member:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
 
     .team-avatar {
         width: 36px;
@@ -197,11 +197,11 @@
         transition: var(--transition);
     }
 
-    .back-btn:hover {
-        background: var(--primary);
-        color: #fff;
-        box-shadow: 0 2px 8px rgba(29, 155, 240, 0.3);
-    }
+        .back-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(29, 155, 240, 0.3);
+        }
 
     .hero {
         background: linear-gradient(135deg, var(--primary), var(--accent));
@@ -212,16 +212,16 @@
         box-shadow: var(--shadow);
     }
 
-    .hero h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-    }
+        .hero h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
 
-    .hero small {
-        opacity: 0.85;
-        font-size: 0.875rem;
-    }
+        .hero small {
+            opacity: 0.85;
+            font-size: 0.875rem;
+        }
 
     .status-badge {
         display: inline-flex;
@@ -234,9 +234,9 @@
         margin-top: 0.5rem;
     }
 
-    .status-badge i {
-        margin-right: 0.25rem;
-    }
+        .status-badge i {
+            margin-right: 0.25rem;
+        }
 
     .hero-progress-container {
         background: rgba(255, 255, 255, 0.25);
@@ -245,7 +245,7 @@
         overflow: hidden;
         margin-top: 0.5rem;
         width: 120px;
-        margin-top:40px;
+        margin-top: 40px;
         margin-left: auto;
     }
 
@@ -428,10 +428,10 @@
                 <div class="info-label">Status Date</div>
                 <div class="info-value">
                     @(
-                        Html.Raw(Model.StatusDate != null
-                        ? Model.StatusDate.Value.ToString("MMM dd, yyyy")
-                        : "<span class='empty-value'>Not specified</span>")
-                        )
+                                        Html.Raw(Model.StatusDate != null
+                                        ? Model.StatusDate.Value.ToString("MMM dd, yyyy")
+                                        : "<span class='empty-value'>Not specified</span>")
+                                        )
                 </div>
             </div>
         </div>

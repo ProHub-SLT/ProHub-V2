@@ -53,7 +53,7 @@
         }
     }
 
-    
+
 
     .details-container {
         max-width: 1200px;
@@ -486,7 +486,7 @@
                     @(string.IsNullOrEmpty(Model.AppUsers) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppUsers)
                 </div>
             </div>
-           
+
         </div>
     </div>
 
@@ -550,14 +550,14 @@
                     </div>
                 </div>
             }
-  
-            
+
+
             <div class="info-item">
                 <div class="info-label">Main Application Name</div>
                 <div class="info-value">
                     @(Model.MainApp != null && !string.IsNullOrEmpty(Model.MainApp.AppName)
-                        ? Model.MainApp.AppName
-                        : Html.Raw("<span class='empty-value'>Not specified</span>"))
+                                        ? Model.MainApp.AppName
+                                        : Html.Raw("<span class='empty-value'>Not specified</span>"))
                 </div>
             </div>
 
@@ -565,8 +565,8 @@
                 <div class="info-label">Main Application URL</div>
                 <div class="info-value">
                     @(Model.MainApp != null && !string.IsNullOrEmpty(Model.MainApp.AppURL)
-                        ? Html.Raw($"<a href='{Model.MainApp.AppURL}' target='_blank'>{Model.MainApp.AppURL}</a>")
-                        : Html.Raw("<span class='empty-value'>Not specified</span>"))
+                                        ? Html.Raw($"<a href='{Model.MainApp.AppURL}' target='_blank'>{Model.MainApp.AppURL}</a>")
+                                        : Html.Raw("<span class='empty-value'>Not specified</span>"))
                 </div>
             </div>
         </div>

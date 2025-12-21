@@ -142,6 +142,28 @@
             transition: box-shadow 0.2s ease;
         }
 
+
+    /* First column gray vibe */
+    .table tbody td:first-child {
+        background-color: #FFFFFF;
+        font-weight: 500;
+    }
+
+    /* Other columns LIGHT YELLOW vibe */
+    /* Logic: Select all columns starting from the 3rd one onward */
+    .table tbody td:nth-child(n+2) {
+        background-color: #FFFFD6;
+    }
+
+    /* Comment column - allow wrapping */
+    .table tbody td:nth-child(6) {
+        white-space: normal;
+        word-wrap: break-word;
+        overflow: visible;
+        /* Optional: set a min-width to prevent it from squishing too small */
+        min-width: 200px;
+    }
+
     /* Common Button Styles */
     .btn-action-base {
         display: inline-flex;
@@ -234,6 +256,43 @@
             .btn-export-excel:hover i {
                 transform: scale(1.15) rotate(-5deg);
             }
+    /* Specific Styles for External Platform Data */
+    .sub-text {
+        font-size: 0.75rem;
+        color: #6c757d;
+        display: block;
+        margin-top: 4px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .billed-yes {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #0f5132;
+        font-weight: 600;
+        background-color: #d1e7dd;
+        padding: 0.4em 0.9em;
+        border-radius: 50rem;
+        font-size: 0.7rem;
+        border: 1px solid rgba(25, 135, 84, 0.15);
+        white-space: nowrap;
+    }
+
+    .billed-no {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #842029;
+        font-weight: 600;
+        background-color: #f8d7da;
+        padding: 0.4em 0.9em;
+        border-radius: 50rem;
+        font-size: 0.75rem;
+        border: 1px solid rgba(220, 53, 69, 0.15);
+        white-space: nowrap;
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -304,7 +363,7 @@
                         </th>
                         <th class="sortable" scope="col" style="width:14%">
                             <a href="@BuildIndexUrl(1, pageSize, "PlatformOTC", ToggleSortOrder("PlatformOTC"), searchTerm)">
-                                OTC / MR
+                                OTC <br> MR
                                 <i class="bi @(sortColumn == "PlatformOTC" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
@@ -352,11 +411,26 @@
                             <tr>
                                 <td title="@item.PlatformName" class="fw-bold text">@item.PlatformName</td>
                                 <td title="@(item.DevelopedBy?.EmpName ?? "-")">@(item.DevelopedBy?.EmpName ?? "-")</td>
-                                <td>@(item.LaunchedDate?.ToString("yyyy-MM-dd") ?? "-")</td>
-                                <td>@($"{item.PlatformOTC?.ToString("N2")} / {item.PlatformMRC?.ToString("N2")}")</td>
+                                <td>
+                                    <div>@(item.LaunchedDate?.ToString("yyyy-MM-dd") ?? "-")</div>
+                                    <div>@(item.BillingDate?.ToString("yyyy-MM-dd") ?? "-")</div>
+                                </td>
+                                <td>
+                                    <div>Rs.@((item.PlatformOTC ?? 0).ToString("N2"))</div>
+                                    <div>Rs.@((item.PlatformMRC ?? 0).ToString("N2"))</div>
+                                </td>
                                 <td>@item.ContractPeriod</td>
-                                <td>@item.SoftwareValue?.ToString("N2")</td>
-                                <td>@item.BillingDate?.ToString("yyyy-MM-dd")</td>
+                                <td>@item.Revenue </td>
+                                <td>
+                                    @if (item.BillingDate.HasValue)
+                                    {
+                                        <span class="billed-yes"> Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="billed-no"> No</span>
+                                    }
+                                </td>
                                 <td>@item.SalesAM</td>
                                 <td>@item.ProposalUploaded</td>
                                 <td class="text-center">

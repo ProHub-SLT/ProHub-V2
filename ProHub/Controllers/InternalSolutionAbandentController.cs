@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
-using OfficeOpenXml; // Excel export
+using OfficeOpenXml;
 using ProHub.Models;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace ProHub.Controllers
         public IActionResult Index(string search = "", string sortColumn = "PlatformName",
                                   string sortOrder = "asc", int page = 1, int pageSize = 10)
         {
+            
             List<InternalPlatform> abandonedList = GetAbandonedSolutions(search);
 
             // ======================
@@ -70,7 +72,7 @@ namespace ProHub.Controllers
         }
 
         // ============================================================
-        // LOAD ALL ABANDONED SOLUTIONS (USED BY INDEX + EXPORT)
+        // LOAD ALL ABANDONED SOLUTIONS (UPDATED SQL QUERY)
         // ============================================================
         private List<InternalPlatform> GetAbandonedSolutions(string search)
         {
@@ -80,26 +82,44 @@ namespace ProHub.Controllers
             {
                 conn.Open();
 
+                
                 string query = @"
-                    SELECT
-                        p.ID AS Id,
-                        p.App_Name AS PlatformName,
-                        p.StartDate,
-                        e.Emp_Name AS DevelopedByName,
-                        s.Phase AS SDLCPhaseName,
-                        (
-                            SELECT c.Comment
-                            FROM Internal_Project_Comments c
-                            WHERE c.Solution_ID = p.ID
-                            ORDER BY c.Updated_Time DESC
-                            LIMIT 1
-                        ) AS LastComment
-                    FROM Internal_Platforms p
-                    INNER JOIN SDLCPhas s ON p.SDLCPhase = s.ID
-                    LEFT JOIN Employee e ON p.Developed_By = e.Emp_Id
-                    WHERE s.Phase = 'Abandoned'
-                      AND (p.App_Name LIKE @search OR e.Emp_Name LIKE @search);
-                ";
+            SELECT
+                p.ID AS Id,
+                p.App_Name AS PlatformName,
+                p.App_URL AS AppURL,
+                p.App_IP AS AppIP,
+                p.StartDate,
+                p.TargetDate,
+                p.VADate,
+                p.LaunchedDate,
+                p.PercentageDone,
+                p.Status,
+                p.Price,
+                
+                -- Joined Columns
+                e.Emp_Name AS DevelopedByName,
+                s.Phase AS SDLCPhaseName,
+                pr.ParentProjectGroup,
+                m.App_Name AS MainAppName,
+
+                (
+                    SELECT c.Comment
+                    FROM Internal_Project_Comments c
+                    WHERE c.Solution_ID = p.ID
+                    ORDER BY c.Updated_Time DESC
+                    LIMIT 1
+                ) AS LastComment
+
+            FROM Internal_Platforms p
+            INNER JOIN SDLCPhas s ON p.SDLCPhase = s.ID
+            LEFT JOIN Employee e ON p.Developed_By = e.Emp_Id
+            LEFT JOIN ParentProject pr ON p.ParentProjectID = pr.ParentProjectID
+            LEFT JOIN Internal_Platforms m ON p.MainAppID = m.ID -- JOIN Self to get Main App Name
+            
+            WHERE s.Phase = 'Abandoned'
+              AND (p.App_Name LIKE @search OR e.Emp_Name LIKE @search);
+        ";
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@search", "%" + search + "%");
@@ -112,7 +132,18 @@ namespace ProHub.Controllers
                         {
                             Id = Convert.ToInt32(reader["Id"]),
                             PlatformName = reader["PlatformName"]?.ToString(),
+                            MainAppName = reader["MainAppName"]?.ToString(),
+
+                            AppURL = reader["AppURL"]?.ToString(),
+                            AppIP = reader["AppIP"]?.ToString(),
+                            Status = reader["Status"]?.ToString(),
+                            PercentageDone = reader["PercentageDone"] as decimal?,
+                            Price = reader["Price"] as decimal?,
+
                             StartDate = reader["StartDate"] as DateTime?,
+                            TargetDate = reader["TargetDate"] as DateTime?,
+                            VADate = reader["VADate"] as DateTime?,
+                            LaunchedDate = reader["LaunchedDate"] as DateTime?,
 
                             DevelopedBy = new Employee
                             {
@@ -124,13 +155,23 @@ namespace ProHub.Controllers
                                 Phase = reader["SDLCPhaseName"]?.ToString()
                             },
 
-                            ProjectComments = new List<InternalProjectComment>
+                            ParentProject = new ParentProject
                             {
-                                new InternalProjectComment
-                                {
-                                    Comment = reader["LastComment"]?.ToString()
-                                }
-                            }
+                                ParentProjectGroup = reader["ParentProjectGroup"]?.ToString()
+                            },
+
+                            MainApp = new InternalPlatform
+                            {
+                                AppName = reader["MainAppName"]?.ToString()
+                            },
+
+                            ProjectComments = new List<InternalProjectComment>
+                    {
+                        new InternalProjectComment
+                        {
+                            Comment = reader["LastComment"]?.ToString()
+                        }
+                    }
                         });
                     }
                 }
@@ -138,51 +179,129 @@ namespace ProHub.Controllers
 
             return list;
         }
-
         // ============================================================
-        // EXPORT ALL TO EXCEL
+        // EXPORT ALL TO EXCEL (15 Columns using ClosedXML)
         // ============================================================
         public IActionResult ExportAllToExcel()
         {
+
             var allData = GetAbandonedSolutions("");
 
-            ExcelPackage.License.SetNonCommercialOrganization("ProHub"); 
-
-            using (var package = new ExcelPackage())
+            using (var workbook = new XLWorkbook())
             {
-                var ws = package.Workbook.Worksheets.Add("Abandoned Solutions");
+                var worksheet = workbook.Worksheets.Add("Abandoned Solutions");
 
-                // Header row
-                ws.Cells[1, 1].Value = "Platform Name";
-                ws.Cells[1, 2].Value = "Developed By";
-                ws.Cells[1, 3].Value = "SDLC Phase";
-                ws.Cells[1, 4].Value = "Start Date";
-                ws.Cells[1, 5].Value = "Last Comment";
+                // 1. Headers List 
+                var headers = new List<string>
+        {
+            "AppGroup",        // 1
+            "App_Name",        // 2
+            "Type",            // 3 
+            "Developed_By",    // 4
+            "App_URL",         // 5
+            "App_IP",          // 6
+            "SDLC_Stage",      // 7
+            "Start_Date",      // 8
+            "Target_Date",     // 9
+            "VA_Date",         // 10
+            "Percentage_Done", // 11
+            "Launched_Date",   // 12
+            "Current_Status",  // 13
+            "Price",           // 14
+            "Comment"          // 15
+        };
+
+                // 2. Set Header Values
+                for (int i = 0; i < headers.Count; i++)
+                {
+                    worksheet.Cell(1, i + 1).Value = headers[i];
+                }
 
                 int row = 2;
-
                 foreach (var item in allData)
                 {
-                    ws.Cells[row, 1].Value = item.PlatformName ?? "";
-                    ws.Cells[row, 2].Value = item.DevelopedBy?.EmpName ?? "";
-                    ws.Cells[row, 3].Value = item.SDLCPhase?.Phase ?? "";
-                    ws.Cells[row, 4].Value = item.StartDate?.ToString("yyyy-MM-dd") ?? "";
-                    ws.Cells[row, 5].Value = item.ProjectComments?.FirstOrDefault()?.Comment ?? "";
+                    // 1. AppGroup
+                    worksheet.Cell(row, 1).Value = item.ParentProject?.ParentProjectGroup ?? "";
+
+                    // 2. App_Name
+                    worksheet.Cell(row, 2).Value = item.PlatformName ?? "";
+
+                    // 3. Type Logic (Main vs CR) - Use MainAppName 
+                    if (!string.IsNullOrEmpty(item.MainApp?.AppName))
+                    {
+                        worksheet.Cell(row, 3).Value = $"CR of {item.MainApp.AppName}";
+                    }
+                    else
+                    {
+                        worksheet.Cell(row, 3).Value = "Main Application";
+                    }
+
+                    // 4. Developed_By
+                    worksheet.Cell(row, 4).Value = item.DevelopedBy?.EmpName ?? "";
+
+                    // 5. App_URL
+                    worksheet.Cell(row, 5).Value = item.AppURL ?? "";
+
+                    // 6. App_IP
+                    worksheet.Cell(row, 6).Value = item.AppIP ?? "";
+
+                    // 7. SDLC_Stage
+                    worksheet.Cell(row, 7).Value = item.SDLCPhase?.Phase ?? "";
+
+                    // 8, 9, 10. Dates
+                    SetDateCell(worksheet, row, 8, item.StartDate);
+                    SetDateCell(worksheet, row, 9, item.TargetDate);
+                    SetDateCell(worksheet, row, 10, item.VADate);
+
+                    // 11. Percentage_Done
+                    worksheet.Cell(row, 11).Value = item.PercentageDone.HasValue ? item.PercentageDone.Value : 0;
+
+                    // 12. Launched_Date
+                    SetDateCell(worksheet, row, 12, item.LaunchedDate);
+
+                    // 13. Current_Status
+                    worksheet.Cell(row, 13).Value = item.Status ?? "";
+
+                    // 14. Price (Currency Formatting)
+                    if (item.Price.HasValue)
+                    {
+                        worksheet.Cell(row, 14).Value = item.Price.Value;
+                        worksheet.Cell(row, 14).Style.NumberFormat.Format = "#,##0.00";
+                    }
+
+                    // 15. Comment
+                    worksheet.Cell(row, 15).Value = item.ProjectComments?.FirstOrDefault()?.Comment ?? "";
 
                     row++;
                 }
 
-                ws.Cells[ws.Dimension.Address].AutoFitColumns();
+                // 3. Styling Headers
+                var headerRange = worksheet.Range(1, 1, 1, headers.Count);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#007BFF");
+                headerRange.Style.Font.FontColor = XLColor.White;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                var stream = new MemoryStream();
-                package.SaveAs(stream);
-                stream.Position = 0;
+                // Auto Fit Columns
+                worksheet.Columns().AdjustToContents();
 
-                string fileName = $"Abandoned_Solutions_{DateTime.Now:yyyy-MM-dd}.xlsx";
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+                    string fileName = $"Internal Solutions - Abandoned_{DateTime.Now:yyyy-MM-dd}.xlsx";
 
-                return File(stream,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    fileName);
+                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                }
+            }
+        }
+        // Helper method to handle null dates cleanly
+        private void SetDateCell(IXLWorksheet ws, int row, int col, DateTime? dateValue)
+        {
+            if (dateValue.HasValue)
+            {
+                ws.Cell(row, col).Value = dateValue.Value;
+                ws.Cell(row, col).Style.DateFormat.Format = "yyyy-MM-dd";
             }
         }
 

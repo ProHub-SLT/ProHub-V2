@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProHub.Models
 {
@@ -72,5 +73,10 @@ namespace ProHub.Models
         public string? CompanyName { get; set; }
         public string? SalesTeamName { get; set; }
         public string? SdlcPhaseName { get; set; }
+
+        [NotMapped]
+        public decimal? Revenue { get; set; }
+        public string? Comment { get; set; }
+        public bool HasComments { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using ProHub.Data;
 
@@ -63,49 +65,104 @@ namespace ProHub.Controllers
 
         public IActionResult ExportAllToExcel()
         {
-            var allData = _consumerPlatformRepository.GetConsumerPlatform(""); // get all consumer platforms
+            // Getiing Data 
+            var allData = _consumerPlatformRepository.GetConsumerPlatform("");
 
-            // Set EPPlus license for non-commercial use
-            OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-
-            using (var package = new ExcelPackage())
+            using (var workbook = new XLWorkbook())
             {
-                var ws = package.Workbook.Worksheets.Add("Consumer Platforms");
+                var ws = workbook.Worksheets.Add("Consumer Platforms");
 
-                // Header row
-                ws.Cells[1, 1].Value = "Application Name";
-                ws.Cells[1, 2].Value = "Developed By";
-                ws.Cells[1, 3].Value = "SDLC Phase";
-                ws.Cells[1, 4].Value = "Start Date";
-                ws.Cells[1, 5].Value = "Target Date";
-                ws.Cells[1, 6].Value = "End User Type";
-                ws.Cells[1, 7].Value = "Solution Value (LKR)";
+                // ✅ 1. Headers 
+                string[] headers = {
+            "App Group",        // 1
+            "App Name",         // 2
+            "Type",             // 3 
+            "Developed By",     // 4
+            "App URL",          // 5
+            "App IP",           // 6
+            "SDLC Stage",       // 7
+            "Start Date",       // 8
+            "Target Date",      // 9
+            "VA Date",          // 10
+            "Percentage Done",  // 11
+            "Launched Date",    // 12
+            "Current Status",   // 13
+            "Price (LKR)",      // 14
+            "Comment",          // 15
+            "End User Type"     // 16
+        };
 
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    ws.Cell(1, i + 1).Value = headers[i];
+                }
+
+                // ✅ 2. Header Styling
+                var headerRange = ws.Range(1, 1, 1, 16);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#007BFF");
+                headerRange.Style.Font.FontColor = XLColor.White;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
+                // ✅ 3. Data Loop
                 int row = 2;
                 foreach (var item in allData)
                 {
-                    ws.Cells[row, 1].Value = item.AppName ?? "";
-                    ws.Cells[row, 2].Value = item.DevelopedBy?.EmpName ?? "";
-                    ws.Cells[row, 3].Value = item.SDLCPhase?.Phase ?? "";
+                    ws.Cell(row, 1).Value = item.ParentProject?.ParentProjectGroup ?? ""; 
+                    ws.Cell(row, 2).Value = item.AppName ?? "";                           
+                    if (!string.IsNullOrEmpty(item.MainApp?.AppName))
+                    {
+                        ws.Cell(row, 3).Value = $"CR of {item.MainApp.AppName}";
+                    }
+                    else
+                    {
+                        ws.Cell(row, 3).Value = "Main Application";
+                    }
+                    ws.Cell(row, 4).Value = item.DevelopedBy?.EmpName ?? "";              
+                    ws.Cell(row, 5).Value = item.AppURL ?? "";                            
+                    ws.Cell(row, 6).Value = item.AppIP ?? "";                             
+                    ws.Cell(row, 7).Value = item.SDLCPhase?.Phase ?? "";                  
 
-                    ws.Cells[row, 4].Value = "";
-                    ws.Cells[row, 5].Value = "";
+                    // Date Formatting
+                    ws.Cell(row, 8).Value = item.StartDate;                               
+                    ws.Cell(row, 9).Value = item.TargetDate;                              
+                    ws.Cell(row, 10).Value = item.VADate;                                 
 
-                    ws.Cells[row, 6].Value = item.EndUserType?.EndUserType ?? "";
+                    ws.Cell(row, 11).Value = item.PercentageDone.HasValue ? item.PercentageDone.Value / 100 : 0; 
+                    ws.Cell(row, 11).Style.NumberFormat.Format = "0%";
 
-                    ws.Cells[row, 7].Value = item.Price?.ToString("N2") ?? "";
+                    ws.Cell(row, 12).Value = item.LaunchedDate;                           
+                    ws.Cell(row, 13).Value = item.Status ?? "";                           
+
+                    // Price Formatting
+                    if (item.Price.HasValue)
+                    {
+                        ws.Cell(row, 14).Value = item.Price.Value;
+                        ws.Cell(row, 14).Style.NumberFormat.Format = "#,##0.00";
+                    }
+                    else
+                    {
+                        ws.Cell(row, 14).Value = 0;
+                    }
+
+                    ws.Cell(row, 15).Value = item.DPOHandoverComment ?? "";               
+                    ws.Cell(row, 16).Value = item.EndUserType?.EndUserType ?? "";         
 
                     row++;
                 }
 
-                ws.Cells[ws.Dimension.Address].AutoFitColumns();
+                // ✅ 4. Auto fit columns
+                ws.Columns().AdjustToContents();
 
-                var stream = new MemoryStream();
-                package.SaveAs(stream);
-                stream.Position = 0;
-                string fileName = $"Consumer_Platforms_{DateTime.Now:yyyy-MM-dd}.xlsx";
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    stream.Position = 0;
+                    string fileName = $"Consumer Service Platform_{DateTime.Now:yyyy-MM-dd_HHmmss}.xlsx";
 
-                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                }
             }
         }
 

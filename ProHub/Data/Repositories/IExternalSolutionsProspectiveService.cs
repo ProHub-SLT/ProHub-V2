@@ -3,6 +3,7 @@ using ProHub.Models;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using static PROHUB.Data.ExternalSolutionsProspectiveDataAccess;
 
 namespace PROHUB.Data
 {
@@ -24,6 +25,9 @@ namespace PROHUB.Data
         Task<List<Company>> GetCompanyAsync();
         Task<List<SalesTeam>> Getsales_teamAsync();
         Task<List<SDLCPhase>> GetsdlcphasAsync();
+        Task<bool> AddCommentAsync(int solutionId, string comment, int? updatedBy);
+
+        Task<List<CommentDto>> GetCommentsAsync(int solutionId);
     }
 
 
@@ -39,18 +43,44 @@ namespace PROHUB.Data
 
         private MySqlConnection GetConnection() => new MySqlConnection(_connectionString);
 
-        
+
         //  READ LISTS
-        
+
         public async Task<List<ExternalPlatform>> GetProspectiveSolutionsAsync(string search)
         {
+            // When sent as "Prospective" from here, the corresponding long query part will be selected from the check below
             return await GetSolutionsAsync(search, "Prospective");
         }
 
         public async Task<List<ExternalPlatform>> GetInProgressSolutionsAsync(string search)
         {
+            // When sent as "InProgress" from here, the 'prospective%' query part is selected from the check below
             return await GetSolutionsAsync(search, "InProgress");
         }
+
+
+        public async Task<bool> AddCommentAsync(int solutionId, string comment, int? updatedBy)
+        {
+            if (string.IsNullOrWhiteSpace(comment)) return false;
+
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string query = @"
+            INSERT INTO External_Project_Comments 
+            (Solution_ID, Comment, Updated_By, Updated_Time) 
+            VALUES 
+            (@SolutionId, @Comment, @UpdatedBy, NOW());";
+
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.Add("@SolutionId", MySqlDbType.Int32).Value = solutionId;
+            command.Parameters.Add("@Comment", MySqlDbType.Text).Value = comment;
+            command.Parameters.Add("@UpdatedBy", MySqlDbType.Int32).Value = (object?)updatedBy ?? DBNull.Value;
+
+            var rows = await command.ExecuteNonQueryAsync();
+            return rows > 0;
+        }
+
 
         private async Task<List<ExternalPlatform>> GetSolutionsAsync(string search, string type)
         {
@@ -58,22 +88,37 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            string filterClause = type == "Prospective"
-                 ? "LOWER(TRIM(sp.Phase)) LIKE 'prospective%'"
-                : "(LOWER(TRIM(sp.Phase)) NOT LIKE '%maintenance%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%retired%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%abandoned%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%prospective%')";
+            
+            string filterClause;
+
+            if (type == "Prospective")
+            {
+                // The filter for the Prospective Tab (NOT LIKE ...)
+                filterClause = "(LOWER(TRIM(sp.Phase)) NOT LIKE '%maintenance%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%retired%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%abandoned%' AND LOWER(TRIM(sp.Phase)) NOT LIKE '%prospective%')";
+            }
+            else
+            {
+                // The filter for the InProgress Tab (LIKE 'prospective%')
+                filterClause = "LOWER(TRIM(sp.Phase)) LIKE 'prospective%'";
+            }
+            // ---------------------------------------------
 
             string query = $@"
-                SELECT 
-                    ep.ID, ep.Platform_Name, ep.StartDate, ep.DPO_Handover_Date, ep.DPO_Handover_Comment, ep.Sales_AM, 
-                    ep.Platform_OTC, ep.Platform_MRC,
-                    e1.Emp_ID AS DevelopedById, e1.Emp_Name AS DevelopedByName,
-                    sp.ID AS SDLCStageId, sp.Phase AS SDLCPhaseName,
-                    c.ID AS CompanyId, c.Company_Name AS CompanyName
-                FROM external_platforms ep
-                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
-                LEFT JOIN Company c ON ep.Company_ID = c.ID
-                WHERE {filterClause}";
+    SELECT 
+        ep.ID, ep.Platform_Name, ep.StartDate, ep.DPO_Handover_Date, ep.DPO_Handover_Comment, ep.Sales_AM, 
+        ep.Platform_OTC, ep.Platform_MRC,
+        e1.Emp_ID AS DevelopedById, e1.Emp_Name AS DevelopedByName,
+        sp.ID AS SDLCStageId, sp.Phase AS SDLCPhaseName,
+        c.ID AS CompanyId, c.Company_Name AS CompanyName,
+        
+        
+        (SELECT COUNT(*) FROM External_Project_Comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
+
+    FROM external_platforms ep
+    LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
+    LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
+    LEFT JOIN Company c ON ep.Company_ID = c.ID
+    WHERE {filterClause}";
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -91,28 +136,76 @@ namespace PROHUB.Data
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                list.Add(MapReaderToExternalPlatform(reader)); // Note: Using simplified mapper for list
+                list.Add(MapReaderToExternalPlatform(reader));
             }
             return list;
         }
 
-      
+
+        //Get Comment 
+
+        public class CommentDto
+        {
+            public string Comment { get; set; } = string.Empty;
+            public string UpdatedByName { get; set; } = string.Empty;
+            public DateTime UpdatedTime { get; set; }
+        }
+        public async Task<List<CommentDto>> GetCommentsAsync(int solutionId)
+        {
+            var list = new List<CommentDto>();
+            using var connection = GetConnection();
+            await connection.OpenAsync();
+
+            
+            string query = @"
+        SELECT 
+            c.Comment, 
+            c.Updated_Time, 
+            e.Emp_Name 
+        FROM External_Project_Comments c
+        LEFT JOIN Employee e ON c.Updated_By = e.Emp_ID
+        WHERE c.Solution_ID = @SolutionId 
+        ORDER BY c.Updated_Time DESC";
+
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@SolutionId", solutionId);
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync()) 
+            {
+                list.Add(new CommentDto
+                {
+                    Comment = GetNullableString(reader, "Comment") ?? "",
+                    UpdatedByName = GetNullableString(reader, "Emp_Name") ?? "Unknown",
+                    UpdatedTime = reader.GetDateTime(reader.GetOrdinal("Updated_Time"))
+                });
+            }
+            return list;
+        }
+
+
         //  GET BY ID
-        
+
         public async Task<ExternalPlatform?> GetByIdAsync(int id)
         {
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            // Fetching full details for Edit/Details view
             string query = @"
                 SELECT 
-                    ep.*,
+                    ep.ID, ep.Platform_Type, ep.Platform_Name, ep.Company_ID, ep.Developed_By, 
+                    ep.Developed_Team, ep.StartDate, ep.TargetDate, ep.SDLCStage, ep.PercentageDone,
+                    ep.BIT_bucket_repo, ep.Sales_Team_ID, ep.Sales_AM, ep.Sales_Manager,
+                    ep.Sales_Enginneer, ep.UATDate, ep.LaunchedDate, ep.Platform_OTC, ep.Platform_MRC,
+                    ep.Software_Value, ep.Contract_Period, ep.SLA, ep.DPO_Handover_Date, ep.DPO_Handover_Comment,
+                    ep.SSLCertificateExpDate, ep.BillingDate, ep.Proposal_Upload, ep.Incentive_Earned, 
+                    ep.Incentive_Share, ep.BackupOfficer_1, ep.BackupOfficer_2,
                     e1.Emp_ID AS DevelopedById, e1.Emp_Name AS DevelopedByName,
                     sp.ID AS SDLCStageId, sp.Phase AS SDLCPhaseName,
                     c.ID AS CompanyId, c.Company_Name AS CompanyName,
                     e2.Emp_ID AS BackupOfficer1Id, e2.Emp_Name AS BackupOfficer1Name,
-                    e3.Emp_ID AS BackupOfficer2Id, e3.Emp_Name AS BackupOfficer2Name
+                    e3.Emp_ID AS BackupOfficer2Id, e3.Emp_Name AS BackupOfficer2Name,
+                    (SELECT COUNT(*) FROM External_Project_Comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
                 FROM external_platforms ep
                 LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
                 LEFT JOIN Employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
@@ -132,9 +225,8 @@ namespace PROHUB.Data
             return null;
         }
 
-        
         //  CREATE 
-       
+
         public async Task<int> CreateAsync(ExternalPlatform model)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
@@ -167,9 +259,8 @@ namespace PROHUB.Data
             return result != null ? Convert.ToInt32(result) : -1;
         }
 
-        
         //  UPDATE
-        
+
         public async Task<bool> UpdateAsync(ExternalPlatform model)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
@@ -218,9 +309,8 @@ namespace PROHUB.Data
             return await command.ExecuteNonQueryAsync() > 0;
         }
 
-      
         //  DELETE
-        
+
         public async Task<bool> DeleteAsync(int id)
         {
             if (id <= 0) return false;
@@ -236,9 +326,8 @@ namespace PROHUB.Data
             return await command.ExecuteNonQueryAsync() > 0;
         }
 
-        
         //  EXPORT DATA
-        
+
         public async Task<DataTable> GetProspectiveExportDataAsync()
         {
             var dt = new DataTable("external_platforms");
@@ -246,12 +335,24 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             string query = @"
-                SELECT ep.*, sp.Phase as SDLC_Phase, c.Company_Name
-                FROM external_platforms ep
-                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
-                LEFT JOIN Company c ON ep.Company_ID = c.ID
-                WHERE (LOWER(TRIM(sp.Phase)) LIKE 'prospective%' OR LOWER(TRIM(ep.Status)) LIKE 'prospective%' OR ep.SDLCStage = 10)
-                ORDER BY ep.Platform_Name";
+        SELECT 
+            ep.*, 
+            sp.Phase as SDLC_Phase, 
+            c.Company_Name, 
+            e.Emp_Name as Developed_By_Name,   
+            st.Sales_Team_Name                 
+        FROM external_platforms ep
+        LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
+        LEFT JOIN Company c ON ep.Company_ID = c.ID
+        LEFT JOIN Employee e ON ep.Developed_By = e.Emp_ID        
+        LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID       
+        WHERE (
+            LOWER(TRIM(sp.Phase)) NOT LIKE '%maintenance%' 
+            AND LOWER(TRIM(sp.Phase)) NOT LIKE '%retired%' 
+            AND LOWER(TRIM(sp.Phase)) NOT LIKE '%abandoned%' 
+            AND LOWER(TRIM(sp.Phase)) NOT LIKE '%prospective%'
+        )
+        ORDER BY ep.Platform_Name";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
@@ -259,9 +360,8 @@ namespace PROHUB.Data
             return dt;
         }
 
-        
         //  DROPDOWN HELPERS
-       
+
         public async Task<List<Employee>> GetEmployeesAsync()
         {
             var list = new List<Employee>();
@@ -318,9 +418,9 @@ namespace PROHUB.Data
             return list;
         }
 
-        
+
         //  MAPPERS & HELPERS
-        
+
 
         private void AddParameters(MySqlCommand command, ExternalPlatform model)
         {
@@ -355,7 +455,6 @@ namespace PROHUB.Data
             command.Parameters.AddWithValue("@BackupOfficer2Id", (object?)model.BackupOfficer2Id ?? DBNull.Value);
         }
 
-        // Simplified mapper for Index lists (fewer fields needed)
         private ExternalPlatform MapReaderToExternalPlatform(IDataReader reader)
         {
             return new ExternalPlatform
@@ -368,6 +467,7 @@ namespace PROHUB.Data
                 SalesAM = GetNullableString(reader, "Sales_AM"),
                 PlatformOTC = GetNullableDecimal(reader, "Platform_OTC"),
                 PlatformMRC = GetNullableDecimal(reader, "Platform_MRC"),
+                HasComments = GetBooleanSafe(reader, "HasComments"),
                 DevelopedBy = new Employee
                 {
                     EmpId = GetInt32Safe(reader, "DevelopedById"),
@@ -386,13 +486,10 @@ namespace PROHUB.Data
             };
         }
 
-        // Full mapper for Edit/Details (includes all fields)
         private ExternalPlatform MapReaderToFullExternalPlatform(IDataReader reader)
         {
-            // Reuse logic or map manually
             var model = MapReaderToExternalPlatform(reader);
 
-            // Map extra fields not in the list view
             model.CompanyId = GetNullableInt32(reader, "Company_ID");
             model.DevelopedById = GetNullableInt32(reader, "Developed_By");
             model.SDLCStageId = GetNullableInt32(reader, "SDLCstage");
@@ -418,7 +515,6 @@ namespace PROHUB.Data
             model.IncentiveEarned = GetNullableDecimal(reader, "Incentive_Earned");
             model.IncentiveShare = GetNullableDecimal(reader, "Incentive_Share");
 
-            // Map backup officers
             if (model.BackupOfficer1Id.HasValue)
             {
                 model.BackupOfficer1 = new Employee
@@ -490,5 +586,16 @@ namespace PROHUB.Data
             }
             catch { return null; }
         }
+
+        private static bool GetBooleanSafe(IDataReader reader, string columnName)
+        {
+            try
+            {
+                var ord = reader.GetOrdinal(columnName);
+                return reader.IsDBNull(ord) ? false : reader.GetBoolean(ord);
+            }
+            catch { return false; }
+        }
+
     }
 }

@@ -33,8 +33,8 @@
             filter: blur(1px);
             z-index: -1;
         }
-   
-   
+
+
     .data-table-wrapper {
         background: white;
         border-radius: 10px;
@@ -77,19 +77,19 @@
                 }
 
                 .table thead th:nth-child(2) {
-                    width: 20%;
+                    width: 25%;
                 }
 
                 .table thead th:nth-child(3) {
-                    width: 18%;
-                }
-
-                .table thead th:nth-child(4) {
                     width: 15%;
                 }
 
+                .table thead th:nth-child(4) {
+                    width: 20%;
+                }
+
                 .table thead th:nth-child(5) {
-                    width: 16%;
+                    width: 15%;
                 }
 
                 .table thead th:nth-child(6) {
@@ -129,10 +129,6 @@
         user-select: none;
         transition: background-color 0.2s ease;
     }
-
-        .sortable:hover {
-            background-color: #1e90ff !important;
-        }
 
     .sort-icon {
         margin-left: 0.5rem;
@@ -321,6 +317,95 @@
             transform: translateY(0px);
             box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
         }
+
+    /* --- Status Badges  --- */
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        white-space: nowrap;
+        border: 1px solid transparent; /* Base border */
+    }
+
+    /* 1. Proposal Preparation - Light Grey */
+    .status-badge-prep {
+        background-color: #f2f2f2;
+        color: #616161;
+        border-color: #d6d6d6;
+    }
+
+    /* 2. Proposal Submitted - Sky Blue */
+    .status-badge-submitted {
+        background-color: #e1f5fe;
+        color: #0277bd;
+        border-color: #b3e5fc;
+    }
+
+    /* 3. Requirement Gathering - Dark Blue theme */
+    .status-badge-req {
+        background-color: #e8eaf6;
+        color: #283593;
+        border-color: #c5cae9;
+    }
+
+    /* 4. Design - Purple */
+    .status-badge-design {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+        border-color: #e1bee7;
+    }
+
+    /* 5. Coding or Implementation - Orange */
+    .status-badge-coding {
+        background-color: #fff3e0;
+        color: #ef6c00;
+        border-color: #ffe0b2;
+    }
+
+    /* 6. Testing - Amber/Yellow */
+    .status-badge-testing {
+        background-color: #fff8e1;
+        color: #ff8f00;
+        border-color: #ffecb3;
+    }
+
+    /* 7. Deployment - Green */
+    .status-badge-deploy {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-color: #c8e6c9;
+    }
+
+    .status-badge-maintenance {
+        background-color: #cfe2ff;
+        color: #084298;
+        border: 1px solid #b6d4fe;
+    }
+
+    /* 8. Abandoned - Muted Red/Pink */
+    .status-badge-abandoned {
+        background-color: #fce4ec;
+        color: #c2185b;
+        border-color: #f8bbd0;
+    }
+
+    /* 9. Retired - Dark Grey/Blue-Grey */
+    .status-badge-retired {
+        background-color: #FFFFD6;
+        color: #455a64;
+        border-color: #cfd8dc;
+    }
+
+    /* Fallback / Default */
+    .status-badge-default {
+        background-color: #ffffff;
+        color: #424242;
+        border-color: #e0e0e0;
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -402,24 +487,49 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td title="@item.AppName"><strong>@item.AppName</strong></td>
+                                <td>
+                                    <div class="fw-semibold text-truncate" title="@item.AppName">@item.AppName</div>
+                                    @if (!string.IsNullOrEmpty(item.MainAppName))
+                                    {
+                                        <div class="small text-primary fst-italic mt-1">
+                                            <i class="bi bi-arrow-return-right"></i> CR of @item.MainAppName
+                                        </div>
+                                    }
+                                </td>
+
                                 <td title="@(item.DevelopedBy?.EmpName ?? "N/A")">@(item.DevelopedBy?.EmpName ?? "N/A")</td>
                                 <td title="@(item.EndUserType?.EndUserType ?? "N/A")">
                                     <span class="badge-custom badge-info-custom">@(item.EndUserType?.EndUserType ?? "N/A")</span>
                                 </td>
-                                <td title="@(item.SDLCPhase?.Phase ?? "N/A")">
-                                    @(item.SDLCPhase?.Phase ?? "N/A")
+                                <td>
+                                    @{
+                                        var phaseName = item.SDLCPhase?.Phase ?? "";
+                                        var p = phaseName.ToLower().Trim();
+                                        var badgeClass = "status-badge status-badge-default";
+
+
+                                        if (p.Contains("proposal preparation")) { badgeClass = "status-badge status-badge-prep"; }
+                                        else if (p.Contains("proposal submitted")) { badgeClass = "status-badge status-badge-submitted"; }
+                                        else if (p.Contains("requirement") || p.Contains("gathering")) { badgeClass = "status-badge status-badge-req"; }
+                                        else if (p.Contains("design")) { badgeClass = "status-badge status-badge-design"; }
+                                        else if (p.Contains("coding") || p.Contains("implementation") || p.Contains("development")) { badgeClass = "status-badge status-badge-coding"; }
+                                        else if (p.Contains("testing") || p.Contains("qa")) { badgeClass = "status-badge status-badge-testing"; }
+                                        else if (p.Contains("deployment") || p.Contains("completed") || p.Contains("live")) { badgeClass = "status-badge status-badge-deploy"; }
+                                        else if (p.Contains("maintenance") || p.Contains("maintenance")) { badgeClass = "status-badge status-badge-maintenance"; }
+                                        else if (p.Contains("abandoned") || p.Contains("abandoned")) { badgeClass = "status-badge status-badge-abandoned"; }
+                                        else if (p.Contains("retired") || p.Contains("retired")) { badgeClass = "status-badge status-badge-retired"; }
+                                    }
+
+                                    <span class="@badgeClass">
+                                        @(string.IsNullOrEmpty(phaseName) ? "-" : phaseName)
+                                    </span>
                                 </td>
                                 <td title="LKR @(item.Price?.ToString("N0") ?? "0")">
                                     LKR @(item.Price?.ToString("N0") ?? "0")
                                 </td>
                                 <td class="text-center">
-                                    <a asp-controller="ConsumerPlatform"
-                                       asp-action="ViewDetails"
-                                       asp-route-id="@item.Id"
-                                       class="view-details-btn"
-                                       title="View Details">
-                                        <i class="bi bi-eye fs-5"></i>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Details">
+                                        <i class="bi bi-eye"></i>
                                     </a>
                                 </td>
                             </tr>

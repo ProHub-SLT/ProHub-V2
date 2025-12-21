@@ -20,6 +20,7 @@ namespace PROHUB.Data
         Task<List<Company>> GetCompanyAsync();
         Task<List<SalesTeam>> Getsales_teamAsync();
         Task<List<SDLCPhase>> GetsdlcphasAsync();
+        Task<bool> AddCommentAsync(int solutionId, string comment, int? updatedBy);
     }
 
     public class ExternalSolutionDataAccess : IExternalSolutionService
@@ -30,6 +31,40 @@ namespace PROHUB.Data
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException(nameof(configuration), "Connection string not found");
+        }
+
+        // ---------------------------------------------------------
+        //  Returns Task<bool> to match Interface
+        // ---------------------------------------------------------
+        public async Task<bool> AddCommentAsync(int solutionId, string comment, int? updatedBy)
+        {
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            // Pass null for transaction since this is a standalone operation
+            int rowsAffected = await AddCommentToDbAsync(connection, null, solutionId, comment, updatedBy);
+
+            return rowsAffected > 0;
+        }
+
+        // ---------------------------------------------------------
+        //  Returns int (Rows Affected)
+        // ---------------------------------------------------------
+        private async Task<int> AddCommentToDbAsync(MySqlConnection connection, MySqlTransaction? transaction, int solutionId, string comment, int? updatedBy)
+        {
+            const string insertQuery = @"
+                INSERT INTO external_project_comments
+                (Solution_ID, Comment, Updated_By, Updated_Time) 
+                VALUES 
+                (@SolutionId, @Comment, @UpdatedBy, @UpdatedTime);";
+
+            using var cmd = new MySqlCommand(insertQuery, connection, transaction);
+            cmd.Parameters.AddWithValue("@SolutionId", solutionId);
+            cmd.Parameters.AddWithValue("@Comment", comment);
+            cmd.Parameters.AddWithValue("@UpdatedBy", updatedBy ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@UpdatedTime", DateTime.Now);
+
+            return await cmd.ExecuteNonQueryAsync();
         }
 
         public async Task<List<ExternalPlatform>> GetAllAsync()
@@ -275,7 +310,7 @@ namespace PROHUB.Data
 
         private ExternalPlatform MapReaderToExternalSolution(IDataReader reader)
         {
-            return new ExternalPlatform
+            var entity = new ExternalPlatform
             {
                 Id = GetInt32Safe(reader, "ID"),
                 PlatformName = GetNullableString(reader, "Platform_Name") ?? string.Empty,
@@ -286,8 +321,6 @@ namespace PROHUB.Data
                 TargetDate = GetNullableDateTime(reader, "TargetDate"),
                 SDLCStageId = GetNullableInt32(reader, "SDLCstage"),
                 PercentageDone = GetNullableDecimal(reader, "PercentageDone"),
-
-                // Uses updated GetNullableString to handle potential Int->String casts
                 BitBucket = GetNullableString(reader, "BitBucket") ?? GetNullableString(reader, "Bit_Bucket") ?? string.Empty,
                 BITBucketRepo = GetNullableString(reader, "BIT_bucket_repo") ?? GetNullableString(reader, "BITBucketRepo") ?? string.Empty,
                 SalesTeamId = GetNullableInt32(reader, "Sales_Team_ID"),
@@ -299,8 +332,11 @@ namespace PROHUB.Data
                 LaunchedDate = GetNullableDateTime(reader, "LaunchedDate"),
                 PlatformOwner = GetNullableString(reader, "PlatformOwner"),
                 APP_Owner = GetNullableString(reader, "APP_Owner"),
+
+                // 1. Get relevant values ​​(OTC and MRC)
                 PlatformOTC = GetNullableDecimal(reader, "Platform_OTC"),
                 PlatformMRC = GetNullableDecimal(reader, "Platform_MRC"),
+
                 ContractPeriod = GetNullableString(reader, "Contract_Period"),
                 IncentiveEarned = GetNullableDecimal(reader, "IncentiveEarned") ?? GetNullableDecimal(reader, "Incentive_Earned"),
                 IncentiveShare = GetNullableDecimal(reader, "IncentiveShare") ?? GetNullableDecimal(reader, "Incentive_Share"),
@@ -311,13 +347,34 @@ namespace PROHUB.Data
                 SSLCertificateExpDate = GetNullableDateTime(reader, "SSLCertificateExpDate"),
                 DPOHandoverDate = GetNullableDateTime(reader, "DPO_Handover_Date"),
                 DPOHandoverComment = GetNullableString(reader, "DPO_Handover_Comment"),
-
-                // Joined display properties
                 DevelopedByName = GetNullableString(reader, "DevelopedByName"),
                 CompanyName = GetNullableString(reader, "CompanyName"),
                 SalesTeamName = GetNullableString(reader, "SalesTeamName"),
                 SdlcPhaseName = GetNullableString(reader, "SdlcPhaseName")
             };
+
+            // ---------------------------------------------------------
+            // REVENUE CALCULATION LOGIC
+            // Formula: Revenue = OneTime_Charge + (Monthly_Charge * 12 * Contract_Period)
+            // ---------------------------------------------------------
+
+            decimal otc = entity.PlatformOTC ?? 0;
+            decimal mrc = entity.PlatformMRC ?? 0;
+            int years = 0;
+
+            // Since the Contract Period is a String (e.g. "3", "3 Years", "1 Year")
+            // Extract only the number (Years) from it.
+            if (!string.IsNullOrEmpty(entity.ContractPeriod))
+            {
+                // If there is a value like "3 Years", only the first part ("3") is taken and converted
+                var periodString = entity.ContractPeriod.Trim().Split(' ')[0];
+                int.TryParse(periodString, out years);
+            }
+
+            // Calculation
+            entity.Revenue = otc + (mrc * 12 * years);
+
+            return entity;
         }
 
         private Employee MapReaderToEmployee(IDataReader reader)

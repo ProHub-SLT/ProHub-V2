@@ -605,7 +605,7 @@
                                 <td>@(item.ContractPeriod ?? "—")</td>
 
                                 <td>
-                                    <div>Rs.@((item.IncentiveEarned ?? 0).ToString("N2"))</div>
+                                    <div>Rs.@((item.Revenue ?? 0).ToString("N2"))</div>
                                     <div>Rs.@((item.SoftwareValue ?? 0).ToString("N2"))</div>
                                 </td>
 
@@ -635,7 +635,9 @@
                                                 title="Delete">
                                             <i class="bi bi-trash"></i>
                                         </button>
-                                        <a href="@Url.Action("Index", "ExternalDocuments", new { platformId = item.Id })" class="btn btn-sm btn-outline-secondary me-1" title="Folder"><i class="bi bi-folder"></i></a>
+                                        <a asp-controller="ExternalDocuments" asp-action="Folder" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1" title="Filter Documents">
+                                            <i class="bi bi-folder"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -762,11 +764,11 @@
         // Auto-show success modal if TempData exists
         @if (TempData["SuccessMessage"] != null)
         {
-                    <text>
-                    window.addEventListener('DOMContentLoaded', () => {
-                        document.getElementById('successModal').classList.add('show');
-                    });
-                    </text>
+                        <text>
+                        window.addEventListener('DOMContentLoaded', () => {
+                            document.getElementById('successModal').classList.add('show');
+                        });
+                        </text>
         }
     </script>
 }

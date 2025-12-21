@@ -53,31 +53,52 @@ namespace ProHub.Data
             using var conn = GetConnection();
             conn.Open();
 
+           
             string query = @"
-                SELECT 
-                    ip.ID AS Id,
-                    ip.App_Name AS AppName,
-                    ip.Developed_By AS DevelopedById,
-                    dev.Emp_Name AS DevelopedByName,
-                    ip.Price AS Price,
-                    ip.SDLCPhase AS SDLCPhaseId,
-                    sp.Phase AS SDLCPhaseName,
-                    ip.EndUserType AS EndUserTypeId,
-                    e.ID AS EndUserId,
-                    e.EndUserType AS EndUserTypeName
-                FROM internal_platforms ip
-                INNER JOIN targetenduser e ON ip.EndUserType = e.ID
-                LEFT JOIN Employee dev ON ip.Developed_By = dev.Emp_ID
-                LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
-                WHERE e.EndUserType = 'SLT Employees'";
+        SELECT 
+            ip.ID AS Id,
+            ip.App_Name AS AppName,
+            ip.App_Category AS AppCategory,
+            ip.App_URL AS AppURL,
+            ip.App_IP AS AppIP,
+            ip.StartDate AS StartDate,
+            ip.TargetDate AS TargetDate,
+            ip.VADate AS VADate,
+            ip.LaunchedDate AS LaunchedDate,
+            ip.PercentageDone AS PercentageDone,
+            ip.Status AS Status,
+            ip.Price AS Price,
+            ip.Developed_By AS DevelopedById,
+            dev.Emp_Name AS DevelopedByName,
+            ip.SDLCPhase AS SDLCPhaseId,
+            sp.Phase AS SDLCPhaseName,
+            ip.EndUserType AS EndUserTypeId,
+            e.ID AS EndUserId,
+            e.EndUserType AS EndUserTypeName,
+            ip.MainAppID AS MainAppID,
+            ma.App_Name AS MainAppName,
+            pp.ParentProjectGroup AS ParentProjectName,
+            ipc.Comment AS Comment
+        FROM internal_platforms ip
+        INNER JOIN targetenduser e ON ip.EndUserType = e.ID
+        LEFT JOIN Employee dev ON ip.Developed_By = dev.Emp_ID
+        LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
+        LEFT JOIN internal_platforms ma ON ip.MainAppID = ma.ID
+        LEFT JOIN ParentProject pp ON ip.ParentProjectID = pp.ParentProjectID
+        LEFT JOIN (
+            SELECT Solution_ID, Comment 
+            FROM Internal_Project_Comments 
+            WHERE ID IN (SELECT MAX(ID) FROM Internal_Project_Comments GROUP BY Solution_ID)
+        ) ipc ON ip.ID = ipc.Solution_ID
+        WHERE e.EndUserType = 'SLT Employees'";
 
             if (!string.IsNullOrEmpty(search))
             {
                 query += @" AND (
-                    ip.App_Name LIKE @search OR
-                    dev.Emp_Name LIKE @search OR
-                    e.EndUserType LIKE @search
-                )";
+            ip.App_Name LIKE @search OR
+            dev.Emp_Name LIKE @search OR
+            e.EndUserType LIKE @search
+        )";
             }
 
             using var cmd = new MySqlCommand(query, conn);
@@ -94,13 +115,26 @@ namespace ProHub.Data
                 {
                     Id = GetValueOrDefault(reader, "Id", 0),
                     AppName = GetValueOrDefault(reader, "AppName", ""),
+                    AppCategory = GetValueOrDefault(reader, "AppCategory", ""),
+                    AppURL = GetValueOrDefault(reader, "AppURL", ""),
+                    AppIP = GetValueOrDefault(reader, "AppIP", ""),
+                    StartDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? (DateTime?)null : reader.GetDateTime("StartDate"),
+                    TargetDate = reader.IsDBNull(reader.GetOrdinal("TargetDate")) ? (DateTime?)null : reader.GetDateTime("TargetDate"),
+                    VADate = reader.IsDBNull(reader.GetOrdinal("VADate")) ? (DateTime?)null : reader.GetDateTime("VADate"),
+                    LaunchedDate = reader.IsDBNull(reader.GetOrdinal("LaunchedDate")) ? (DateTime?)null : reader.GetDateTime("LaunchedDate"),
+                    PercentageDone = GetValueOrDefault(reader, "PercentageDone", (decimal?)null),
+                    Status = GetValueOrDefault(reader, "Status", ""),
+                    Price = GetValueOrDefault(reader, "Price", (decimal?)null),
+
+                    // Comment field mapped to DPOHandoverComment or a specific comment property
+                    DPOHandoverComment = GetValueOrDefault(reader, "Comment", ""),
+
                     DevelopedById = GetValueOrDefault(reader, "DevelopedById", (int?)null),
                     DevelopedBy = new Employee
                     {
                         EmpId = GetValueOrDefault(reader, "DevelopedById", 0),
                         EmpName = GetValueOrDefault(reader, "DevelopedByName", "")
                     },
-                    Price = GetValueOrDefault(reader, "Price", (decimal?)null),
                     SDLCPhaseId = GetValueOrDefault(reader, "SDLCPhaseId", (int?)null),
                     SDLCPhase = new SDLCPhase
                     {
@@ -112,6 +146,12 @@ namespace ProHub.Data
                     {
                         ID = GetValueOrDefault(reader, "EndUserId", 0),
                         EndUserType = GetValueOrDefault(reader, "EndUserTypeName", "")
+                    },
+                    MainAppID = GetValueOrDefault(reader, "MainAppID", (int?)null),
+                    MainAppName = GetValueOrDefault(reader, "MainAppName", ""),
+                    ParentProject = new ParentProject
+                    {
+                        ParentProjectGroup = GetValueOrDefault(reader, "ParentProjectName", "")
                     }
                 });
             }
@@ -178,8 +218,8 @@ namespace ProHub.Data
             e3.Emp_Name AS Backup2Name,
             e3.Emp_Email AS Backup2Email,
             ip.MainAppID AS MainAppID,
-            ma.App_Name AS MainAppName,   -- ✅ New: Main app name
-            ma.App_URL AS MainAppURL,     -- (optional: you can remove if not needed)
+            ma.App_Name AS MainAppName,   
+            ma.App_URL AS MainAppURL,     
             ip.SSLCertificateExpDate AS SSLCertificateExpDate
         FROM internal_platforms ip
         INNER JOIN targetenduser e ON ip.EndUserType = e.ID
@@ -188,7 +228,7 @@ namespace ProHub.Data
         LEFT JOIN Employee e3 ON ip.BackupOfficer_2 = e3.Emp_ID
         LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
         LEFT JOIN ParentProject pp ON ip.ParentProjectID = pp.ParentProjectID
-        LEFT JOIN internal_platforms ma ON ip.MainAppID = ma.ID  -- ✅ Self join for main app
+        LEFT JOIN internal_platforms ma ON ip.MainAppID = ma.ID  
         WHERE ip.ID = @id AND e.EndUserType = 'SLT Employees';";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -372,7 +412,7 @@ namespace ProHub.Data
             }
 
             return list;
-        } 
+        }
 
 
         public List<InternalPlatform> GetRetiredSolutions(string search = "")
@@ -385,14 +425,25 @@ namespace ProHub.Data
         SELECT 
             ip.ID AS Id,
             ip.App_Name AS AppName,
-            e.Emp_Name AS DevelopedByName,
+            ip.App_URL AS AppURL,
+            ip.App_IP AS AppIP,
+            ip.StartDate AS StartDate,
+            ip.TargetDate AS TargetDate,
+            ip.VADate AS VADate,
+            ip.PercentageDone AS PercentageDone,
+            ip.Status AS Status,
             ip.LaunchedDate AS LaunchedDate,
-            sp.Phase AS SDLCPhase,
             ip.Price AS Price,
+            e.Emp_Name AS DevelopedByName,
+            sp.Phase AS SDLCPhase,
+            pp.ParentProjectGroup AS ParentProjectName,
+            ma.App_Name AS MainAppName,
             ipc.Comment AS Comment
         FROM internal_platforms ip
         LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
         LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
+        LEFT JOIN ParentProject pp ON ip.ParentProjectID = pp.ParentProjectID
+        LEFT JOIN internal_platforms ma ON ip.MainAppID = ma.ID 
         LEFT JOIN (
             SELECT Solution_ID, Comment
             FROM Internal_Project_Comments
@@ -418,16 +469,28 @@ namespace ProHub.Data
                 {
                     Id = GetValueOrDefault(r, "Id", 0),
                     AppName = GetValueOrDefault(r, "AppName", ""),
+                    MainAppName = GetValueOrDefault(r, "MainAppName", ""),
+                    AppURL = GetValueOrDefault(r, "AppURL", ""),
+                    AppIP = GetValueOrDefault(r, "AppIP", ""),
+                    StartDate = r.IsDBNull(r.GetOrdinal("StartDate")) ? (DateTime?)null : r.GetDateTime("StartDate"),
+                    TargetDate = r.IsDBNull(r.GetOrdinal("TargetDate")) ? (DateTime?)null : r.GetDateTime("TargetDate"),
+                    VADate = r.IsDBNull(r.GetOrdinal("VADate")) ? (DateTime?)null : r.GetDateTime("VADate"),
+                    LaunchedDate = r.IsDBNull(r.GetOrdinal("LaunchedDate")) ? (DateTime?)null : r.GetDateTime("LaunchedDate"),
+                    PercentageDone = r.IsDBNull(r.GetOrdinal("PercentageDone")) ? (decimal?)null : r.GetDecimal("PercentageDone"),
+                    Status = GetValueOrDefault(r, "Status", ""),
+                    Price = GetValueOrDefault(r, "Price", (decimal?)null),
                     DevelopedBy = new Employee
                     {
                         EmpName = GetValueOrDefault(r, "DevelopedByName", "")
                     },
-                    LaunchedDate = GetValueOrDefault(r, "LaunchedDate", (DateTime?)null),
                     SDLCPhase = new SDLCPhase
                     {
                         Phase = GetValueOrDefault(r, "SDLCPhase", "")
                     },
-                    Price = GetValueOrDefault(r, "Price", (decimal?)null),
+                    ParentProject = new ParentProject
+                    {
+                        ParentProjectGroup = GetValueOrDefault(r, "ParentProjectName", "")
+                    },
                     DPOHandoverComment = GetValueOrDefault(r, "Comment", "")
                 });
             }
@@ -500,12 +563,12 @@ namespace ProHub.Data
 
 
         public InternalPlatform GetRetiredSolutionById(int id)
-{
-    InternalPlatform? item = null;
-    using var conn = GetConnection();
-    conn.Open();
+        {
+            InternalPlatform? item = null;
+            using var conn = GetConnection();
+            conn.Open();
 
-    string query = @"
+            string query = @"
         SELECT 
             ip.*,
             e.Emp_Name AS DevelopedByName,
@@ -519,58 +582,56 @@ namespace ProHub.Data
         LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
         WHERE ip.ID = @id";
 
-    using var cmd = new MySqlCommand(query, conn);
-    cmd.Parameters.AddWithValue("@id", id);
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@id", id);
 
-    using var r = cmd.ExecuteReader();
-    if (r.Read())
-    {
-        item = new InternalPlatform
-        {
-            Id = GetValueOrDefault(r, "ID", 0),
-            AppName = GetValueOrDefault(r, "App_Name", ""),
-            DevelopedBy = new Employee
+            using var r = cmd.ExecuteReader();
+            if (r.Read())
             {
-                EmpName = GetValueOrDefault(r, "DevelopedByName", "")
-            },
-            DevelopedTeam = GetValueOrDefault(r, "DevelopedTeam", ""),
-            StartDate = GetValueOrDefault(r, "StartDate", (DateTime?)null),
-            TargetDate = GetValueOrDefault(r, "TargetDate", (DateTime?)null),
-            LaunchedDate = GetValueOrDefault(r, "LaunchedDate", (DateTime?)null),
-            UATDate = GetValueOrDefault(r, "UATDate", (DateTime?)null),
-            Status = GetValueOrDefault(r, "Status", ""),
-            StatusDate = GetValueOrDefault(r, "StatusDate", (DateTime?)null),
-            BitBucket = GetValueOrDefault(r, "BitBucket", ""),
-            BitBucketRepo = GetValueOrDefault(r, "BitBucketRepo", ""),
-            AppURL = GetValueOrDefault(r, "AppURL", ""),
-            AppIP = GetValueOrDefault(r, "AppIP", ""),
-            AppUsers = GetValueOrDefault(r, "AppUsers", ""),
-            IntegratedApps = GetValueOrDefault(r, "Integrated_apps", ""),
-            WAF = GetValueOrDefault(r, "WAF", ""),
-            BusOwner = GetValueOrDefault(r, "Bus_Owner", ""),
-            AppBusinessOwner = GetValueOrDefault(r, "App_Business_Owner", ""),
-            AppCategory = GetValueOrDefault(r, "App_Category", ""),
-            Scope = GetValueOrDefault(r, "Scope", ""),
-            Price = GetValueOrDefault(r, "Price", (decimal?)null),
-            SDLCPhase = new SDLCPhase
-            {
-                Phase = GetValueOrDefault(r, "SDLCPhaseName", "")
-            },
-            SSLCertificateExpDate = GetValueOrDefault(r, "SSLCertificateExpDate", (DateTime?)null),
-            DPOHandoverDate = GetValueOrDefault(r, "DPO_Handover_Date", (DateTime?)null),
-            DPOHandoverComment = GetValueOrDefault(r, "DPO_Handover_Comment", ""),
-            BackupOfficer1 = string.IsNullOrEmpty(GetValueOrDefault(r, "BackupOfficer1Name", "")) 
-                ? null 
-                : new Employee { EmpName = GetValueOrDefault(r, "BackupOfficer1Name", "") },
-            BackupOfficer2 = string.IsNullOrEmpty(GetValueOrDefault(r, "BackupOfficer2Name", "")) 
-                ? null 
-                : new Employee { EmpName = GetValueOrDefault(r, "BackupOfficer2Name", "") }
-        };
-    }
+                item = new InternalPlatform
+                {
+                    Id = GetValueOrDefault(r, "ID", 0),
+                    AppName = GetValueOrDefault(r, "App_Name", ""),
+                    DevelopedBy = new Employee
+                    {
+                        EmpName = GetValueOrDefault(r, "DevelopedByName", "")
+                    },
+                    DevelopedTeam = GetValueOrDefault(r, "DevelopedTeam", ""),
+                    StartDate = GetValueOrDefault(r, "StartDate", (DateTime?)null),
+                    TargetDate = GetValueOrDefault(r, "TargetDate", (DateTime?)null),
+                    LaunchedDate = GetValueOrDefault(r, "LaunchedDate", (DateTime?)null),
+                    UATDate = GetValueOrDefault(r, "UATDate", (DateTime?)null),
+                    Status = GetValueOrDefault(r, "Status", ""),
+                    StatusDate = GetValueOrDefault(r, "StatusDate", (DateTime?)null),
+                    BitBucket = GetValueOrDefault(r, "BitBucket", ""),
+                    BitBucketRepo = GetValueOrDefault(r, "BitBucketRepo", ""),
+                    AppURL = GetValueOrDefault(r, "AppURL", ""),
+                    AppIP = GetValueOrDefault(r, "AppIP", ""),
+                    AppUsers = GetValueOrDefault(r, "AppUsers", ""),
+                    IntegratedApps = GetValueOrDefault(r, "Integrated_apps", ""),
+                    WAF = GetValueOrDefault(r, "WAF", ""),
+                    BusOwner = GetValueOrDefault(r, "Bus_Owner", ""),
+                    AppBusinessOwner = GetValueOrDefault(r, "App_Business_Owner", ""),
+                    AppCategory = GetValueOrDefault(r, "App_Category", ""),
+                    Scope = GetValueOrDefault(r, "Scope", ""),
+                    Price = GetValueOrDefault(r, "Price", (decimal?)null),
+                    SDLCPhase = new SDLCPhase
+                    {
+                        Phase = GetValueOrDefault(r, "SDLCPhaseName", "")
+                    },
+                    SSLCertificateExpDate = GetValueOrDefault(r, "SSLCertificateExpDate", (DateTime?)null),
+                    DPOHandoverDate = GetValueOrDefault(r, "DPO_Handover_Date", (DateTime?)null),
+                    DPOHandoverComment = GetValueOrDefault(r, "DPO_Handover_Comment", ""),
+                    BackupOfficer1 = string.IsNullOrEmpty(GetValueOrDefault(r, "BackupOfficer1Name", ""))
+                        ? null
+                        : new Employee { EmpName = GetValueOrDefault(r, "BackupOfficer1Name", "") },
+                    BackupOfficer2 = string.IsNullOrEmpty(GetValueOrDefault(r, "BackupOfficer2Name", ""))
+                        ? null
+                        : new Employee { EmpName = GetValueOrDefault(r, "BackupOfficer2Name", "") }
+                };
+            }
 
-    return item!;
-}
-
-
+            return item!;
+        }
     }
 }

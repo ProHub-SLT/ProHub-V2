@@ -790,8 +790,8 @@
                             </a>
                         </th>
                         <th class="sortable" style="width:12%">
-                            <a href="@BuildIndexUrl(1, pageSize, "Developed By", ToggleSortOrder("Developed By"), searchTerm, activeTab)">
-                                Developed By <i class="bi @(sortColumn == "Developed By" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            <a href="@BuildIndexUrl(1, pageSize, "DevelopedBy", ToggleSortOrder("DevelopedBy"), searchTerm, activeTab)">
+                                Developed By <i class="bi @(sortColumn == "DevelopedBy" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
                         <th style="width:10%">SDLC Phase</th>
@@ -881,7 +881,7 @@
                                             <i class="bi bi-trash"></i>
                                         </button>
 
-                                        <a href="@Url.Action("Index", "InternalDocuments", new { platformId = item.Id })" class="btn btn-sm btn-outline-secondary" title="Folder">
+                                        <a asp-controller="InternalSolution" asp-action="Folder" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1" title="Filter Documents">
                                             <i class="bi bi-folder"></i>
                                         </a>
 
@@ -1045,11 +1045,11 @@
         // Show success modal if TempData message exists
         @if (TempData["SuccessMessage"] != null)
         {
-                            <text>
-                            window.addEventListener('DOMContentLoaded', () => {
-                                document.getElementById('successModal').classList.add('show');
-                            });
-                            </text>
+                                <text>
+                                window.addEventListener('DOMContentLoaded', () => {
+                                    document.getElementById('successModal').classList.add('show');
+                                });
+                                </text>
         }
 
         // --- Enhanced Comment Modal Logic ---

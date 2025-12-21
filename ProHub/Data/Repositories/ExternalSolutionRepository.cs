@@ -3,6 +3,7 @@ using ProHub.Models;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ProHub.Data
 {
@@ -18,6 +19,7 @@ namespace ProHub.Data
         private MySqlConnection GetConnection()
             => new MySqlConnection(_configuration.GetConnectionString("DefaultConnection"));
 
+        // Helper to safely retrieve values handling DBNull
         private T GetValueOrDefault<T>(MySqlDataReader reader, string columnName, T defaultValue = default)
         {
             try
@@ -33,7 +35,11 @@ namespace ProHub.Data
             }
         }
 
-        // Get abandoned solutions list (table view)
+        // ==================================================================================
+        //                                ABANDONED SOLUTIONS
+        // ==================================================================================
+
+        // Get abandoned solutions list (Updated for Excel Export requirements)
         public List<ExternalPlatform> GetAbandonedSolutions(string search = "")
         {
             var list = new List<ExternalPlatform>();
@@ -41,32 +47,61 @@ namespace ProHub.Data
             conn.Open();
 
             string query = @"
-                SELECT 
-                    ep.ID AS Id,
-                    ep.Platform_Name AS PlatformName,
-                    e1.Emp_ID AS DevelopedById,
-                    e1.Emp_Name AS DevelopedByName,
-                    sp.ID AS SDLCStageId,
-                    sp.Phase AS SDLCPhaseName,
-                    ep.StartDate AS StartDate,
-                    ep.DPO_Handover_Date AS DPOHandoverDate,
-                    ep.DPO_Handover_Comment AS DPOHandoverComment,
-                    c.ID AS CompanyId,
-                    c.Company_Name AS CompanyName
-                FROM external_platforms ep
-                INNER JOIN company c ON ep.Company_ID = c.ID
-                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCstage = sp.ID
-                WHERE sp.Phase = 'Abandoned'";
+        SELECT 
+            ep.ID AS Id,
+            ep.Platform_Name AS PlatformName,
+            e1.Emp_ID AS DevelopedById,
+            e1.Emp_Name AS DevelopedByName,
+            sp.ID AS SDLCStageId,
+            sp.Phase AS SDLCPhaseName,
+            ep.StartDate AS StartDate,
+            ep.DPO_Handover_Date AS DPOHandoverDate,
+            ep.DPO_Handover_Comment AS DPOHandoverComment,
+            c.ID AS CompanyId,
+            c.Company_Name AS CompanyName,
+            
+            /* --- Fields for Excel Export & View --- */
+            ep.LaunchedDate,
+            ep.BillingDate,
+            ep.Platform_OTC AS PlatformOTC,
+            ep.Platform_MRC AS PlatformMRC,
+            ep.Contract_Period AS ContractPeriod,
+            ep.Sales_AM AS SalesAM,
+            ep.Proposal_Upload AS ProposalUploaded,
+            ep.Software_Value AS SoftwareValue,
+            
+            /* --- New Fields You Requested --- */
+            ep.Developed_Team AS DevelopedTeam,
+            ep.Incentive_Earned AS IncentiveEarned,
+            ep.Incentive_Share AS IncentiveShare,
+            st.ID AS SalesTeamId,
+            st.Sales_Team_Name AS SalesTeamName,
+
+            /* --- Revenue Calculation --- */
+            (
+                COALESCE(ep.Platform_OTC, 0) + 
+                (COALESCE(ep.Platform_MRC, 0) * 12 * COALESCE(ep.Contract_Period, 0))
+            ) AS Revenue
+
+        FROM external_platforms ep
+        INNER JOIN company c ON ep.Company_ID = c.ID
+        LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
+        LEFT JOIN SDLCPhas sp ON ep.SDLCstage = sp.ID
+        LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID  /* <--- Added JOIN here */
+        WHERE sp.Phase = 'Abandoned'";
 
             if (!string.IsNullOrEmpty(search))
             {
                 query += @" AND (
-                    ep.Platform_Name LIKE @search OR
-                    c.Company_Name LIKE @search OR
-                    e1.Emp_Name LIKE @search
-                )";
+            ep.Platform_Name LIKE @search OR 
+            c.Company_Name LIKE @search OR 
+            e1.Emp_Name LIKE @search OR 
+            ep.Sales_AM LIKE @search OR
+            st.Sales_Team_Name LIKE @search
+        )";
             }
+
+            query += " ORDER BY ep.Platform_Name";
 
             using var cmd = new MySqlCommand(query, conn);
             if (!string.IsNullOrEmpty(search))
@@ -82,6 +117,22 @@ namespace ProHub.Data
                     StartDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? (DateTime?)null : reader.GetDateTime("StartDate"),
                     DPOHandoverDate = reader.IsDBNull(reader.GetOrdinal("DPOHandoverDate")) ? (DateTime?)null : reader.GetDateTime("DPOHandoverDate"),
                     DPOHandoverComment = GetValueOrDefault(reader, "DPOHandoverComment", ""),
+
+                    // Mapped View/Excel Fields
+                    LaunchedDate = reader.IsDBNull(reader.GetOrdinal("LaunchedDate")) ? (DateTime?)null : reader.GetDateTime("LaunchedDate"),
+                    BillingDate = reader.IsDBNull(reader.GetOrdinal("BillingDate")) ? (DateTime?)null : reader.GetDateTime("BillingDate"),
+                    PlatformOTC = reader.IsDBNull(reader.GetOrdinal("PlatformOTC")) ? (decimal?)null : reader.GetDecimal("PlatformOTC"),
+                    PlatformMRC = reader.IsDBNull(reader.GetOrdinal("PlatformMRC")) ? (decimal?)null : reader.GetDecimal("PlatformMRC"),
+                    ContractPeriod = reader["ContractPeriod"]?.ToString() ?? "",
+                    SalesAM = GetValueOrDefault(reader, "SalesAM", ""),
+                    ProposalUploaded = GetValueOrDefault(reader, "ProposalUploaded", ""),
+                    Revenue = GetValueOrDefault(reader, "Revenue", 0m),
+                    SoftwareValue = reader.IsDBNull(reader.GetOrdinal("SoftwareValue")) ? (decimal?)null : reader.GetDecimal("SoftwareValue"),
+
+                    // New Mappings
+                    DevelopedTeam = GetValueOrDefault(reader, "DevelopedTeam", ""),
+                    IncentiveEarned = reader.IsDBNull(reader.GetOrdinal("IncentiveEarned")) ? (decimal?)null : reader.GetDecimal("IncentiveEarned"),
+                    IncentiveShare = reader.IsDBNull(reader.GetOrdinal("IncentiveShare")) ? (decimal?)null : reader.GetDecimal("IncentiveShare"),
 
                     DevelopedBy = new Employee
                     {
@@ -99,6 +150,12 @@ namespace ProHub.Data
                     {
                         Id = GetValueOrDefault(reader, "CompanyId", 0),
                         CompanyName = GetValueOrDefault(reader, "CompanyName", "")
+                    },
+
+                    SalesTeam = new SalesTeam
+                    {
+                        Id = GetValueOrDefault(reader, "SalesTeamId", 0),
+                        SalesTeamName = GetValueOrDefault(reader, "SalesTeamName", "")
                     }
                 });
             }
@@ -266,6 +323,10 @@ namespace ProHub.Data
             return null;
         }
 
+        // ==================================================================================
+        //                                GENERAL / HELPER METHODS
+        // ==================================================================================
+
         // Get all external_platform names 
         public List<ExternalPlatform> GetAll()
         {
@@ -362,7 +423,6 @@ namespace ProHub.Data
         }
 
         // Get the ID of the "external" platform from Main_Platforms table
-        // Made more robust to handle variations like "external solution"
         public int? GetExternalPlatformId()
         {
             using var conn = GetConnection();
@@ -374,36 +434,42 @@ namespace ProHub.Data
             return null;
         }
 
-        //----------------------------------------Retired------------------------------------------------//
+        // ==================================================================================
+        //                                RETIRED SOLUTIONS
+        // ==================================================================================
 
-        // Get retired solutions list (table view)
         public List<ExternalPlatform> GetRetiredSolutions(string search = "")
         {
             List<ExternalPlatform> list = new();
             using var conn = GetConnection();
             conn.Open();
 
-
             string query = @"
-        SELECT ep.ID AS Id,
-                ep.Platform_Name AS PlatformName,
-                COALESCE(ep.LaunchedDate, ep.BillingDate) AS LaunchedDate,
-                ep.Platform_OTC AS PlatformOTC,
-                ep.Platform_MRC AS PlatformMRC,
-                ep.Contract_Period AS ContractPeriod,  /* මෙන්න මේ පේළිය අනිවාර්යයෙන් තිබිය යුතුයි */
-                ep.Software_Value AS SoftwareValue,
-                ep.BillingDate,
-                st.Sales_Team_Name AS SalesTeamName,
-                ep.Sales_AM AS SalesAM,
-                ep.Proposal_Upload AS ProposalUploaded,
-                e1.Emp_ID AS DevelopedById,
-                e1.Emp_Name AS DevelopedByName,
-                sp.Phase AS SDLCPhaseName
-        FROM external_platforms ep
-        LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-        LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
-        LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID
-        WHERE (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')";
+                SELECT ep.ID AS Id,
+                       ep.Platform_Name AS PlatformName,
+                       COALESCE(ep.LaunchedDate, ep.BillingDate) AS LaunchedDate,
+                       ep.Platform_OTC AS PlatformOTC,
+                       ep.Platform_MRC AS PlatformMRC,
+                       ep.Contract_Period AS ContractPeriod,
+                       ep.Software_Value AS SoftwareValue,
+                       ep.BillingDate,
+                       st.Sales_Team_Name AS SalesTeamName,
+                       ep.Sales_AM AS SalesAM,
+                       ep.Proposal_Upload AS ProposalUploaded,
+                       e1.Emp_ID AS DevelopedById,
+                       e1.Emp_Name AS DevelopedByName,
+                       sp.Phase AS SDLCPhaseName,
+
+                       (
+                         COALESCE(ep.Platform_OTC, 0) + 
+                         (COALESCE(ep.Platform_MRC, 0) * 12 * COALESCE(ep.Contract_Period, 0))
+                       ) AS Revenue
+
+                FROM external_platforms ep
+                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
+                LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID
+                WHERE (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')";
 
             if (!string.IsNullOrWhiteSpace(search))
                 query += " AND (ep.Platform_Name LIKE @search OR e1.Emp_Name LIKE @search OR st.Sales_Team_Name LIKE @search OR ep.Sales_AM LIKE @search)";
@@ -423,7 +489,8 @@ namespace ProHub.Data
                     LaunchedDate = reader.IsDBNull(reader.GetOrdinal("LaunchedDate")) ? (DateTime?)null : reader.GetDateTime("LaunchedDate"),
                     PlatformOTC = reader.IsDBNull(reader.GetOrdinal("PlatformOTC")) ? (decimal?)null : reader.GetDecimal("PlatformOTC"),
                     PlatformMRC = reader.IsDBNull(reader.GetOrdinal("PlatformMRC")) ? (decimal?)null : reader.GetDecimal("PlatformMRC"),
-                    ContractPeriod = reader.IsDBNull(reader.GetOrdinal("ContractPeriod")) ? "" : reader.GetValue(reader.GetOrdinal("ContractPeriod")).ToString(),
+                    ContractPeriod = reader["ContractPeriod"]?.ToString() ?? "",
+                    Revenue = GetValueOrDefault(reader, "Revenue", 0m),
                     SoftwareValue = reader.IsDBNull(reader.GetOrdinal("SoftwareValue")) ? (decimal?)null : reader.GetDecimal("SoftwareValue"),
                     BillingDate = reader.IsDBNull(reader.GetOrdinal("BillingDate")) ? (DateTime?)null : reader.GetDateTime("BillingDate"),
                     SalesAM = GetValueOrDefault(reader, "SalesAM", ""),
@@ -559,7 +626,6 @@ namespace ProHub.Data
                     PercentageDone = GetValueOrDefault(reader, "PercentageDone", (decimal?)null),
                     DevelopedTeam = GetValueOrDefault(reader, "DevelopedTeam", ""),
                     SalesAM = GetValueOrDefault(reader, "SalesAM", ""),
-                    SalesManager = GetValueOrDefault(reader, "SalesManager", ""),
                     DevelopedBy = new Employee { EmpId = GetValueOrDefault(reader, "DevelopedById", 0), EmpName = GetValueOrDefault(reader, "DevelopedByName", "") },
                     Company = new Company { Id = GetValueOrDefault(reader, "CompanyId", 0), CompanyName = GetValueOrDefault(reader, "CompanyName", "") },
                     SDLCStage = new SDLCPhase { Id = GetValueOrDefault(reader, "SDLCStageId", 0), Phase = GetValueOrDefault(reader, "SDLCPhaseName", "Retired") }
@@ -666,9 +732,3 @@ namespace ProHub.Data
         }
     }
 }
-
-
-
-
-
-

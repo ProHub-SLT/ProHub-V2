@@ -1,9 +1,47 @@
 @model List<ProHub.Models.InternalPlatform>
 @{
-    ViewData["Title"] = "Internal Solutions - Retired ";
+    ViewData["Title"] = "Internal Solutions - Retired";
+
+    // --- Pagination & Sort Logic (Mapping ViewBag to local vars for cleaner Razor) ---
+    int pageSize = Convert.ToInt32(ViewBag.PageSize ?? 10);
+    int currentPage = Convert.ToInt32(ViewBag.CurrentPage ?? 1);
+    int totalRecords = Convert.ToInt32(ViewBag.TotalRecords ?? 0);
+    int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+    if (totalPages == 0) totalPages = 1;
+
+    int startRecord = totalRecords > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    int endRecord = totalRecords > 0 ? Math.Min(currentPage * pageSize, totalRecords) : 0;
+
+    string sortColumn = (ViewBag.SortColumn ?? "AppName").ToString();
+    string sortOrder = (ViewBag.SortOrder ?? "asc").ToString();
+    string searchTerm = (ViewBag.SearchTerm ?? string.Empty).ToString();
+
+    // Helper for sorting toggles
+    Func<string, string> ToggleSortOrder = column =>
+    {
+        if (string.Equals(column, sortColumn, StringComparison.OrdinalIgnoreCase))
+        {
+            return sortOrder == "asc" ? "desc" : "asc";
+        }
+        return "asc";
+    };
+
+    // Helper for URL building
+    string BuildUrl(int page, int? size = null, string? sortCol = null, string? sortOrd = null, string? search = null)
+    {
+        return Url.Action("Index", new
+        {
+            page = page,
+            pageSize = size ?? pageSize,
+            sortColumn = sortCol ?? sortColumn,
+            sortOrder = sortOrd ?? sortOrder,
+            search = search ?? searchTerm
+        }) ?? "#";
+    }
 }
 
 <style>
+    /* --- Base Styles --- */
     body {
         margin: 0;
         background: url('/images/bg.jpg') no-repeat center center fixed;
@@ -12,7 +50,6 @@
         position: relative;
     }
 
-        /* Blur overlay */
         body::before {
             content: "";
             position: absolute;
@@ -25,6 +62,7 @@
             z-index: -1;
         }
 
+    /* --- Table Styles --- */
     .data-table-wrapper {
         background: white;
         border-radius: 10px;
@@ -32,12 +70,10 @@
         overflow: hidden;
     }
 
-    /* Table container - no horizontal scroll */
     .table-responsive {
         overflow-x: visible;
     }
 
-    /* Table layout */
     .table {
         table-layout: fixed;
         width: 100%;
@@ -61,33 +97,12 @@
                 vertical-align: middle;
             }
 
-                /* Set specific column widths */
-                .table thead th:nth-child(1) {
-                    width: 25%;
-                }
-
-                .table thead th:nth-child(2) {
-                    width: 15%;
-                }
-
-                .table thead th:nth-child(3) {
-                    width: 12%;
-                }
-
-                .table thead th:nth-child(4) {
-                    width: 10%;
-                }
-
-                .table thead th:nth-child(5) {
-                    width: 12%;
-                }
-
-                .table thead th:nth-child(6) {
-                    width: 25%;
-                }
-
-                .table thead th:nth-child(7) {
-                    width: 6%;
+                .table thead th a {
+                    color: white;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
                 }
 
         .table tbody td {
@@ -99,6 +114,12 @@
             text-overflow: ellipsis;
         }
 
+            /* Specific override for the Comment column to allow wrapping */
+            .table tbody td.text-wrap-cell {
+                white-space: normal;
+                line-height: 1.4;
+            }
+
         .table tbody tr {
             transition: background-color 0.2s ease;
         }
@@ -106,15 +127,15 @@
             .table tbody tr:hover {
                 background-color: #f8f9fa;
             }
-
         /* First column gray vibe */
         .table tbody td:first-child {
-            background-color: #f8f9fa;
+            background-color: #FFFFFF;
             font-weight: 500;
         }
 
         /* Other columns LIGHT YELLOW vibe */
-        .table tbody td:not(:first-child) {
+        /* Logic: Select all columns starting from the 3rd one onward */
+        .table tbody td:nth-child(n+2) {
             background-color: #FFFFD6;
         }
 
@@ -123,36 +144,10 @@
             white-space: normal;
             word-wrap: break-word;
             overflow: visible;
-            text-overflow: clip;
+            /* Optional: set a min-width to prevent it from squishing too small */
+            min-width: 200px;
         }
-
-    .badge-custom {
-        padding: 0.4rem 0.75rem;
-        border-radius: 6px;
-        font-weight: 500;
-        font-size: 0.8rem;
-        white-space: nowrap;
-        display: inline-block;
-    }
-
-    .badge-secondary-custom {
-        background-color: #F7F76D;
-        color: #383d41;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: #6c757d;
-    }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #dee2e6;
-        }
-
-    /* Toolbar Styling */
+    /* --- Toolbar Styling --- */
     .toolbar-wrapper {
         background: white;
         border-radius: 12px;
@@ -165,36 +160,25 @@
             transition: box-shadow 0.2s ease;
         }
 
-    .view-details-btn {
-        width: 26px;
-        height: 26px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1.5px solid #28a745;
-        color: #28a745;
-        background-color: #f8fff9;
-        border-radius: 50%;
-        transition: all 0.25s ease-in-out;
-        text-decoration: none;
+    /* --- Buttons --- */
+    .btn-search {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 123, 255, 0.2);
     }
 
-        .view-details-btn:hover {
-            background-color: #28a745;
-            color: #fff;
-            transform: scale(1.08);
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        .btn-search:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
+            color: white;
         }
 
-        .view-details-btn i {
-            font-size: 0.8rem;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .view-details-btn:hover i {
-            transform: scale(1.15);
-        }
-
+    /* Export Button Specific */
     .btn-export-excel {
         display: inline-flex;
         align-items: center;
@@ -244,104 +228,193 @@
                 transform: scale(1.15) rotate(-5deg);
             }
 
-        .btn-export-excel:active {
-            transform: translateY(0px);
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-        }
-
-    /* Date icon alignment */
-    .table tbody td i.bi-calendar3 {
-        margin-right: 0.35rem;
-        vertical-align: middle;
+    /* --- Status Badges  --- */
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        white-space: nowrap;
+        border: 1px solid transparent;
     }
+
+    /* Status Colors */
+    .status-badge-retired {
+        background-color: #FFFF8A;
+        color: #616161;
+        border-color: #d6d6d6;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
 </style>
 
 <div class="container-fluid mt-4">
     <h1 class="mb-4 text-primary">@ViewData["Title"]</h1>
 
+    @* --- Toolbar --- *@
     <div class="toolbar-wrapper mb-4">
         <div class="row g-3 align-items-center">
-            <!-- Search -->
+
+            @* --- 1. Search Box --- *@
             <div class="col-lg-5 col-md-6">
-                <form method="get" asp-action="Index"
-                      class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
+                <form method="get" asp-action="Index" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
                     <i class="bi bi-search text-muted me-2"></i>
                     <input type="text" name="search" class="form-control border-0 shadow-none"
-                           placeholder="Search all records..." value="@ViewBag.searchTerm" />
-                    <input type="hidden" name="pageSize" value="@ViewBag.pageSize" />
-                    <button type="submit" class="btn btn-primary btn-sm ms-2 px-3">
+                           placeholder="Search retired solutions..." value="@searchTerm" />
+
+                    @if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <a href="@Url.Action("Index", new { pageSize = pageSize })" class="text-secondary text-decoration-none me-2">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </a>
+                    }
+
+                    <input type="hidden" name="pageSize" value="@pageSize" />
+
+                    <button type="submit" class="btn btn-search btn-sm ms-2 px-3">
                         Search
                     </button>
                 </form>
             </div>
 
-            <!-- Empty Column -->
-            <div class="col-lg-3 col-md-4 col-sm-6">
-            </div>
+            @* --- Spacer --- *@
+            <div class="col-lg-3 col-md-4 col-sm-6"></div>
 
-            <!-- Entries Dropdown -->
+            @* --- 2. Page Size Selector --- *@
             <div class="col-lg-4 col-md-12 d-flex justify-content-lg-end justify-content-start">
                 <form method="get" asp-action="Index" id="entriesForm"
                       class="d-flex align-items-center bg-white rounded-3 px-3 py-2 border">
                     <label class="me-2 text-nowrap text-secondary small fw-semibold">Show</label>
                     <select name="pageSize" class="form-select form-select-sm border-0 shadow-none fw-semibold"
                             onchange="this.form.submit()">
-                        <option value="10" selected="@(ViewBag.pageSize == 10)">10</option>
-                        <option value="25" selected="@(ViewBag.pageSize == 25)">25</option>
-                        <option value="50" selected="@(ViewBag.pageSize == 50)">50</option>
-                        <option value="100" selected="@(ViewBag.pageSize == 100)">100</option>
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="25" selected="@(pageSize == 25)">25</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
                     </select>
                     <span class="ms-2 small text-secondary">entries</span>
-                    <input type="hidden" name="search" value="@ViewBag.searchTerm" />
+                    <input type="hidden" name="search" value="@searchTerm" />
                     <input type="hidden" name="page" value="1" />
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Table -->
+    @* --- Data Table --- *@
     <div class="data-table-wrapper">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="retiredSolutionsTable">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th>Application Name</th>
-                        <th>Developed By</th>
-                        <th>Launched Date</th>
-                        <th>SDLC Phase</th>
-                        <th>Solution Value</th>
-                        <th>Comment</th>
-                        <th>Action</th>
+                        <th class="sortable" scope="col" style="width:16%">
+                            <a href="@BuildUrl(1, pageSize, "AppName", ToggleSortOrder("AppName"), searchTerm)">
+                                Application Name
+                                <i class="bi @(sortColumn == "AppName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+                        <th class="sortable" scope="col" style="width:16%">
+                            <a href="@BuildUrl(1, pageSize, " DevelopedBy", ToggleSortOrder(" DevelopedBy"), searchTerm)">
+                                Developed By
+                                <i class="bi @(sortColumn == " DevelopedBy" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+
+                        <th class="sortable" scope="col" style="width:11%">
+                            <a href="@BuildUrl(1, pageSize, " LaunchedDate", ToggleSortOrder(" LaunchedDate"), searchTerm)">
+                                Launched
+                                <i class="bi @(sortColumn == " LaunchedDate" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+
+                        <th style="width:11%">SDLC Phase</th>
+
+                        <th class="sortable" scope="col" style="width:15%">
+                            <a href="@BuildUrl(1, pageSize, " Price", ToggleSortOrder(" Price"), searchTerm)">
+                                Solution Value
+                                <i class="bi @(sortColumn == " Price" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+
+                        <th class="sortable" scope="col" style="width:26%">
+                            <a href="@BuildUrl(1, pageSize, " Comment", ToggleSortOrder(" Comment"), searchTerm)">
+                                Comment
+                                <i class="bi @(sortColumn == " Comment" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
+
+                        <th style="width:5%" class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (Model != null && Model.Any())
                     {
-                        @foreach (var item in Model)
+                        foreach (var item in Model)
                         {
                             <tr>
-                                <td title="@item.AppName"><strong>@item.AppName</strong></td>
-                                <td title="@(item.DevelopedBy?.EmpName ?? "N/A")">@(item.DevelopedBy?.EmpName ?? "N/A")</td>
+                                <td>
+
+                                    <div class="fw-semibold text-truncate" title="@item.AppName">@item.AppName</div>
+                                    @if (!string.IsNullOrEmpty(item.MainAppName))
+                                    {
+                                        <div class="small text-primary fst-italic mt-1">
+                                            <i class="bi bi-arrow-return-right"></i> CR of @item.MainAppName
+                                        </div>
+                                    }
+
+                                </td>
+                                <td title="@(item.DevelopedBy?.EmpName)">
+                                    <div class="text-truncate">@(item.DevelopedBy?.EmpName ?? "-")</div>
+                                </td>
                                 <td>
                                     @if (item.LaunchedDate.HasValue)
                                     {
-                                        <i class="bi bi-calendar3 text-muted"></i>
-                                        @item.LaunchedDate.Value.ToString("yyyy-MM-dd")
+                                        <span class="text-nowrap">
+
+                                            @item.LaunchedDate.Value.ToString("MMM dd, yyyy")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
                                     }
                                 </td>
                                 <td>
-                                    <span class="badge-custom badge-secondary-custom">@(item.SDLCPhase?.Phase ?? "N/A")</span>
+                                    @{
+                                        var phaseName = item.SDLCPhase?.Phase ?? "";
+                                        var p = phaseName.ToLower().Trim();
+                                        var badgeClass = "status-badge status-badge-default";
+
+                                        if (p.Contains("retired")) { badgeClass = "status-badge status-badge-retired"; }
+
+                                    }
+                                    <span class="@badgeClass">
+                                        @(string.IsNullOrEmpty(phaseName) ? "-" : phaseName)
+                                    </span>
                                 </td>
-                                <td>Rs. @(item.Price?.ToString("N2") ?? "0.00")</td>
+                                <td>
+                                    @(item.Price.HasValue ? $"Rs.{item.Price.Value:N2}" : "-")
+                                </td>
                                 <td title="@(item.DPOHandoverComment ?? "")">
                                     @(item.DPOHandoverComment ?? "")
                                 </td>
                                 <td class="text-center">
-                                    <a asp-action="ViewDetails"
-                                       asp-route-id="@item.Id"
-                                       class="view-details-btn"
+                                    <a asp-action="ViewDetails" asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-info"
                                        title="View Details">
-                                        <i class="bi bi-eye fs-5"></i>
+                                        <i class="bi bi-eye"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -351,8 +424,9 @@
                     {
                         <tr>
                             <td colspan="7" class="empty-state">
-                                <i class="bi bi-inbox"></i>
+                                <i class="bi bi-search fs-1 mb-2"></i>
                                 <p class="mb-0">No retired solutions found</p>
+                                <small class="text-muted">Try adjusting your search terms.</small>
                             </td>
                         </tr>
                     }
@@ -361,45 +435,35 @@
         </div>
     </div>
 
-    <!-- Export Button -->
-    <div class="mt-3 d-flex justify-content-start gap-2">
-        <a asp-action="ExportToExcel" class="btn-export-excel" title="Export to Excel">
+    @* --- Excel Button --- *@
+    <div class="mt-3 d-flex justify-content-start">
+        <a asp-action="ExportAllToExcel" class="btn-export-excel" title="Export to Excel">
             <i class="bi bi-file-earmark-excel"></i>
             <span>Export to Excel</span>
         </a>
     </div>
 
-    <!-- Pagination -->
-    @{
-        var totalPages = (int)Math.Ceiling((double)ViewBag.TotalRecords / ViewBag.PageSize);
-    }
+    @* --- Pagination --- *@
     @if (totalPages > 1)
     {
-        <div class="row mt-3 align-items-center">
+        <div class="row mt-3 align-items-center mb-5">
             <div class="col-md-6">
-                <p class="text-muted mb-0">Showing @Model.Count of @ViewBag.TotalRecords entries</p>
+                <p class="text-muted mb-0">Showing @startRecord to @endRecord of @totalRecords entries</p>
             </div>
             <div class="col-md-6">
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-end mb-0">
-                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)"
-                               asp-route-search="@ViewBag.SearchTerm" asp-route-sortColumn="@ViewBag.SortColumn"
-                               asp-route-sortOrder="@ViewBag.SortOrder">Previous</a>
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@BuildUrl(Math.Max(1, currentPage - 1))">Previous</a>
                         </li>
-
                         @for (int i = 1; i <= totalPages; i++)
                         {
-                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                                <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.SearchTerm"
-                                   asp-route-sortColumn="@ViewBag.SortColumn" asp-route-sortOrder="@ViewBag.SortOrder">@i</a>
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@BuildUrl(i)">@i</a>
                             </li>
                         }
-
-                        <li class="page-item @(ViewBag.CurrentPage == totalPages ? "disabled" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)"
-                               asp-route-search="@ViewBag.SearchTerm" asp-route-sortColumn="@ViewBag.SortColumn"
-                               asp-route-sortOrder="@ViewBag.SortOrder">Next</a>
+                        <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@BuildUrl(Math.Min(totalPages, currentPage + 1))">Next</a>
                         </li>
                     </ul>
                 </nav>
@@ -407,3 +471,9 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+
+    </script>
+}

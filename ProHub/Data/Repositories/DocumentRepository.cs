@@ -41,7 +41,9 @@ namespace ProHub.Data
             return externalPlatformId ?? 2; // Fallback to 2 if not found in Main_Platforms table
         }
 
-        public List<Document> GetInternalDocuments(string search, int page, int pageSize)
+
+        //  GetInternalDocuments Method 
+        public List<Document> GetInternalDocuments(string search, int? solutionId, int page, int pageSize)
         {
             var list = new List<Document>();
             using var conn = GetConnection();
@@ -50,18 +52,24 @@ namespace ProHub.Data
             // Get the correct platform ID for internal documents
             var internalPlatformId = GetInternalPlatformId();
 
+
             string sql = @"
-                SELECT d.*, ip.App_Name AS SolutionName, e.Emp_Name AS CreatedByName
-                FROM Document d
-                LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
-                LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
-                WHERE d.Platform_ID = @platformId 
-                  AND (d.Doc_Name LIKE @search OR ip.App_Name LIKE @search OR e.Emp_Name LIKE @search)
-                ORDER BY d.Created_Time DESC
-                LIMIT @offset, @pageSize";
+        SELECT d.*, ip.App_Name AS SolutionName, e.Emp_Name AS CreatedByName
+        FROM Document d
+        LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
+        LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+        WHERE d.Platform_ID = @platformId 
+          AND (@solutionId IS NULL OR d.Solution_ID = @solutionId)
+          AND (d.Doc_Name LIKE @search OR ip.App_Name LIKE @search OR e.Emp_Name LIKE @search)
+        ORDER BY d.Created_Time DESC
+        LIMIT @offset, @pageSize";
 
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@platformId", internalPlatformId);
+
+
+            cmd.Parameters.AddWithValue("@solutionId", solutionId ?? (object)DBNull.Value);
+
             cmd.Parameters.AddWithValue("@search", $"%{search}%");
             cmd.Parameters.AddWithValue("@offset", (page - 1) * pageSize);
             cmd.Parameters.AddWithValue("@pageSize", pageSize);
@@ -93,27 +101,62 @@ namespace ProHub.Data
             return list;
         }
 
-        public List<Document> GetExternalDocuments(string search, int page, int pageSize)
+
+        public int GetInternalDocumentCount(string search, int? solutionId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            var internalPlatformId = GetInternalPlatformId();
+
+
+            string sql = @"
+        SELECT COUNT(*) 
+        FROM Document d
+        LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
+        LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+        WHERE d.Platform_ID = @platformId 
+          AND (@solutionId IS NULL OR d.Solution_ID = @solutionId)
+          AND (d.Doc_Name LIKE @search OR ip.App_Name LIKE @search OR e.Emp_Name LIKE @search)";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@platformId", internalPlatformId);
+
+
+            cmd.Parameters.AddWithValue("@solutionId", solutionId ?? (object)DBNull.Value);
+
+            cmd.Parameters.AddWithValue("@search", $"%{search}%");
+            return Convert.ToInt32(cmd.ExecuteScalar());
+        }
+
+
+
+        // Repositories/DocumentRepository.cs  Methods 
+
+        // 1. GetExternalDocuments Method  'int solutionId' 
+        public List<Document> GetExternalDocuments(string search, int? solutionId, int page, int pageSize)
         {
             var list = new List<Document>();
             using var conn = GetConnection();
             conn.Open();
 
-            // Get the correct platform ID for external documents
             var externalPlatformId = GetExternalPlatformId();
 
+            // SQL Query  solutionId check 
             string sql = @"
-                SELECT d.*, ep.Platform_Name AS SolutionName, e.Emp_Name AS CreatedByName
-                FROM Document d
-                LEFT JOIN External_Platforms ep ON d.Solution_ID = ep.ID
-                LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
-                WHERE d.Platform_ID = @platformId 
-                  AND (d.Doc_Name LIKE @search OR ep.Platform_Name LIKE @search OR e.Emp_Name LIKE @search)
-                ORDER BY d.Created_Time DESC
-                LIMIT @offset, @pageSize";
+        SELECT d.*, ep.Platform_Name AS SolutionName, e.Emp_Name AS CreatedByName
+        FROM Document d
+        LEFT JOIN External_Platforms ep ON d.Solution_ID = ep.ID
+        LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+        WHERE d.Platform_ID = @platformId 
+          AND (@solutionId IS NULL OR d.Solution_ID = @solutionId) -- New Filter
+          AND (d.Doc_Name LIKE @search OR ep.Platform_Name LIKE @search OR e.Emp_Name LIKE @search)
+        ORDER BY d.Created_Time DESC
+        LIMIT @offset, @pageSize";
 
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@platformId", externalPlatformId);
+            cmd.Parameters.AddWithValue("@solutionId", solutionId ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@search", $"%{search}%");
             cmd.Parameters.AddWithValue("@offset", (page - 1) * pageSize);
             cmd.Parameters.AddWithValue("@pageSize", pageSize);
@@ -121,6 +164,7 @@ namespace ProHub.Data
             using var r = cmd.ExecuteReader();
             while (r.Read())
             {
+                // (Data Mapping)
                 int solutionNameCol = r.GetOrdinal("SolutionName");
                 int createdByNameCol = r.GetOrdinal("CreatedByName");
 
@@ -139,30 +183,31 @@ namespace ProHub.Data
                     SolutionName = r.IsDBNull(solutionNameCol) ? "None" : r.GetString(solutionNameCol),
                     CreatedByName = r.IsDBNull(createdByNameCol) ? "Unknown" : r.GetString(createdByNameCol)
                 };
-
                 list.Add(doc);
             }
             return list;
         }
 
-        public int GetInternalDocumentCount(string search)
+        // 2. Adding 'int? solutionId' to the GetExternalDocumentCount Method
+        public int GetExternalDocumentCount(string search, int? solutionId)
         {
             using var conn = GetConnection();
             conn.Open();
 
-            // Get the correct platform ID for internal documents
-            var internalPlatformId = GetInternalPlatformId();
+            var externalPlatformId = GetExternalPlatformId();
 
             string sql = @"
-                SELECT COUNT(*) 
-                FROM Document d
-                LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
-                LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
-                WHERE d.Platform_ID = @platformId 
-                  AND (d.Doc_Name LIKE @search OR ip.App_Name LIKE @search OR e.Emp_Name LIKE @search)";
+        SELECT COUNT(*) 
+        FROM Document d
+        LEFT JOIN External_Platforms ep ON d.Solution_ID = ep.ID
+        LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+        WHERE d.Platform_ID = @platformId 
+          AND (@solutionId IS NULL OR d.Solution_ID = @solutionId) -- New Filter
+          AND (d.Doc_Name LIKE @search OR ep.Platform_Name LIKE @search OR e.Emp_Name LIKE @search)";
 
             using var cmd = new MySqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@platformId", internalPlatformId);
+            cmd.Parameters.AddWithValue("@platformId", externalPlatformId);
+            cmd.Parameters.AddWithValue("@solutionId", solutionId ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@search", $"%{search}%");
             return Convert.ToInt32(cmd.ExecuteScalar());
         }

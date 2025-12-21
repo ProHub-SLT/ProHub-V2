@@ -808,9 +808,9 @@
             // --- 5. Popup Logic ---
             @if (TempData["SuccessMessage"] != null)
             {
-                            <text>
-                            document.getElementById('successPopup').classList.remove('hidden');
-                            </text>
+                                <text>
+                                document.getElementById('successPopup').classList.remove('hidden');
+                                </text>
             }
 
             document.getElementById('popupCloseBtn').addEventListener('click', function () {
@@ -824,23 +824,23 @@
 
         if (statusDropdown && statusDateInput) {
             statusDropdown.addEventListener('change', function () {
-                // Status ???? ???? ?????? ????? ???? update ?????
+                // Status 
                 if (this.value !== "") {
                     const today = new Date();
 
-                    // ???? YYYY-MM-DD format ??? ???? ?????
+                    // ???? YYYY-MM-DD format 
                     const year = today.getFullYear();
                     const month = String(today.getMonth() + 1).padStart(2, '0');
                     const day = String(today.getDate()).padStart(2, '0');
 
                     const formattedDate = `${year}-${month}-${day}`;
 
-                    // StatusDate input ??? ???? ??? ??? ???
+                    // StatusDate input 
                     statusDateInput.value = formattedDate;
 
-                    console.log("Status changed. Date updated to: " + formattedDate); // Testing purpose
+                    console.log("Status changed. Date updated to: " + formattedDate); 
                 } else {
-                    // Status ?? clear ????? ?????? clear ???????? ??? ????? ?????? ?????
+                   
                     statusDateInput.value = "";
                 }
             });

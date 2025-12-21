@@ -156,7 +156,7 @@ builder.Services.AddScoped<IEmployeePermissionRepository, EmployeePermissionRepo
 builder.Services.AddScoped<IInternalSolutionInprogressService, InternalSolutionInprogressDataAccess>();
 builder.Services.AddScoped<IExternalSolutionsProspectiveService, ExternalSolutionsProspectiveDataAccess>();
 builder.Services.AddScoped<ProHub.Data.CompanyRepository>();
-
+builder.Services.AddScoped<IRecentlyLaunchedService, RecentlyLaunchedDataAccess>();
 
 
 

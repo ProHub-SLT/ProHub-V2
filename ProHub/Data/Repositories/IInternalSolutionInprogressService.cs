@@ -46,13 +46,13 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             // --- SQL Query Updated ---
-            // MainAppName එක ලබා ගැනීමට පහත JOIN එක සහ Column එක එකතු කළා
+           
             string query = @"
         SELECT ip.*, 
                e.Emp_Name AS DevelopedByName, 
                sp.Phase AS SDLCPhaseName, 
                pr.ParentProjectGroup AS ParentProjectName,
-               parent.App_Name AS MainAppName,  -- <--- අලුතෙන් එකතු කළ කොටස (For CR Name)
+               parent.App_Name AS MainAppName,  
                (SELECT COUNT(*) FROM Internal_Project_Comments WHERE Solution_ID = ip.ID) AS CommentCount
         FROM internal_platforms ip
         LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
@@ -104,7 +104,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             // Step A: Get Main Solution Data
-            // මෙතනත් MainAppName එක ගන්න ඕන, නැත්නම් MapReaderToModel එකේදී Error එකක් එන්න පුළුවන්
+           
             const string query = @"
                 SELECT ip.*, 
                        e.Emp_Name AS DevelopedByName, 
@@ -307,7 +307,7 @@ namespace PROHUB.Data
             {
                 Id = GetInt32(r, "ID"),
                 AppName = GetNullableString(r, "App_Name"),
-                MainAppName = GetNullableString(r, "MainAppName"), // <--- අලුතෙන් එකතු කළ කොටස (Assigning to Model)
+                MainAppName = GetNullableString(r, "MainAppName"), 
                 DevelopedById = GetNullableInt32(r, "Developed_By"),
                 DevelopedTeam = GetNullableString(r, "Developed_Team"),
                 StartDate = GetNullableDateTime(r, "StartDate"),

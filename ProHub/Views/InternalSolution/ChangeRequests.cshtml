@@ -50,6 +50,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
 <style>
+    /* --- Base Styles --- */
     body {
         margin: 0;
         background: url('/images/bg.jpg') no-repeat center center fixed;
@@ -58,7 +59,6 @@
         position: relative;
     }
 
-        /* Blur overlay */
         body::before {
             content: "";
             position: absolute;
@@ -71,6 +71,7 @@
             z-index: -1;
         }
 
+    /* --- Table Styles --- */
     .data-table-wrapper {
         background: white;
         border-radius: 10px;
@@ -130,12 +131,12 @@
                 background-color: #f8f9fa;
             }
 
-        /* Action column */
         .table tbody td:last-child {
             white-space: normal;
             overflow: visible;
         }
 
+    /* --- Toolbar Styling --- */
     .toolbar-wrapper {
         background: white;
         border-radius: 12px;
@@ -148,29 +149,7 @@
             transition: box-shadow 0.2s ease;
         }
 
-    .btn-create-new {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.6rem 1.25rem;
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: #fff;
-        font-weight: 600;
-        font-size: 0.85rem;
-        border: none;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
-    }
-
-        .btn-create-new:hover {
-            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-            color: #fff;
-        }
-
+    /* --- Buttons --- */
     .btn-search {
         background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
         color: white;
@@ -188,33 +167,95 @@
             color: white;
         }
 
-    /* Custom Tabs Styling */
-    .nav-tabs {
-        border-bottom: none;
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
         gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
     }
 
-        .nav-tabs .nav-link {
-            border: none;
-            background: white;
-            color: #495057;
-            font-weight: 500;
-            border-radius: 8px !important;
-            padding: 0.6rem 1.2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
+        .btn-back:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+            color: #fff;
         }
 
-            .nav-tabs .nav-link.active {
-                background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
-                color: white;
-                box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
-            }
+    /* --- Status Badges --- */
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        white-space: nowrap;
+        border: 1px solid transparent;
+    }
 
-            .nav-tabs .nav-link:hover:not(.active) {
-                background: #e9ecef;
-                transform: translateY(-1px);
-            }
+    .status-badge-prep {
+        background-color: #f2f2f2;
+        color: #616161;
+        border-color: #d6d6d6;
+    }
+
+    .status-badge-submitted {
+        background-color: #e1f5fe;
+        color: #0277bd;
+        border-color: #b3e5fc;
+    }
+
+    .status-badge-req {
+        background-color: #e8eaf6;
+        color: #283593;
+        border-color: #c5cae9;
+    }
+
+    .status-badge-design {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+        border-color: #e1bee7;
+    }
+
+    .status-badge-coding {
+        background-color: #fff3e0;
+        color: #ef6c00;
+        border-color: #ffe0b2;
+    }
+
+    .status-badge-testing {
+        background-color: #fff8e1;
+        color: #ff8f00;
+        border-color: #ffecb3;
+    }
+
+    .status-badge-deploy {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-color: #c8e6c9;
+    }
+
+    .status-badge-maintenance {
+        background-color: #cfe2ff;
+        color: #084298;
+        border-color: #b6d4fe;
+    }
+
+    .status-badge-default {
+        background-color: #ffffff;
+        color: #424242;
+        border-color: #e0e0e0;
+    }
 
     .empty-state {
         text-align: center;
@@ -227,267 +268,17 @@
             margin-bottom: 1rem;
             color: #dee2e6;
         }
-
-    /* Delete Modal Styles */
-    .delete-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.45);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-    }
-
-        .delete-modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-    .delete-modal-content {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem 3rem;
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        max-width: 450px;
-        width: 90%;
-        border-top: 6px solid #dc3545;
-        animation: modalSlideIn 0.4s ease forwards;
-        transform: scale(0.7);
-    }
-
-    .delete-modal-overlay.show .delete-modal-content {
-        transform: scale(1);
-    }
-
-    @@keyframes modalSlideIn {
-        from {
-            transform: scale(0.7) translateY(-50px);
-            opacity: 0;
-        }
-
-        to {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .delete-modal-content i.warning-icon {
-        font-size: 3.5rem;
-        color: #dc3545;
-        margin-bottom: 1rem;
-        animation: iconPulse 1.5s ease-in-out infinite;
-    }
-
-    @@keyframes iconPulse {
-        0%, 100% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.1);
-        }
-    }
-
-    .delete-modal-content h4 {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.75rem;
-        font-size: 1.5rem;
-    }
-
-    .delete-modal-content p {
-        font-size: 1rem;
-        color: #718096;
-        margin-bottom: 0.5rem;
-    }
-
-    .delete-modal-content .item-name {
-        font-weight: 600;
-        color: #dc3545;
-        font-size: 1.1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .delete-modal-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-top: 2rem;
-    }
-
-    .btn-modal-cancel {
-        padding: 0.75rem 1.75rem;
-        background: white;
-        color: #495057;
-        font-weight: 600;
-        border: 2px solid #dee2e6;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.95rem;
-    }
-
-        .btn-modal-cancel:hover {
-            background: #f8f9fa;
-            border-color: #adb5bd;
-            transform: translateY(-1px);
-        }
-
-    .btn-modal-delete {
-        padding: 0.75rem 1.75rem;
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        color: white;
-        font-weight: 600;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
-        font-size: 0.95rem;
-    }
-
-        .btn-modal-delete:hover {
-            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.35);
-        }
-
-    /* Success Modal */
-    .success-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.45);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-    }
-
-        .success-modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-    .success-modal-content {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem 3rem;
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        max-width: 420px;
-        width: 90%;
-        border-top: 6px solid #28a745;
-        animation: modalSlideIn 0.4s ease forwards;
-        transform: scale(0.7);
-    }
-
-    .success-modal-overlay.show .success-modal-content {
-        transform: scale(1);
-    }
-
-    .success-modal-content i {
-        font-size: 3rem;
-        color: #28a745;
-        margin-bottom: 1rem;
-    }
-
-    .success-modal-content h4 {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-    }
-
-    .success-modal-content p {
-        font-size: 0.95rem;
-        color: #718096;
-        margin-bottom: 1.5rem;
-    }
-
-    .btn-modal-ok {
-        padding: 0.75rem 2rem;
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        border: none;
-        border-radius: 8px;
-        color: #fff;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
-        font-size: 0.95rem;
-    }
-
-        .btn-modal-ok:hover {
-            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
-        }
-
-    .btn-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.65rem 1.5rem;
-        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-        color: #fff;
-        font-weight: 600;
-        font-size: 0.9rem;
-        border: none;
-        border-radius: 10px;
-        text-decoration: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.25);
-    }
-
-        .btn-back:hover {
-            background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.35);
-            color: #fff;
-        }
-
-        .btn-back i {
-            font-size: 1rem;
-            transition: transform 0.3s ease;
-        }
-
-        .btn-back:hover i {
-            transform: translateX(-3px);
-        }
-
-    /* Simple status badge style (if needed) */
-    .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.6rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        background: #e9f5ff;
-        color: #0056b3;
-    }
 </style>
 
 <div class="container-fluid mt-4">
     @* --- Header / Title --- *@
     <div class="d-flex align-items-center mb-4">
-        <h1 class="text-primary mb-0 me-2">Change Requests of - </h1>
-        <h1 class="text-dark mb-0 fst-italic">
+        <h1 class="text-primary mb-0 me-2" style="font-weight: 600;">Change Requests of - </h1>
+        <h1 class="text-primary mb-0 me-2 fst-italic" style="font-weight: 300;">
             @ViewBag.MainAppName
         </h1>
     </div>
+
 
     @* --- Inline Toolbar --- *@
     <div class="toolbar-wrapper mb-4">
@@ -539,31 +330,31 @@
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th style="width: 30%;">
+                        <th class="sortable" style="width: 25%;">
                             <a href="@BuildUrl(mainAppId, 1, pageSize, "AppName", ToggleSortOrder("AppName"), searchTerm)">
                                 Application Name
                                 <i class="bi @(sortColumn == "AppName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1"></i>
                             </a>
                         </th>
-                        <th style="width: 25%;">
+                        <th class="sortable" style="width: 20%;">
                             <a href="@BuildUrl(mainAppId, 1, pageSize, "DevelopedByName", ToggleSortOrder("DevelopedByName"), searchTerm)">
                                 Developed By
                                 <i class="bi @(sortColumn == "DevelopedByName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1"></i>
                             </a>
                         </th>
-                        <th style="width: 15%; text-align: right;">
+                        <th class="sortable" style="width: 15%;">
                             <a href="@BuildUrl(mainAppId, 1, pageSize, "Price", ToggleSortOrder("Price"), searchTerm)">
                                 Solution Value
                                 <i class="bi @(sortColumn == "Price" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1"></i>
                             </a>
                         </th>
-                        <th style="width: 15%;">
+                        <th class="sortable" style="width: 22%;">
                             <a href="@BuildUrl(mainAppId, 1, pageSize, "SDLCPhaseName", ToggleSortOrder("SDLCPhaseName"), searchTerm)">
                                 SDLC Phase
                                 <i class="bi @(sortColumn == "SDLCPhaseName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1"></i>
                             </a>
                         </th>
-                        <th style="width: 10%; text-align: center;">Actions</th>
+                        <th style="width: 8%; text-align: center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -572,14 +363,31 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td class="fw-semibold text-secondary">@item.AppName</td>
+                                <td title="@item.AppName">
+                                    <div class="fw-semibold text-truncate">@item.AppName</div>
+                                </td>
                                 <td>@(item.DevelopedByName ?? "N/A")</td>
-                                <td class="text-end fw-bold text-dark">
-                                    @(item.Price.HasValue ? string.Format("{0:N2}", item.Price) : "0.00")
+                                <td>
+                                    @(item.Price.HasValue ? $"Rs.{item.Price.Value:N2}" : "-")
                                 </td>
                                 <td>
-                                    <span class="status-badge">
-                                        @(item.SDLCPhaseName ?? "Maintenance")
+                                    @{
+                                        // Logic to apply color badges based on Phase name
+                                        var phaseName = item.SDLCPhaseName ?? "Maintenance";
+                                        var p = phaseName.ToLower().Trim();
+                                        var badgeClass = "status-badge status-badge-default";
+
+                                        if (p.Contains("proposal preparation")) { badgeClass = "status-badge status-badge-prep"; }
+                                        else if (p.Contains("proposal submitted")) { badgeClass = "status-badge status-badge-submitted"; }
+                                        else if (p.Contains("requirement") || p.Contains("gathering")) { badgeClass = "status-badge status-badge-req"; }
+                                        else if (p.Contains("design")) { badgeClass = "status-badge status-badge-design"; }
+                                        else if (p.Contains("coding") || p.Contains("implementation") || p.Contains("development")) { badgeClass = "status-badge status-badge-coding"; }
+                                        else if (p.Contains("testing") || p.Contains("qa")) { badgeClass = "status-badge status-badge-testing"; }
+                                        else if (p.Contains("deployment") || p.Contains("completed") || p.Contains("live")) { badgeClass = "status-badge status-badge-deploy"; }
+                                        else if (p.Contains("maintenance")) { badgeClass = "status-badge status-badge-maintenance"; }
+                                    }
+                                    <span class="@badgeClass">
+                                        @phaseName
                                     </span>
                                 </td>
                                 <td class="text-center">

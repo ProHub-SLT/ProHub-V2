@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using ProHub.Models;
 using PROHUB.Data;
 using System;
 using System.Collections.Generic;
+using System.Composition;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ClosedXML.Excel;
-using System.IO;
 
 namespace PROHUB.Controllers
 {
@@ -309,9 +310,11 @@ namespace PROHUB.Controllers
         [HttpGet]
         public IActionResult Folder(int id)
         {
-            TempData["SuccessMessage"] = $"Folder view for ID {id} (placeholder).";
-            return RedirectToAction(nameof(Index));
+
+            return RedirectToAction("Index", "InternalDocuments", new { solutionId = id });
         }
+
+
 
         [HttpGet]
         public IActionResult Settings(int id)
@@ -407,6 +410,7 @@ namespace PROHUB.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+        // ------------------ Export Excel ------------------
         public async Task<IActionResult> ExportToExcel(
             string tab = "operational",
             string sortColumn = "AppName",
@@ -429,16 +433,17 @@ namespace PROHUB.Controllers
                 {
                     // Filter: Maintenance Only
                     filtered = filtered.Where(x => string.Equals(x.SDLCPhaseName, "Maintenance", StringComparison.OrdinalIgnoreCase));
-                    fileNamePrefix = "Operational_Solutions";
+                    fileNamePrefix = "Internal Solutions - Operational";
                 }
                 else if (tab == "withoutcr" || tab == "without_cr")
                 {
                     // Filter: Maintenance AND Main Application (No CRs)
                     filtered = filtered.Where(x => string.Equals(x.SDLCPhaseName, "Maintenance", StringComparison.OrdinalIgnoreCase));
                     filtered = filtered.Where(x => string.Equals(x.AppCategory, "Main Application", StringComparison.OrdinalIgnoreCase));
-                    fileNamePrefix = "Operational_Solutions_NoCR";
+                    fileNamePrefix = "Internal Solutions - Operational Without CR";
                 }
 
+                // ... (Search Logic & Sort Logic remain the same) ...
                 // --- SEARCH LOGIC ---
                 if (!string.IsNullOrWhiteSpace(search))
                 {
@@ -472,26 +477,31 @@ namespace PROHUB.Controllers
                     var worksheet = workbook.Worksheets.Add("Solutions");
                     int colIndex = 1;
 
-                    // --- A. DEFINE HEADERS BASED ON TAB ---
-                    List<string> headers;
+                    // --- A. DEFINE HEADERS ---
 
-                    if (tab == "withoutcr" || tab == "without_cr")
+                    var headers = new List<string> {
+                "Application Group",    // 1
+                "Application Name",     // 2
+                "Application Category", // 3
+                "Developed By",         // 4
+                "Application URL",      // 5
+                "Hosted Server IP",     // 6
+                "SDLC Phase",           // 7
+                "Start Date",           // 8
+                "Target Date",          // 9
+                "VA Date",              // 10
+                "Launched Date",        // 11
+                "Percentage Done",      // 12
+                "Current Status",       // 13
+                "Price (Rs)"            // 14
+            };
+
+
+                    bool showMainApp = !(tab == "withoutcr" || tab == "without_cr");
+
+                    if (showMainApp)
                     {
-                        // Columns for "Operational without CR"
-                        headers = new List<string> {
-                    "Application Group", "Application Name", "Category", "Developed By",
-                    "SDLC Phase", "Start Date", "Target Date", "UD",
-                    "VA Date", "Price (Rs)", "Platform Owner", "Main App"
-                };
-                    }
-                    else
-                    {
-                        // Default Columns for "Operational"
-                        headers = new List<string> {
-                   "Application Group", "Application Name", "Category", "Developed By",
-                    "SDLC Phase", "Start Date", "Target Date", "UD",
-                    "VA Date", "Price (Rs)", "Platform Owner", "Main App"
-                };
+                        headers.Add("Main App"); // 15
                     }
 
                     // --- B. WRITE HEADERS ---
@@ -511,37 +521,26 @@ namespace PROHUB.Controllers
                     int row = 2;
                     foreach (var item in dataList)
                     {
-                        int col = 1; // Reset column counter for each row
+                        int col = 1;
 
-                        // 1. Common Columns
                         worksheet.Cell(row, col++).Value = item.ParentProjectGroupName;
                         worksheet.Cell(row, col++).Value = item.AppName;
                         worksheet.Cell(row, col++).Value = item.AppCategory;
                         worksheet.Cell(row, col++).Value = item.DevelopedByName;
+                        worksheet.Cell(row, col++).Value = item.AppURL;
+                        worksheet.Cell(row, col++).Value = item.AppIP;
+                        worksheet.Cell(row, col++).Value = item.SDLCPhaseName;
+                        worksheet.Cell(row, col++).Value = item.StartDate;
+                        worksheet.Cell(row, col++).Value = item.TargetDate;
+                        worksheet.Cell(row, col++).Value = item.VADate;
+                        worksheet.Cell(row, col++).Value = item.LaunchedDate;
+                        worksheet.Cell(row, col++).Value = item.PercentageDone;
+                        worksheet.Cell(row, col++).Value = item.Status;
+                        worksheet.Cell(row, col++).Value = item.Price;
 
-                        // 2. Tab Specific Columns
-                        if (tab == "withoutcr" || tab == "without_cr")
+
+                        if (showMainApp)
                         {
-                            // Specific Data for Without CR (Matches headers defined above)
-                            worksheet.Cell(row, col++).Value = item.SDLCPhaseName;
-                            worksheet.Cell(row, col++).Value = item.StartDate;
-                            worksheet.Cell(row, col++).Value = item.TargetDate;
-                            worksheet.Cell(row, col++).Value = item.AppUsers;
-                            worksheet.Cell(row, col++).Value = item.VADate;
-                            worksheet.Cell(row, col++).Value = item.Price;
-                            worksheet.Cell(row, col++).Value = item.PlatformOwner;
-                            worksheet.Cell(row, col++).Value = item.MainAppName;
-                        }
-                        else
-                        {
-                            // Specific Data for Operational (Matches headers defined above)
-                            worksheet.Cell(row, col++).Value = item.SDLCPhaseName;
-                            worksheet.Cell(row, col++).Value = item.StartDate;
-                            worksheet.Cell(row, col++).Value = item.TargetDate;
-                            worksheet.Cell(row, col++).Value = item.AppUsers;
-                            worksheet.Cell(row, col++).Value = item.VADate;
-                            worksheet.Cell(row, col++).Value = item.Price;
-                            worksheet.Cell(row, col++).Value = item.PlatformOwner;
                             worksheet.Cell(row, col++).Value = item.MainAppName;
                         }
 
@@ -562,7 +561,7 @@ namespace PROHUB.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Export failed");
-                TempData["ErrorMessage"] = "Failed to export data.";
+                TempData["ErrorMessage"] = "Failed to export data: " + ex.Message;
                 return RedirectToAction(nameof(Index), new { tab = tab });
             }
         }

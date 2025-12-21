@@ -25,10 +25,13 @@ namespace ProHub.Controllers
             _empRepo = empRepo;
         }
 
+        // Controllers/ExternalDocumentsController.cs
+
         public IActionResult Index(string search = "", int page = 1, int pageSize = 10)
         {
-            var docs = _docRepo.GetExternalDocuments(search, page, pageSize);
-            int total = _docRepo.GetExternalDocumentCount(search);
+
+            var docs = _docRepo.GetExternalDocuments(search, null, page, pageSize);
+            int total = _docRepo.GetExternalDocumentCount(search, null);
 
             ViewBag.Search = search;
             ViewBag.Page = page;
@@ -36,7 +39,34 @@ namespace ProHub.Controllers
             ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
             ViewBag.TotalCount = total;
 
+
+            ViewBag.CurrentSolutionId = null;
+
             return View(docs);
+        }
+
+
+        public IActionResult Folder(int id, string search = "", int page = 1, int pageSize = 10)
+        {
+
+            var docs = _docRepo.GetExternalDocuments(search, id, page, pageSize);
+            int total = _docRepo.GetExternalDocumentCount(search, id);
+
+
+            var solution = _externalRepo.GetAll().FirstOrDefault(x => x.Id == id);
+            ViewBag.SolutionName = solution?.PlatformName ?? "Unknown Solution";
+
+            ViewBag.Search = search;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
+            ViewBag.TotalCount = total;
+
+
+            ViewBag.CurrentSolutionId = id;
+
+
+            return View("Index", docs);
         }
 
         [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer}")]

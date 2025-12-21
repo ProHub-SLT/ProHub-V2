@@ -42,7 +42,7 @@ namespace PROHUB.Controllers
                 ViewData["PageSize"] = pageSize;
                 ViewData["ActiveTab"] = activeTab;
 
-                // --- ERROR WAS HERE: "return View(pagedItems);" was here before pagedItems existed. I REMOVED IT. ---
+
 
                 // 4. Sorting Logic
                 switch (sortColumn)
@@ -304,8 +304,23 @@ namespace PROHUB.Controllers
                     string sheetName = (activeTab == "level1") ? "Level 1 Solutions" : "Other Solutions";
                     var worksheet = workbook.Worksheets.Add(sheetName);
 
-                    // --- HEADERS ---
-                    string[] headers = { "Application Group", "Application Name", "Developed By", "SDLC Phase", "Start Date", "Target Date", "Users", "Price (Rs)" };
+                    // --- HEADERS (Updated to match your list) ---
+                    string[] headers = {
+                "Application Group",   // AppGroup
+                "Application Name",    // App_Name
+                "Developed By",        // Developed_By
+                "Application URL",     // App_URL
+                "Application IP",      // App_IP
+                "SDLC Phase",          // SDLC_Stage
+                "Start Date",          // Start_Date
+                "Target Date",         // Target_Date
+                "VA Date",             // VA_Date
+                "Percentage Done",     // Percentage_Done
+                "Launched Date",       // Launched_Date
+                "Current Status",      // Current_Status
+                "Price (Rs)",          // Price
+                "Launched Date"        // Launched_Year
+            };
 
                     for (int i = 0; i < headers.Length; i++)
                     {
@@ -322,29 +337,70 @@ namespace PROHUB.Controllers
                     int row = 2;
                     foreach (var item in filteredItems)
                     {
+                        // 1. AppGroup
                         worksheet.Cell(row, 1).Value = item.ParentProject?.ParentProjectGroup ?? item.AppCategory ?? "-";
-                        worksheet.Cell(row, 2).Value = item.AppName;
-                        worksheet.Cell(row, 3).Value = item.DevelopedBy?.EmpName ?? "-";
-                        worksheet.Cell(row, 4).Value = item.SDLCPhase?.Phase ?? "-";
 
+                        // 2. App_Name
+                        worksheet.Cell(row, 2).Value = item.AppName;
+
+                        // 3. Developed_By
+                        worksheet.Cell(row, 3).Value = item.DevelopedBy?.EmpName ?? "-";
+
+                        // 4. App_URL (Verify property name 'AppURL' in your model)
+                        worksheet.Cell(row, 4).Value = item.AppURL ?? "-";
+
+                        // 5. App_IP (Verify property name 'AppIP' in your model)
+                        worksheet.Cell(row, 5).Value = item.AppIP ?? "-";
+
+                        // 6. SDLC_Stage
+                        worksheet.Cell(row, 6).Value = item.SDLCPhase?.Phase ?? "-";
+
+                        // 7. Start_Date
                         if (item.StartDate.HasValue)
                         {
-                            worksheet.Cell(row, 5).Value = item.StartDate.Value;
-                            worksheet.Cell(row, 5).Style.DateFormat.Format = "MMM dd, yyyy";
+                            worksheet.Cell(row, 7).Value = item.StartDate.Value;
+                            worksheet.Cell(row, 7).Style.DateFormat.Format = "MMM dd, yyyy";
                         }
 
+                        // 8. Target_Date
                         if (item.TargetDate.HasValue)
                         {
-                            worksheet.Cell(row, 6).Value = item.TargetDate.Value;
-                            worksheet.Cell(row, 6).Style.DateFormat.Format = "MMM dd, yyyy";
+                            worksheet.Cell(row, 8).Value = item.TargetDate.Value;
+                            worksheet.Cell(row, 8).Style.DateFormat.Format = "MMM dd, yyyy";
                         }
 
-                        worksheet.Cell(row, 7).Value = item.AppUsers ?? "-";
+                        // 9. VA_Date (Verify property name 'VADate' in your model)
+                        if (item.VADate.HasValue)
+                        {
+                            worksheet.Cell(row, 9).Value = item.VADate.Value;
+                            worksheet.Cell(row, 9).Style.DateFormat.Format = "MMM dd, yyyy";
+                        }
 
+                        // 10. Percentage_Done (Verify property name 'PercentageDone')
+                        worksheet.Cell(row, 10).Value = item.PercentageDone;
+
+                        // 11. Launched_Date
+                        if (item.LaunchedDate.HasValue)
+                        {
+                            worksheet.Cell(row, 11).Value = item.LaunchedDate.Value;
+                            worksheet.Cell(row, 11).Style.DateFormat.Format = "MMM dd, yyyy";
+                        }
+
+                        // 12. Current_Status (Verify property name 'Status')
+                        worksheet.Cell(row, 12).Value = item.Status ?? "-";
+
+                        // 13. Price
                         if (item.Price.HasValue)
                         {
-                            worksheet.Cell(row, 8).Value = item.Price.Value;
-                            worksheet.Cell(row, 8).Style.NumberFormat.Format = "#,##0.00";
+                            worksheet.Cell(row, 13).Value = item.Price.Value;
+                            worksheet.Cell(row, 13).Style.NumberFormat.Format = "#,##0.00";
+                        }
+
+                        // 14. Launched_Year
+                        if (item.LaunchedDate.HasValue)
+                        {
+                            worksheet.Cell(row, 14).Value = item.LaunchedDate.Value;
+                            worksheet.Cell(row, 11).Style.DateFormat.Format = "MMM dd, yyyy";
                         }
 
                         row++;
@@ -357,8 +413,6 @@ namespace PROHUB.Controllers
                         stream.Position = 0;
 
                         string nameSuffix = (activeTab == "level1") ? "level 1" : "other";
-
-
                         string excelName = $"Internal Solutions - In-Progress {nameSuffix}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
                         return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);

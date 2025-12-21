@@ -1,58 +1,55 @@
 ﻿@model IEnumerable<ProHub.Models.InternalPlatform>
 
 @{
-    ViewData["Title"] = "Internal Solutions";
+    ViewData["Title"] = "Internal Solutions - Recently Launched";
 
-    // --- Pagination & Sort Logic ---
-    int pageSize = Convert.ToInt32(ViewBag.PageSize ?? 10);
-    int currentPage = Convert.ToInt32(ViewBag.CurrentPage ?? 1);
-    int totalRecords = Convert.ToInt32(ViewBag.TotalRecords ?? 0);
-    int totalPages = Convert.ToInt32(ViewBag.TotalPages ?? 1);
-    if (totalPages == 0) totalPages = 1;
+    // --- Pagination & Sort Logic (Null-Safe Parsing) ---
+    // Using TryParse or explicit null checks handles cases where ViewBag values might be missing
+    int pageSize = ViewBag.PageSize != null ? Convert.ToInt32(ViewBag.PageSize) : 10;
+    int currentPage = ViewBag.CurrentPage != null ? Convert.ToInt32(ViewBag.CurrentPage) : 1;
+    int totalRecords = ViewBag.TotalRecords != null ? Convert.ToInt32(ViewBag.TotalRecords) : 0;
+    int totalPages = ViewBag.TotalPages != null ? Convert.ToInt32(ViewBag.TotalPages) : 1;
+
+    // Prevent division by zero or invalid page counts
+    if (totalPages < 1) totalPages = 1;
 
     int startRecord = totalRecords > 0 ? (currentPage - 1) * pageSize + 1 : 0;
     int endRecord = totalRecords > 0 ? Math.Min(currentPage * pageSize, totalRecords) : 0;
 
-    string sortColumn = (ViewBag.SortColumn ?? "AppName").ToString();
-    string sortOrder = (ViewBag.SortOrder ?? "asc").ToString().ToLowerInvariant();
-    string searchTerm = (ViewBag.SearchTerm ?? string.Empty).ToString();
-    string activeTab = (ViewBag.Tab ?? "operational").ToString().ToLowerInvariant();
+    string sortColumn = (ViewBag.SortColumn as string) ?? "LaunchedDate";
+    string sortOrder = (ViewBag.SortOrder as string) ?? "desc";
+    // Normalize to lower case for comparison
+    sortOrder = sortOrder.ToLowerInvariant();
+    string searchTerm = (ViewBag.SearchTerm as string) ?? string.Empty;
 
-    // Helper for sorting toggles
-    Func<string, string> ToggleSortOrder = column =>
+    // --- Helpers ---
+
+    // 1. Toggle Sort Order Helper
+    string GetNextSortOrder(string column)
     {
         if (string.Equals(column, sortColumn, StringComparison.OrdinalIgnoreCase))
         {
             return sortOrder == "asc" ? "desc" : "asc";
         }
         return "asc";
-    };
+    }
 
-    // Helper to build URLs preserving state
-    Func<string, int, int, string, string, string, string> BuildIndexUrl = (tab, page, pageSizeLocal, sortCol, sortOrd, search) =>
+    // 2. URL Builder Helper (Keeps code clean in the HTML)
+    string BuildUrl(int page, int size, string col, string order, string search)
     {
         return Url.Action("Index", new
         {
-            tab,
-            page,
-            pageSize = pageSizeLocal,
-            sortColumn = sortCol,
-            sortOrder = sortOrd,
-            search
+            page = page,
+            pageSize = size,
+            sortColumn = col,
+            sortOrder = order,
+            search = search
         }) ?? "#";
-    };
-    // Helper to choose badge class based on phase name
-    Func<string, string> GetSdlcClass = phase =>
-    {
-        if (string.IsNullOrEmpty(phase)) return "sdlc-default";
-        phase = phase.ToLower();
-
-        if (phase.Contains("maintenance")) return "sdlc-maintenance";
-        return "sdlc-default";
-    };
+    }
 }
 
 <style>
+    /* ... (Your existing styles) ... */
     body {
         margin: 0;
         background: url('/images/bg.jpg') no-repeat center center fixed;
@@ -61,7 +58,6 @@
         position: relative;
     }
 
-        /* Blur overlay */
         body::before {
             content: "";
             position: absolute;
@@ -133,7 +129,6 @@
                 background-color: #f8f9fa;
             }
 
-        /* Action column */
         .table tbody td:last-child {
             white-space: normal;
             overflow: visible;
@@ -151,7 +146,7 @@
             transition: box-shadow 0.2s ease;
         }
 
-    /* Common Button Styles */
+    /* Button Styles */
     .btn-action-base {
         display: inline-flex;
         align-items: center;
@@ -178,18 +173,6 @@
             color: #fff;
         }
 
-    .btn-export-excel {
-        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); /* Teal/Blue for Excel */
-        box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
-    }
-
-        .btn-export-excel:hover {
-            background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
-            color: #fff;
-        }
-
     .btn-search {
         background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
         color: white;
@@ -207,34 +190,6 @@
             color: white;
         }
 
-    /* Custom Tabs Styling */
-    .nav-tabs {
-        border-bottom: none;
-        gap: 0.5rem;
-    }
-
-        .nav-tabs .nav-link {
-            border: none;
-            background: white;
-            color: #495057;
-            font-weight: 500;
-            border-radius: 8px !important;
-            padding: 0.6rem 1.2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
-        }
-
-            .nav-tabs .nav-link.active {
-                background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
-                color: white;
-                box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
-            }
-
-            .nav-tabs .nav-link:hover:not(.active) {
-                background: #e9ecef;
-                transform: translateY(-1px);
-            }
-
     .empty-state {
         text-align: center;
         padding: 3rem 1rem;
@@ -247,8 +202,8 @@
             color: #dee2e6;
         }
 
-    /* Delete Modal Styles */
-    .delete-modal-overlay {
+    /* Modals CSS */
+    .delete-modal-overlay, .success-modal-overlay {
         position: fixed;
         top: 0;
         left: 0;
@@ -264,12 +219,12 @@
         transition: all 0.3s ease;
     }
 
-        .delete-modal-overlay.show {
+        .delete-modal-overlay.show, .success-modal-overlay.show {
             opacity: 1;
             visibility: visible;
         }
 
-    .delete-modal-content {
+    .delete-modal-content, .success-modal-content {
         background: white;
         border-radius: 16px;
         padding: 2.5rem 3rem;
@@ -277,12 +232,19 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         max-width: 450px;
         width: 90%;
-        border-top: 6px solid #dc3545;
-        animation: modalSlideIn 0.4s ease forwards;
         transform: scale(0.7);
+        animation: modalSlideIn 0.4s ease forwards;
     }
 
-    .delete-modal-overlay.show .delete-modal-content {
+    .delete-modal-content {
+        border-top: 6px solid #dc3545;
+    }
+
+    .success-modal-content {
+        border-top: 6px solid #28a745;
+    }
+
+    .delete-modal-overlay.show .delete-modal-content, .success-modal-overlay.show .success-modal-content {
         transform: scale(1);
     }
 
@@ -305,6 +267,12 @@
         animation: iconPulse 1.5s ease-in-out infinite;
     }
 
+    .success-modal-content i {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
     @@keyframes iconPulse {
         0%, 100% {
             transform: scale(1);
@@ -315,24 +283,11 @@
         }
     }
 
-    .delete-modal-content h4 {
+    .delete-modal-content h4, .success-modal-content h4 {
         font-weight: 600;
         color: #2d3748;
         margin-bottom: 0.75rem;
         font-size: 1.5rem;
-    }
-
-    .delete-modal-content p {
-        font-size: 1rem;
-        color: #718096;
-        margin-bottom: 0.5rem;
-    }
-
-    .delete-modal-content .item-name {
-        font-weight: 600;
-        color: #dc3545;
-        font-size: 1.1rem;
-        margin-bottom: 1.5rem;
     }
 
     .delete-modal-actions {
@@ -351,7 +306,6 @@
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.3s ease;
-        font-size: 0.95rem;
     }
 
         .btn-modal-cancel:hover {
@@ -370,7 +324,6 @@
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
-        font-size: 0.95rem;
     }
 
         .btn-modal-delete:hover {
@@ -378,63 +331,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(220, 53, 69, 0.35);
         }
-
-    /* Success Modal */
-    .success-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.45);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-    }
-
-        .success-modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-    .success-modal-content {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem 3rem;
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        max-width: 420px;
-        width: 90%;
-        border-top: 6px solid #28a745;
-        animation: modalSlideIn 0.4s ease forwards;
-        transform: scale(0.7);
-    }
-
-    .success-modal-overlay.show .success-modal-content {
-        transform: scale(1);
-    }
-
-    .success-modal-content i {
-        font-size: 3rem;
-        color: #28a745;
-        margin-bottom: 1rem;
-    }
-
-    .success-modal-content h4 {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-    }
-
-    .success-modal-content p {
-        font-size: 0.95rem;
-        color: #718096;
-        margin-bottom: 1.5rem;
-    }
 
     .btn-modal-ok {
         padding: 0.75rem 2rem;
@@ -446,7 +342,6 @@
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
-        font-size: 0.95rem;
     }
 
         .btn-modal-ok:hover {
@@ -455,6 +350,7 @@
             box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
         }
 
+    /* Export Excel Style */
     .btn-export-excel {
         display: inline-flex;
         align-items: center;
@@ -488,29 +384,14 @@
             left: 100%;
         }
 
-        .btn-export-excel i {
-            font-size: 1.1rem;
-            transition: transform 0.3s ease;
-        }
-
         .btn-export-excel:hover {
             background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
             color: #fff;
         }
-
-            .btn-export-excel:hover i {
-                transform: scale(1.15) rotate(-5deg);
-            }
-
-        .btn-export-excel:active {
-            transform: translateY(0px);
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-        }
-
-    /* --- SDLC Badge Styles --- */
-    .sdlc-badge {
+    /* --- Status Badges --- */
+    .status-badge {
         padding: 0.35rem 0.75rem;
         border-radius: 20px;
         font-size: 0.75rem;
@@ -522,37 +403,88 @@
         border: 1px solid transparent;
     }
 
-    /* 1. Maintenance Phase  */
+    .status-badge-prep {
+        background-color: #f2f2f2;
+        color: #616161;
+        border-color: #d6d6d6;
+    }
 
-    .sdlc-maintenance {
+    .status-badge-submitted {
+        background-color: #e1f5fe;
+        color: #0277bd;
+        border-color: #b3e5fc;
+    }
+
+    .status-badge-req {
+        background-color: #e8eaf6;
+        color: #283593;
+        border-color: #c5cae9;
+    }
+
+    .status-badge-design {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+        border-color: #e1bee7;
+    }
+
+    .status-badge-coding {
+        background-color: #fff3e0;
+        color: #ef6c00;
+        border-color: #ffe0b2;
+    }
+
+    .status-badge-testing {
+        background-color: #fff8e1;
+        color: #ff8f00;
+        border-color: #ffecb3;
+    }
+
+    .status-badge-deploy {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-color: #c8e6c9;
+    }
+
+    .status-badge-maintenance {
         background-color: #cfe2ff;
         color: #084298;
-        border: 1px solid #b6d4fe;
+        border-color: #b6d4fe;
     }
+
+    .status-badge-default {
+        background-color: #ffffff;
+        color: #424242;
+        border-color: #e0e0e0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
 </style>
 
-
 <div class="container-fluid mt-4">
-    <h1 class="mb-4 text-primary">Internal Solutions - Operational </h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-primary mb-0">Internal Solutions - Recently Launched</h1>
+        <div class="text-muted small">
+            <i class="bi bi-calendar-check me-1"></i> Showing projects launched in the current year
+        </div>
+    </div>
 
-    @* --- Tabs --- *@
-    <ul class="nav nav-tabs mb-4" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link @(activeTab == "operational" ? "active" : "")"
-               href="@BuildIndexUrl("operational", 1, pageSize, sortColumn, sortOrder, searchTerm)">Operational</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(activeTab == "withoutcr" || activeTab == "without_cr" ? "active" : "")"
-               href="@BuildIndexUrl("withoutcr", 1, pageSize, sortColumn, sortOrder, searchTerm)">Operational without CR</a>
-        </li>
-    </ul>
-
+    @* --- Toolbar --- *@
     <div class="toolbar-wrapper mb-4">
         <div class="row g-3 align-items-center">
 
-            @* ---  Create Buttons --- *@
+            @* --- 1. Create Button --- *@
             <div class="col-lg-3 col-md-4 col-sm-6">
-                <a asp-action="Create" class="btn-action-base btn-create-new">
+                <a asp-controller="InternalSolution" asp-action="Create" class="btn-action-base btn-create-new">
                     <i class="bi bi-plus-circle"></i>
                     <span>Create New</span>
                 </a>
@@ -563,16 +495,17 @@
                 <form method="get" asp-action="Index" class="d-flex align-items-center bg-white rounded-3 px-3 py-1 border">
                     <i class="bi bi-search text-muted me-2"></i>
                     <input type="text" name="search" class="form-control border-0 shadow-none"
-                           placeholder="Search solutions..." value="@searchTerm" />
+                           placeholder="Search launched solutions..." value="@searchTerm" />
 
                     @if (!string.IsNullOrEmpty(searchTerm))
                     {
-                        <a href="@Url.Action("Index", new { tab = activeTab, pageSize = pageSize })" class="text-secondary text-decoration-none me-2">
+                        @* Reset Search Link *@
+                        <a href="@BuildUrl(1, pageSize, sortColumn, sortOrder, "")" class="text-secondary text-decoration-none me-2">
                             <i class="bi bi-x-circle-fill"></i>
                         </a>
                     }
 
-                    <input type="hidden" name="tab" value="@activeTab" />
+                    @* Maintain current page size when searching *@
                     <input type="hidden" name="pageSize" value="@pageSize" />
 
                     <button type="submit" class="btn btn-search btn-sm ms-2 px-3">
@@ -581,108 +514,99 @@
                 </form>
             </div>
 
-            @* --- Right Side: Page Size Selector --- *@
+            @* --- 3. Page Size Selector --- *@
             <div class="col-lg-4 col-md-12 d-flex justify-content-lg-end justify-content-start">
                 <form method="get" asp-action="Index" id="entriesForm"
                       class="d-flex align-items-center bg-white rounded-3 px-3 py-2 border">
                     <label class="me-2 text-nowrap text-secondary small fw-semibold">Show</label>
+
+
                     <select name="pageSize" class="form-select form-select-sm border-0 shadow-none fw-semibold"
                             onchange="this.form.submit()">
-                        <!option value="10" @(pageSize == 10 ? "selected" : "")>10</!option>
-                        <!option value="25" @(pageSize == 25 ? "selected" : "")>25</!option>
-                        <!option value="50" @(pageSize == 50 ? "selected" : "")>50</!option>
-                        <!option value="100" @(pageSize == 100 ? "selected" : "")>100</!option>
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="25" selected="@(pageSize == 25)">25</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
                     </select>
+
                     <span class="ms-2 small text-secondary">entries</span>
+                    @* Maintain current search and sort when changing page size *@
                     <input type="hidden" name="search" value="@searchTerm" />
+                    <input type="hidden" name="sortColumn" value="@sortColumn" />
+                    <input type="hidden" name="sortOrder" value="@sortOrder" />
                     <input type="hidden" name="page" value="1" />
-                    <input type="hidden" name="tab" value="@activeTab" />
                 </form>
             </div>
         </div>
     </div>
 
+    @* --- Data Table --- *@
     <div class="data-table-wrapper">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th class="sortable" scope="col" style="width:16%">
-                            <a href="@BuildIndexUrl(activeTab, 1, pageSize, "ParentProjectGroupName", ToggleSortOrder("ParentProjectGroupName"), searchTerm)">
+                        @* Application Group (Sortable) *@
+                        <th class="sortable" scope="col" style="width:12%">
+                            <a href="@BuildUrl(1, pageSize, "ParentProjectGroupName", GetNextSortOrder("ParentProjectGroupName"), searchTerm)">
                                 Application Group
                                 <i class="bi @(sortColumn == "ParentProjectGroupName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
-                        <th class="sortable" scope="col" style="width:18%">
-                            <a href="@BuildIndexUrl(activeTab, 1, pageSize, "AppName", ToggleSortOrder("AppName"), searchTerm)">
+
+                        @* App Name (Sortable) *@
+                        <th class="sortable" scope="col" style="width:12%">
+                            <a href="@BuildUrl(1, pageSize, "AppName", GetNextSortOrder("AppName"), searchTerm)">
                                 Application Name
                                 <i class="bi @(sortColumn == "AppName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
-                        <th class="sortable" scope="col" style="width:14%">
-                            <a href="@BuildIndexUrl(activeTab, 1, pageSize, "DevelopedByName", ToggleSortOrder("DevelopedByName"), searchTerm)">
+
+                        @* Developed By (Sortable) *@
+                        <th class="sortable" scope="col" style="width:10%">
+                            <a href="@BuildUrl(1, pageSize, "DevelopedBy", GetNextSortOrder("DevelopedBy"), searchTerm)">
                                 Developed By
-                                <i class="bi @(sortColumn == "DevelopedByName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                                <i class="bi @(sortColumn == "DevelopedBy" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
 
-                        @* --- Conditional Columns for Without CR Tab --- *@
-                        @if (activeTab == "withoutcr" || activeTab == "without_cr")
-                        {
+                        @* SDLC Phase (Sortable) *@
+                        <th class="sortable" scope="col" style="width:13%">
+                            <a href="@BuildUrl(1, pageSize, "SDLCPhase", GetNextSortOrder("SDLCPhase"), searchTerm)">
+                                SDLC Phase
+                                <i class="bi @(sortColumn == "SDLCPhase" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
 
-                            <th scope="col" style="width:12%">SDLC Phase</th>
+                        @* Start (Sortable) *@
+                        <th class="sortable" style="width:10%">
+                            <a href="@BuildUrl(1, pageSize, "Start", GetNextSortOrder("Start"), searchTerm)">
+                                Start <i class="bi @(sortColumn == "Start" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
 
-                            <th class="sortable" scope="col" style="width:10%">
-                                <a href="@BuildIndexUrl(activeTab, 1, pageSize, "StartDate", ToggleSortOrder("StartDate"), searchTerm)">
-                                    Start<br>Date
-                                    <i class="bi @(sortColumn == "StartDate" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
-                                </a>
-                            </th>
-                            <th class="sortable" scope="col" style="width:10%">
-                                <a href="@BuildIndexUrl(activeTab, 1, pageSize, "TargetDate", ToggleSortOrder("TargetDate"), searchTerm)">
-                                    Target<br>Date
-                                    <i class="bi @(sortColumn == "TargetDate" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
-                                </a>
-                            </th>
+                        @* Target (Sortable) *@
+                        <th class="sortable" style="width:10%">
+                            <a href="@BuildUrl(1, pageSize, "Target", GetNextSortOrder("Target"), searchTerm)">
+                                Target <i class="bi @(sortColumn == "Target" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
 
-                            <th class="sortable" scope="col" style="width:10%">
-                                <a href="@BuildIndexUrl(activeTab, 1, pageSize, "UD", ToggleSortOrder("UD"), searchTerm)">
-                                    UD
-                                    <i class="bi @(sortColumn == "UD" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
-                                </a>
-                            </th>
+                        @* User Dept? (UD) (Sortable) *@
+                        <th class="sortable" style="width:10%">
+                            <a href="@BuildUrl(1, pageSize, "UD", GetNextSortOrder("UD"), searchTerm)">
+                                UD <i class="bi @(sortColumn == "UD" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
+                            </a>
+                        </th>
 
-                        }
-
-
-                        @if (activeTab == "operational")
-                        {
-                            <th class="sortable" scope="col" style="width:11%">
-                                <a href="@BuildIndexUrl(activeTab, 1, pageSize, "LaunchedDate", ToggleSortOrder("LaunchedDate"), searchTerm)">
-                                    Launched Date
-                                    <i class="bi @(sortColumn == "LaunchedDate" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
-                                </a>
-                            </th>
-                        }
-
-
-                        @if (activeTab == "operational")
-                        {
-                            <th class="sortable" scope="col" style="width:11%">
-                                <a href="@BuildIndexUrl(activeTab, 1, pageSize, "VADate", ToggleSortOrder("VADate"), searchTerm)">
-                                    VA Date
-                                    <i class="bi @(sortColumn == "VADate" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
-                                </a>
-                            </th>
-                        }
-
-                        <th class="sortable" scope="col" style="width:11%">
-                            <a href="@BuildIndexUrl(activeTab, 1, pageSize, "Price", ToggleSortOrder("Price"), searchTerm)">
-                                Solution <br> Value
+                        @* Price/Value (Sortable) *@
+                        <th class="sortable" scope="col" style="width:10%">
+                            <a href="@BuildUrl(1, pageSize, "Price", GetNextSortOrder("Price"), searchTerm)">
+                                Value
                                 <i class="bi @(sortColumn == "Price" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
-                        <th scope="col" style="width:18%">Actions</th>
+                        <th scope="col" style="width:13%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -693,7 +617,6 @@
                             <tr>
                                 <td title="@item.ParentProjectGroupName">@item.ParentProjectGroupName</td>
                                 <td>
-
                                     <div class="fw-semibold text-truncate" title="@item.AppName">@item.AppName</div>
                                     @if (!string.IsNullOrEmpty(item.MainAppName))
                                     {
@@ -701,58 +624,48 @@
                                             <i class="bi bi-arrow-return-right"></i> CR of @item.MainAppName
                                         </div>
                                     }
-
                                 </td>
                                 <td title="@(item.DevelopedByName ?? "-")">@(item.DevelopedByName ?? "-")</td>
 
-                                @* --- Conditional Data for Without CR Tab --- *@
-                                @if (activeTab == "withoutcr" || activeTab == "without_cr")
-                                {
-                                    <td title="@(item.SDLCPhaseName ?? "-")" class="text-center">
-                                        <span class="sdlc-badge @GetSdlcClass(item.SDLCPhaseName)">
-                                            @(item.SDLCPhaseName ?? "-")
-                                        </span>
-                                    </td>
-                                    <td title="@(item.StartDate?.ToString("MMM dd, yyyy") ?? "-")">
-                                        @(item.StartDate?.ToString("MMM dd, yyyy") ?? "-")
-                                    </td>
-                                    <td title="@(item.TargetDate?.ToString("MMM dd, yyyy") ?? "-")">
-                                        @(item.TargetDate?.ToString("MMM dd, yyyy") ?? "-")
-                                    </td>
-                                    <td>@(item.AppUsers ?? "-")</td>
-                                }
+                                <td>
+                                    @{
+                                        // Logic to apply color badges based on Phase name
+                                        var phaseName = item.SDLCPhaseName ?? "Maintenance";
+                                        var p = phaseName.ToLower().Trim();
+                                        var badgeClass = "status-badge status-badge-default";
 
+                                        if (p.Contains("proposal preparation")) { badgeClass = "status-badge status-badge-prep"; }
+                                        else if (p.Contains("proposal submitted")) { badgeClass = "status-badge status-badge-submitted"; }
+                                        else if (p.Contains("requirement") || p.Contains("gathering")) { badgeClass = "status-badge status-badge-req"; }
+                                        else if (p.Contains("design")) { badgeClass = "status-badge status-badge-design"; }
+                                        else if (p.Contains("coding") || p.Contains("implementation") || p.Contains("development")) { badgeClass = "status-badge status-badge-coding"; }
+                                        else if (p.Contains("testing") || p.Contains("qa")) { badgeClass = "status-badge status-badge-testing"; }
+                                        else if (p.Contains("deployment") || p.Contains("completed") || p.Contains("live")) { badgeClass = "status-badge status-badge-deploy"; }
+                                        else if (p.Contains("maintenance")) { badgeClass = "status-badge status-badge-maintenance"; }
+                                    }
+                                    <span class="@badgeClass">
+                                        @phaseName
+                                    </span>
+                                </td>
 
-                                @if (activeTab == "operational")
-                                {
-                                    <td title="@(item.LaunchedDate?.ToString("MMM dd, yyyy") ?? "-")">@(item.LaunchedDate?.ToString("MMM dd, yyyy") ?? "-")</td>
-                                }
+                                <td title="@(item.StartDate?.ToString("MMM dd, yyyy") ?? "-")">@(item.StartDate?.ToString("MMM dd, yyyy") ?? "-")</td>
 
-
-                                @if (activeTab == "operational")
-                                {
-                                    <td title="@(item.VADate?.ToString("MMM dd, yyyy") ?? "-")">@(item.VADate?.ToString("MMM dd, yyyy") ?? "-")</td>
-                                }
+                                <td title="@(item.TargetDate?.ToString("MMM dd, yyyy") ?? "-")">@(item.TargetDate?.ToString("MMM dd, yyyy") ?? "-")</td>
+                                <td>@(item.AppUsers ?? "-")</td>
 
                                 <td title="Rs.@(item.Price)">Rs.@(item.Price)</td>
+
                                 <td class="text-center">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil"></i></a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye"></i></a>
+                                    <a asp-controller="InternalSolution" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil"></i></a>
+                                    <a asp-controller="InternalSolution" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye"></i></a>
                                     <button type="button" class="btn btn-sm btn-outline-danger me-1"
                                             onclick="showDeleteModal(@item.Id, '@item.AppName')" title="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
+
                                     <a asp-controller="InternalSolution" asp-action="Folder" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1" title="Filter Documents">
                                         <i class="bi bi-folder"></i>
                                     </a>
-
-                                    @if (string.Equals(item.AppCategory, "Main Application", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        <a asp-action="ChangeRequests" asp-route-mainAppId="@item.Id"
-                                           class="btn btn-sm btn-outline-dark me-1" title="View Change Requests">
-                                            <i class="bi bi-wrench"></i>
-                                        </a>
-                                    }
                                 </td>
                             </tr>
                         }
@@ -760,11 +673,10 @@
                     else
                     {
                         <tr>
-
-                            <td colspan="@(activeTab == "withoutcr" || activeTab == "without_cr" ? 9 : 7)" class="empty-state">
-                                <i class="bi bi-inbox fs-1 mb-2"></i>
-                                <p class="mb-0">No internal solutions found for this tab</p>
-                                <small class="text-muted">Create your first internal solution by clicking the "Create New" button above.</small>
+                            <td colspan="9" class="empty-state">
+                                <i class="bi bi-rocket fs-1 mb-2"></i>
+                                <p class="mb-0">No recently launched solutions found.</p>
+                                <small class="text-muted">Solutions launched in the last 6 months will appear here.</small>
                             </td>
                         </tr>
                     }
@@ -773,39 +685,14 @@
         </div>
     </div>
 
-
-
-    @* ---  Excel Buttons --- *@
+    @* --- Excel Button --- *@
     <div class="mt-3 d-flex justify-content-start gap-2">
-
-        @* Condition 1: Show only if tab is 'operational' *@
-        @if (activeTab == "operational")
-        {
-            <a asp-action="ExportToExcel"
-               asp-route-tab="operational"
-               asp-route-search="@searchTerm"
-               asp-route-sortColumn="@sortColumn"
-               asp-route-sortOrder="@sortOrder"
-               class="btn-action-base btn-export-excel">
-                <i class="bi bi-file-earmark-excel"></i>
-                <span>Export All Operational to Excel</span>
-            </a>
-        }
-
-        @* Condition 2: Show only if tab is 'withoutcr' *@
-        @if (activeTab == "withoutcr")
-        {
-            <a asp-action="ExportToExcel"
-               asp-route-tab="withoutcr"
-               asp-route-search="@searchTerm"
-               asp-route-sortColumn="@sortColumn"
-               asp-route-sortOrder="@sortOrder"
-               class="btn-action-base btn-export-excel">
-                <i class="bi bi-file-earmark-excel"></i>
-                <span>Export Without CR to Excel</span>
-            </a>
-        }
-
+        <a asp-action="ExportToExcel"
+           asp-route-search="@searchTerm"
+           class="btn-action-base btn-export-excel">
+            <i class="bi bi-file-earmark-excel"></i>
+            <span>Export Recently Launched to Excel</span>
+        </a>
     </div>
 
     @* --- Pagination Footer --- *@
@@ -817,16 +704,16 @@
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-end mb-0">
                     <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                        <a class="page-link" href="@BuildIndexUrl(activeTab, Math.Max(1, currentPage - 1), pageSize, sortColumn, sortOrder, searchTerm)">Previous</a>
+                        <a class="page-link" href="@BuildUrl(Math.Max(1, currentPage - 1), pageSize, sortColumn, sortOrder, searchTerm)">Previous</a>
                     </li>
                     @for (int i = 1; i <= totalPages; i++)
                     {
                         <li class="page-item @(i == currentPage ? "active" : "")">
-                            <a class="page-link" href="@BuildIndexUrl(activeTab, i, pageSize, sortColumn, sortOrder, searchTerm)">@i</a>
+                            <a class="page-link" href="@BuildUrl(i, pageSize, sortColumn, sortOrder, searchTerm)">@i</a>
                         </li>
                     }
                     <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
-                        <a class="page-link" href="@BuildIndexUrl(activeTab, Math.Min(totalPages, currentPage + 1), pageSize, sortColumn, sortOrder, searchTerm)">Next</a>
+                        <a class="page-link" href="@BuildUrl(Math.Min(totalPages, currentPage + 1), pageSize, sortColumn, sortOrder, searchTerm)">Next</a>
                     </li>
                 </ul>
             </nav>
@@ -834,7 +721,7 @@
     </div>
 </div>
 
-@* ---Delete Modals --- *@
+@* --- Delete Modal --- *@
 <div id="deleteModal" class="delete-modal-overlay">
     <div class="delete-modal-content">
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
@@ -846,16 +733,10 @@
             <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
                 <i class="bi bi-x-circle me-1"></i> Cancel
             </button>
-            <form id="deleteForm" method="post" asp-action="Delete" style="display: inline;">
+
+            <form id="deleteForm" method="post" asp-controller="InternalSolution" asp-action="Delete" style="display: inline;">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" id="deleteId" />
-                <input type="hidden" name="tab" value="@activeTab" />
-                <input type="hidden" name="page" value="@currentPage" />
-                <input type="hidden" name="pageSize" value="@pageSize" />
-                <input type="hidden" name="sortColumn" value="@sortColumn" />
-                <input type="hidden" name="sortOrder" value="@sortOrder" />
-                <input type="hidden" name="search" value="@searchTerm" />
-
                 <button type="submit" class="btn-modal-delete">
                     <i class="bi bi-trash-fill me-1"></i> Yes, Delete
                 </button>
@@ -864,6 +745,7 @@
     </div>
 </div>
 
+@* --- Success Modal --- *@
 <div id="successModal" class="success-modal-overlay">
     <div class="success-modal-content">
         <i class="bi bi-check-circle-fill"></i>
@@ -892,29 +774,22 @@
             document.getElementById('successModal').classList.remove('show');
         }
 
-        // --- Event Listeners ---
-
-        // Close modals on outside click
+        // Close on outside click
         document.getElementById('deleteModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeDeleteModal();
-            }
+            if (e.target === this) closeDeleteModal();
         });
-
         document.getElementById('successModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeSuccessModal();
-            }
+            if (e.target === this) closeSuccessModal();
         });
 
         // Show success modal if TempData message exists
         @if (TempData["SuccessMessage"] != null)
         {
-                                    <text>
-                                        window.addEventListener('DOMContentLoaded', () => {
-                                            document.getElementById('successModal').classList.add('show');
-                                        });
-                                    </text>
+                    <text>
+                        window.addEventListener('DOMContentLoaded', () => {
+                            document.getElementById('successModal').classList.add('show');
+                        });
+                    </text>
         }
     </script>
 }

@@ -26,12 +26,17 @@ namespace ProHub.Controllers
         }
 
         // INDEX � Everyone can view
-        public IActionResult Index(string search = "", int page = 1, int pageSize = 10)
+        public IActionResult Index(string search = "", int? solutionId = null, int page = 1, int pageSize = 10)
         {
-            var docs = _docRepo.GetInternalDocuments(search, page, pageSize);
-            int total = _docRepo.GetInternalDocumentCount(search);
+
+            var docs = _docRepo.GetInternalDocuments(search, solutionId, page, pageSize);
+            int total = _docRepo.GetInternalDocumentCount(search, solutionId);
 
             ViewBag.Search = search;
+
+
+            ViewBag.SolutionId = solutionId;
+
             ViewBag.Page = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);

@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using OfficeOpenXml;
 using ProHub.Models;
 using PROHUB.Data;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using OfficeOpenXml;
 
 namespace ProHub.Controllers
 {
@@ -21,9 +22,9 @@ namespace ProHub.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-       
+
         //  LISTS (Index & InProgress)
-       
+
 
         [HttpGet]
         public async Task<IActionResult> Index(string search = "", string sortColumn = "PlatformName", string sortOrder = "asc", int page = 1, int pageSize = 10)
@@ -43,9 +44,9 @@ namespace ProHub.Controllers
             return View("Index", pagedModel);
         }
 
-        
+
         //  CREATE
-        
+
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -59,17 +60,17 @@ namespace ProHub.Controllers
         {
             await PopulateDropdowns();
 
-            
+
             if (model == null)
             {
                 TempData["ErrorMessage"] = "Invalid form submission.";
                 return View(new ExternalPlatform());
             }
 
-            
+
             DefaultMissingProperties(model);
 
-            
+
 
             try
             {
@@ -94,19 +95,27 @@ namespace ProHub.Controllers
             }
         }
 
-        
+
         //  EDIT
-        
+
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            if (id <= 0) return BadRequest();
+            _logger.LogInformation("Edit action called with ID: {Id}", id);
+
+            if (id <= 0)
+            {
+                _logger.LogWarning("Invalid ID received: {Id}", id);
+                TempData["ErrorMessage"] = "Invalid solution ID.";
+                return RedirectToAction(nameof(Index));
+            }
 
             try
             {
                 var model = await _service.GetByIdAsync(id);
                 if (model == null)
                 {
+                    _logger.LogWarning("Solution not found for ID: {Id}", id);
                     TempData["ErrorMessage"] = "Solution not found.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -117,10 +126,11 @@ namespace ProHub.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading Edit form for ID {Id}", id);
-                TempData["ErrorMessage"] = "Error loading form.";
+                TempData["ErrorMessage"] = $"Error loading form: {ex.Message}. Please try again or contact support.";
                 return RedirectToAction(nameof(Index));
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -134,16 +144,27 @@ namespace ProHub.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            
             DefaultMissingProperties(model);
-
-            
 
             try
             {
+                // 1.Main Data updated 
                 var success = await _service.UpdateAsync(model);
+
                 if (success)
                 {
+                    // 2. Save a comment if there is one.
+                    if (!string.IsNullOrWhiteSpace(model.Comment)) 
+                    {
+                        
+                        int? updatedById = model.DevelopedById;
+
+                        
+                        if (updatedById == 0) updatedById = null;
+
+                        await _service.AddCommentAsync(model.Id, model.Comment, updatedById);
+                    }
+
                     TempData["SuccessMessage"] = "Solution updated successfully.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -159,9 +180,9 @@ namespace ProHub.Controllers
             }
         }
 
-        
+
         //  DELETE
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -186,9 +207,9 @@ namespace ProHub.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        
+
         //  VIEW DETAILS
-        
+
         [HttpGet]
         public async Task<IActionResult> ViewDetails(int id)
         {
@@ -197,44 +218,150 @@ namespace ProHub.Controllers
             return View(model);
         }
 
-     
+
+        // Get comment 
+        [HttpGet]
+        public async Task<IActionResult> GetComments(int id) 
+        {
+            if (id <= 0) return Json(new { success = false, message = "Invalid ID" });
+
+            try
+            {
+                var commentsList = await _service.GetCommentsAsync(id);
+
+                if (commentsList == null || !commentsList.Any())
+                {
+                    return Json(new { success = true, hasData = false, message = "No comments found." });
+                }
+
+                // Return the list of comments
+                return Json(new
+                {
+                    success = true,
+                    hasData = true,
+                    comments = commentsList.Select(c => new {
+                        comment = c.Comment,
+                        updatedBy = c.UpdatedByName,
+                        updatedTime = c.UpdatedTime.ToString("MMM dd, yyyy , hh:mm tt")
+                    })
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching comments for ID {Id}", id);
+                return Json(new { success = false, message = "Error loading comments." });
+            }
+        }
+
         //  EXPORT TO EXCEL
-        
+
         [HttpGet]
         public async Task<IActionResult> ExportAllToExcel()
         {
             try
             {
+                // 1. Get raw data (Now includes names from the updated SQL)
                 var dt = await _service.GetProspectiveExportDataAsync();
 
+                // 2. Process data
+                var exportList = dt.Rows.Cast<DataRow>().Select(row =>
+                {
+                    // --- Helper Functions ---
+                    decimal GetDecimal(string colName) =>
+                        row.Table.Columns.Contains(colName) && row[colName] != DBNull.Value
+                        ? Convert.ToDecimal(row[colName]) : 0m;
+
+                    string GetString(string colName) =>
+                        row.Table.Columns.Contains(colName) ? row[colName]?.ToString() : "";
+
+                    string GetDate(string colName) =>
+                        row.Table.Columns.Contains(colName) && row[colName] != DBNull.Value
+                        ? Convert.ToDateTime(row[colName]).ToString("yyyy-MM-dd") : "";
+
+                    // --- Calculations ---
+                    decimal otc = GetDecimal("Platform_OTC");
+                    decimal mrc = GetDecimal("Platform_MRC");
+
+                    decimal contractPeriod = 0;
+                    decimal.TryParse(GetString("Contract_Period"), out contractPeriod);
+
+                    decimal revenue = otc + (mrc * 12 * contractPeriod);
+
+                    // --- Return Object ---
+                    return new
+                    {
+                        PlatformName = GetString("Platform_Name"),
+                        CompanyName = GetString("Company_Name"),
+                        DevelopedBy = GetString("Developed_By_Name"),
+                        DevelopedTeam = GetString("Developed_Team"),
+                        SalesTeam = GetString("Sales_Team_Name"),
+                        SDLCStage = GetString("SDLC_Phase"),
+                        LaunchedDate = GetDate("LaunchedDate"),
+                        BilledDate = GetDate("BillingDate"),
+                        OTC = otc,
+                        MRC = mrc,
+                        ContractPeriod = GetString("Contract_Period"),
+                        IncentiveEarned = GetDecimal("Incentive_Earned"),
+                        IncentiveSharedWith = GetDecimal("Incentive_Share"),
+                        ProposalUploaded = GetString("Proposal_Upload"),
+                        Revenue = revenue,
+                        SoftwareValue = GetDecimal("Software_Value"),
+                        DPOHandoverDate = GetDate("DPO_Handover_Date")
+                    };
+                }).ToList();
+
+                // 3. Generate Excel
                 ExcelPackage.License.SetNonCommercialOrganization("ProHub");
                 using var package = new ExcelPackage();
                 var ws = package.Workbook.Worksheets.Add("Prospective Solutions");
 
-                ws.Cells[1, 1].LoadFromDataTable(dt, true);
+                ws.Cells[1, 1].LoadFromCollection(exportList, true);
 
-                using (var rng = ws.Cells[1, 1, 1, dt.Columns.Count])
+                // 4. Headers
+                var headers = new string[]
+                {
+            "Platform Name", "Company Name", "Developed By", "Developed Team",
+            "Sales Team Involved", "SDLC Stage", "Launched Date", "Billed Date",
+            "One Time Charge (OTC)", "Monthly Charge (MRC)", "Contract Period",
+            "Incentive Earned", "Incentive Shared With", "Proposal Uploaded",
+            "Revenue", "Software Value", "DPO Handover Date"
+                };
+
+                for (int i = 0; i < headers.Length; i++) ws.Cells[1, i + 1].Value = headers[i];
+
+                // 5. Styling
+                using (var rng = ws.Cells[1, 1, 1, headers.Length])
                 {
                     rng.Style.Font.Bold = true;
                     rng.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                     rng.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                    rng.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                 }
+
+                // Format Currency Columns: 9, 10, 12, 13, 15, 16
+                int[] currencyCols = { 9, 10, 12, 13, 15, 16 };
+                foreach (var col in currencyCols)
+                {
+                    ws.Column(col).Style.Numberformat.Format = "#,##0.00";
+                }
+
                 ws.Cells[ws.Dimension.Address].AutoFitColumns();
 
                 byte[] fileBytes = package.GetAsByteArray();
-                string fileName = $"External_Solutions_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                string fileName = $"External Solutions - Prospective_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
                 return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Export failed");
                 return BadRequest("Error exporting data: " + ex.Message);
             }
         }
 
-        
+
         //  HELPERS & UTILS
-       
+
         private List<ExternalPlatform> ProcessList(List<ExternalPlatform> list, string search, string sortColumn, string sortOrder, int page, int pageSize)
         {
             page = Math.Max(page, 1);

@@ -639,6 +639,19 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group-modern" style="grid-column: span 2;">
+                        <label asp-for="Comment" class="form-label-modern">
+                            <i class="bi bi-chat-left-text me-1"></i> Comment
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-pencil" style="top: 20px; transform: none;"></i>
+                            <textarea asp-for="Comment" class="form-control-modern" rows="4" placeholder="Enter comments here..."></textarea>
+                        </div>
+                        <span asp-validation-for="Comment" class="text-danger"></span>
+                    </div>
+                </div>
+
             </div>
 
             <div class="form-footer">
@@ -701,11 +714,11 @@
         // 3. Popup Logic
         @if (TempData["SuccessMessage"] != null)
         {
-                    <text>
-                    window.addEventListener('DOMContentLoaded', () => {
-                        document.getElementById('successPopup').classList.remove('hidden');
-                    });
-                    </text>
+                        <text>
+                        window.addEventListener('DOMContentLoaded', () => {
+                            document.getElementById('successPopup').classList.remove('hidden');
+                        });
+                        </text>
         }
 
         document.getElementById('popupCloseBtn').addEventListener('click', function () {

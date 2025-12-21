@@ -173,6 +173,7 @@ namespace PROHUB.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Validation සඳහා අනවශ්‍ය fields ඉවත් කිරීම
             DefaultMissingProperties(externalSolution);
             RemoveDbOnlyModelStateKeys();
 
@@ -180,28 +181,40 @@ namespace PROHUB.Controllers
             {
                 LogModelStateErrors("Edit", externalSolution);
                 ModelState.AddModelError(string.Empty, "Please fix the validation errors shown below.");
-                TempData["ErrorMessage"] = "Validation failed. See field errors.";
+                TempData["ErrorMessage"] = "Validation failed.";
                 return View(externalSolution);
             }
 
             try
             {
-                var ok = await _externalSolutionService.UpdateAsync(externalSolution);
-                if (ok)
+               
+                var updateSuccess = await _externalSolutionService.UpdateAsync(externalSolution);
+
+                if (updateSuccess)
                 {
-                    TempData["SuccessMessage"] = "External solution updated.";
+                  
+                    if (!string.IsNullOrEmpty(externalSolution.Comment))
+                    {
+                        
+                        int? userId = externalSolution.DevelopedById;
+
+                        await _externalSolutionService.AddCommentAsync(externalSolution.Id, externalSolution.Comment, userId);
+                    }
+                    
+
+                    TempData["SuccessMessage"] = "External solution updated successfully.";
                     return RedirectToAction(nameof(Index));
                 }
 
                 _logger.LogWarning("Update returned false for model {@Model}", externalSolution);
                 ModelState.AddModelError(string.Empty, "Update failed (record may not exist).");
-                TempData["ErrorMessage"] = "Update failed (record may not exist).";
+                TempData["ErrorMessage"] = "Update failed.";
                 return View(externalSolution);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating ExternalPlatform. Model: {@Model}", externalSolution);
-                ModelState.AddModelError(string.Empty, $"An error occurred while updating: {GetInnermostMessage(ex)}");
+                ModelState.AddModelError(string.Empty, $"An error occurred: {GetInnermostMessage(ex)}");
                 TempData["ErrorMessage"] = "An error occurred while updating.";
                 return View(externalSolution);
             }
@@ -288,9 +301,24 @@ namespace PROHUB.Controllers
                     // --- Header Row ---
                     var headers = new[]
                     {
-                "Platform Name", "Developed By", "Company", "Launched Date",
-                "Billed Date", "OTC", "MRC", "Contract Period",
-                "Revenue", "Software Value", "Billed Status", "DPO Handover Date"
+                "Platform Name",
+                "Company Name",
+                "Developed By",
+                "Developed Team",
+                "Sales Team Involved",
+                "SDLC Stage",
+                "Launched Date",
+                "Billed Date",
+                "One Time Charge (OTC)",
+                "Monthly Charge (MRC)",
+                "Contract Period",
+                "Incentive Earned",
+                "Incentive Shared With",
+                "Proposal Uploaded",
+                "Revenue",
+                "Software Value",
+                "Billed Status",
+                "DPO Handover Date"
             };
 
                     for (int i = 0; i < headers.Length; i++)
@@ -298,8 +326,10 @@ namespace PROHUB.Controllers
                         var cell = worksheet.Cell(1, i + 1);
                         cell.Value = headers[i];
                         cell.Style.Font.Bold = true;
-                        cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                        cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#007BFF");
+                        cell.Style.Font.FontColor = XLColor.White;
                         cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        cell.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
                     }
 
                     // --- Data Rows ---
@@ -308,54 +338,84 @@ namespace PROHUB.Controllers
                         var solution = allSolutions[i];
                         int row = i + 2;
 
+                        // Columns 1-7
                         worksheet.Cell(row, 1).Value = solution.PlatformName ?? "";
-                        worksheet.Cell(row, 2).Value = solution.DevelopedByName ?? "";
-                        worksheet.Cell(row, 3).Value = solution.CompanyName ?? "";
-                        worksheet.Cell(row, 4).Value = solution.LaunchedDate?.ToString("yyyy-MM-dd") ?? "";
-                        worksheet.Cell(row, 5).Value = solution.BillingDate?.ToString("yyyy-MM-dd") ?? "";
+                        worksheet.Cell(row, 2).Value = solution.CompanyName ?? "";
+                        worksheet.Cell(row, 3).Value = solution.DevelopedByName ?? "";
+                        worksheet.Cell(row, 4).Value = solution.DevelopedTeam ?? "";
+                        worksheet.Cell(row, 5).Value = solution.SalesTeamName ?? "";
+                        worksheet.Cell(row, 6).Value = solution.SdlcPhaseName ?? "";
+                        worksheet.Cell(row, 7).Value = solution.LaunchedDate?.ToString("yyyy-MM-dd") ?? "";
 
-                        // Numeric values stored as numbers for Excel math
-                        worksheet.Cell(row, 6).Value = solution.PlatformOTC ?? 0;
-                        worksheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0.00";
+                        // Column 8: Billed Date
+                        worksheet.Cell(row, 8).Value = solution.BillingDate?.ToString("yyyy-MM-dd") ?? "";
 
-                        worksheet.Cell(row, 7).Value = solution.PlatformMRC ?? 0;
-                        worksheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0.00";
-
-                        worksheet.Cell(row, 8).Value = solution.ContractPeriod ?? "";
-
-                        worksheet.Cell(row, 9).Value = solution.IncentiveEarned ?? 0;
+                        // Column 9: OTC
+                        worksheet.Cell(row, 9).Value = solution.PlatformOTC ?? 0;
                         worksheet.Cell(row, 9).Style.NumberFormat.Format = "#,##0.00";
 
-                        worksheet.Cell(row, 10).Value = solution.SoftwareValue ?? 0;
+                        // Column 10: MRC
+                        worksheet.Cell(row, 10).Value = solution.PlatformMRC ?? 0;
                         worksheet.Cell(row, 10).Style.NumberFormat.Format = "#,##0.00";
 
-                        worksheet.Cell(row, 11).Value = solution.BillingDate.HasValue ? "Yes" : "No";
+                        // Column 11: Contract Period
+                        worksheet.Cell(row, 11).Value = solution.ContractPeriod ?? "";
 
-                        // Color code the "No" status for better visibility
-                        if (!solution.BillingDate.HasValue)
+                        // Column 12: Incentive Earned
+                        worksheet.Cell(row, 12).Value = solution.IncentiveEarned ?? 0;
+                        worksheet.Cell(row, 12).Style.NumberFormat.Format = "#,##0.00";
+
+                        // Column 13: Incentive Share
+                        worksheet.Cell(row, 13).Value = solution.IncentiveShare ?? 0;
+                        worksheet.Cell(row, 13).Style.NumberFormat.Format = "#,##0.00";
+
+                        // Column 14: Proposal Uploaded
+                        worksheet.Cell(row, 14).Value = solution.ProposalUploaded ?? "";
+
+                        // Column 15: Revenue
+                        worksheet.Cell(row, 15).Value = solution.Revenue ?? 0;
+                        worksheet.Cell(row, 15).Style.NumberFormat.Format = "#,##0.00";
+                        worksheet.Cell(row, 15).Style.Font.Bold = true;
+
+                        // Column 16: Software Value
+                        worksheet.Cell(row, 16).Value = solution.SoftwareValue ?? 0;
+                        worksheet.Cell(row, 16).Style.NumberFormat.Format = "#,##0.00";
+
+                        // Column 17: Billed Status
+                        bool isBilled = solution.BillingDate.HasValue;
+                        var statusCell = worksheet.Cell(row, 17);
+                        statusCell.Value = isBilled ? "Yes" : "No";
+                        statusCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                        if (!isBilled)
                         {
-                            worksheet.Cell(row, 11).Style.Font.FontColor = XLColor.Red;
-                            worksheet.Cell(row, 11).Style.Font.Bold = true;
+                            statusCell.Style.Font.FontColor = XLColor.Red;
+                            statusCell.Style.Font.Bold = true;
+                        }
+                        else
+                        {
+                            statusCell.Style.Font.FontColor = XLColor.Green;
                         }
 
-                        worksheet.Cell(row, 12).Value = solution.DPOHandoverDate?.ToString("yyyy-MM-dd") ?? "";
+                        // Column 18: DPO Handover Date
+                        worksheet.Cell(row, 18).Value = solution.DPOHandoverDate?.ToString("yyyy-MM-dd") ?? "";
                     }
 
                     // --- Final Formatting ---
-                    worksheet.Columns().AdjustToContents(); // Auto-fit columns
+                    worksheet.Columns().AdjustToContents();
 
                     using (var stream = new MemoryStream())
                     {
                         workbook.SaveAs(stream);
                         var content = stream.ToArray();
-                        var fileName = $"External_Solutions_Operational_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                        var fileName = $"External Solutions - Operational_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
                         return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                     }
                 }
             }
             catch (Exception ex)
             {
-                // _logger.LogError(ex, "Error exporting external solutions to Excel."); // Uncomment if you have logger
+                // _logger.LogError(ex, "Error exporting external solutions.");
                 TempData["ErrorMessage"] = "Error exporting to Excel. Please check server logs.";
                 return RedirectToAction(nameof(Index));
             }

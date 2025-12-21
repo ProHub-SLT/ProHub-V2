@@ -211,7 +211,7 @@ namespace ProHub.Controllers
         //  VIEW DETAILS
 
         [HttpGet]
-        public async Task<IActionResult> ViewDetails(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var model = await _service.GetByIdAsync(id);
             if (model == null) return NotFound();

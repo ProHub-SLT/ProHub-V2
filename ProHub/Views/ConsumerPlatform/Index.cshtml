@@ -322,13 +322,18 @@
     .status-badge {
         padding: 0.35rem 0.75rem;
         border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
+        font-size: 0.70rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         display: inline-block;
         white-space: nowrap;
+        width: 120px;
+        text-align: center;
+        
         border: 1px solid transparent; /* Base border */
+        overflow: hidden; /* hide overflow */
+        text-overflow: ellipsis; /* show ... if too long */
     }
 
     /* 1. Proposal Preparation - Light Grey */
@@ -528,7 +533,7 @@
                                     LKR @(item.Price?.ToString("N0") ?? "0")
                                 </td>
                                 <td class="text-center">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Details">
+                                    <a asp-action="ViewDetails" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Details">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 </td>

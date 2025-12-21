@@ -1,7 +1,9 @@
 ﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
+using ProHub.Constants;
 using ProHub.Models;
 using PROHUB.Data;
 using System;
@@ -76,7 +78,10 @@ namespace PROHUB.Controllers
             }
         }
 
+
+
         // GET: /ExternalSolutions/Create
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -85,6 +90,7 @@ namespace PROHUB.Controllers
         }
 
         // POST: /ExternalSolutions/Create
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ExternalPlatform externalSolution)
@@ -135,6 +141,7 @@ namespace PROHUB.Controllers
         }
 
         // GET: /ExternalSolutions/Edit/{id}
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -161,6 +168,7 @@ namespace PROHUB.Controllers
         }
 
         // POST: /ExternalSolutions/Edit
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ExternalPlatform externalSolution)
@@ -241,6 +249,7 @@ namespace PROHUB.Controllers
         }
 
         // POST: /ExternalSolutions/Delete/{id}
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

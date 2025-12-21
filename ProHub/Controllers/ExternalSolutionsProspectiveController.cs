@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
+using ProHub.Constants;
 using ProHub.Models;
 using PROHUB.Data;
 using System;
@@ -47,6 +49,7 @@ namespace ProHub.Controllers
 
         //  CREATE
 
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -54,6 +57,8 @@ namespace ProHub.Controllers
             return View(new ExternalPlatform());
         }
 
+
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ExternalPlatform model)
@@ -98,6 +103,7 @@ namespace ProHub.Controllers
 
         //  EDIT
 
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -131,7 +137,7 @@ namespace ProHub.Controllers
             }
         }
 
-
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ExternalPlatform model)
@@ -182,7 +188,7 @@ namespace ProHub.Controllers
 
 
         //  DELETE
-
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

@@ -1,7 +1,8 @@
 ﻿@model IEnumerable<ProHub.Models.InternalPlatform>
+@using ProHub.Constants
 
 @{
-    ViewData["Title"] = "Internal Solutions";
+    ViewData["Title"] = "Internal Solutions - Operational";
 
     // --- Pagination & Sort Logic ---
     int pageSize = Convert.ToInt32(ViewBag.PageSize ?? 10);
@@ -529,6 +530,76 @@
         color: #084298;
         border: 1px solid #b6d4fe;
     }
+
+
+    /* <CHANGE> Enhanced permission styling to match app theme */
+    .permission-restricted {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: 1px solid #f5c2c7;
+        border-radius: 8px;
+        color: #842029;
+        font-weight: 500;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 6px rgba(132, 32, 41, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .permission-restricted:hover {
+            box-shadow: 0 3px 10px rgba(132, 32, 41, 0.15);
+        }
+
+        .permission-restricted i {
+            font-size: 1rem;
+            color: #842029;
+        }
+
+    .permission-badge2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #dc3545;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge2:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
+
+    .permission-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #0056b3;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
 </style>
 
 
@@ -552,10 +623,20 @@
 
             @* ---  Create Buttons --- *@
             <div class="col-lg-3 col-md-4 col-sm-6">
-                <a asp-action="Create" class="btn-action-base btn-create-new">
-                    <i class="bi bi-plus-circle"></i>
-                    <span>Create New</span>
-                </a>
+                @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer) || User.IsInRole(AppRoles.DPO))
+                {
+                    <a asp-action="Create" class="btn-action-base btn-create-new">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Create New</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="permission-restricted">
+                        <i class="bi bi-lock-fill"></i>
+                        View-only access
+                    </span>
+                }
             </div>
 
             @* --- 2. Search Box --- *@
@@ -685,15 +766,21 @@
                         <th scope="col" style="width:18%">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+               <tbody>
                     @if (Model != null && Model.Any())
                     {
                         foreach (var item in Model)
                         {
+           
+                                var canManage =
+                                    User.IsInRole(AppRoles.Admin) ||
+                                    User.IsInRole(AppRoles.Developer) ||
+                                    User.IsInRole(AppRoles.DPO);
+           
+
                             <tr>
                                 <td title="@item.ParentProjectGroupName">@item.ParentProjectGroupName</td>
                                 <td>
-
                                     <div class="fw-semibold text-truncate" title="@item.AppName">@item.AppName</div>
                                     @if (!string.IsNullOrEmpty(item.MainAppName))
                                     {
@@ -701,8 +788,8 @@
                                             <i class="bi bi-arrow-return-right"></i> CR of @item.MainAppName
                                         </div>
                                     }
-
                                 </td>
+
                                 <td title="@(item.DevelopedByName ?? "-")">@(item.DevelopedByName ?? "-")</td>
 
                                 @* --- Conditional Data for Without CR Tab --- *@
@@ -722,34 +809,78 @@
                                     <td>@(item.AppUsers ?? "-")</td>
                                 }
 
-
                                 @if (activeTab == "operational")
                                 {
-                                    <td title="@(item.LaunchedDate?.ToString("MMM dd, yyyy") ?? "-")">@(item.LaunchedDate?.ToString("MMM dd, yyyy") ?? "-")</td>
+                                    <td title="@(item.LaunchedDate?.ToString("MMM dd, yyyy") ?? "-")">
+                                        @(item.LaunchedDate?.ToString("MMM dd, yyyy") ?? "-")
+                                    </td>
                                 }
 
-
                                 @if (activeTab == "operational")
                                 {
-                                    <td title="@(item.VADate?.ToString("MMM dd, yyyy") ?? "-")">@(item.VADate?.ToString("MMM dd, yyyy") ?? "-")</td>
+                                    <td title="@(item.VADate?.ToString("MMM dd, yyyy") ?? "-")">
+                                        @(item.VADate?.ToString("MMM dd, yyyy") ?? "-")
+                                    </td>
                                 }
 
                                 <td title="Rs.@(item.Price)">Rs.@(item.Price)</td>
-                                <td class="text-center">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil"></i></a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye"></i></a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger me-1"
-                                            onclick="showDeleteModal(@item.Id, '@item.AppName')" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                    <a asp-controller="InternalSolution" asp-action="Folder" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1" title="Filter Documents">
+
+                                <td>
+                                    <!-- VIEW – Everyone -->
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-info me-1"
+                                       title="Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    @if (canManage)
+                                    {
+                                        <!-- EDIT -->
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-primary me-1"
+                                           title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        <!-- DELETE -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger me-1"
+                                                onclick="showDeleteModal(@item.Id, '@item.AppName')"
+                                                title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <!-- VIEW ONLY -->
+                                        <span class="permission-badge me-1" title="No Permisson to Edit">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </span>
+
+                                        <!-- VIEW ONLY -->
+                                        <span class="permission-badge2 me-1" title="No Permisson to Delete" >
+                                            <i class="bi bi-lock-fill"></i>
+                                        </span>
+                                    }
+
+                                    <!-- FOLDER – Everyone -->
+                                    <a asp-controller="InternalSolution"
+                                       asp-action="Folder"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-secondary me-1"
+                                       title="Filter Documents">
                                         <i class="bi bi-folder"></i>
                                     </a>
 
+                                    <!-- CHANGE REQUESTS – Everyone -->
                                     @if (string.Equals(item.AppCategory, "Main Application", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        <a asp-action="ChangeRequests" asp-route-mainAppId="@item.Id"
-                                           class="btn btn-sm btn-outline-dark me-1" title="View Change Requests">
+                                        <a asp-action="ChangeRequests"
+                                           asp-route-mainAppId="@item.Id"
+                                           class="btn btn-sm btn-outline-dark me-1"
+                                           title="View Change Requests">
                                             <i class="bi bi-wrench"></i>
                                         </a>
                                     }
@@ -760,7 +891,6 @@
                     else
                     {
                         <tr>
-
                             <td colspan="@(activeTab == "withoutcr" || activeTab == "without_cr" ? 9 : 7)" class="empty-state">
                                 <i class="bi bi-inbox fs-1 mb-2"></i>
                                 <p class="mb-0">No internal solutions found for this tab</p>
@@ -769,6 +899,7 @@
                         </tr>
                     }
                 </tbody>
+
             </table>
         </div>
     </div>

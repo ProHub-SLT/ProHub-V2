@@ -153,14 +153,14 @@
 
             <p class="message">
                 Hello <strong>@userName</strong>,
-                You do not have permission to perform this action because your current role is <strong>@userRole</strong>.
+                You do not have permission to perform this action because your current privillage is <strong>@userRole</strong>.
             </p>
 
             @if (userRole == "View Only")
             {
                 <p class="message">
                     <strong>View Only</strong> users can browse data only.<br />
-                    You need <strong>Developer</strong> or <strong>Administrator</strong> access to create, edit, or delete records.
+                    You need <strong>upgarde</strong> your <strong>privillages</strong> access to create, edit, or delete records.
                 </p>
             }
             else if (userRole == "Developer")

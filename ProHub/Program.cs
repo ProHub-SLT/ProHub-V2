@@ -30,6 +30,21 @@ builder.Services.AddAuthentication(options =>
     .AddMicrosoftGraph(builder.Configuration.GetSection("DownstreamApi"))
     .AddInMemoryTokenCaches();
 
+
+
+// ===============================
+// SESSION (REQUIRED FOR LOGIN LOGIC)
+// ===============================
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(1); // session lifetime
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+
 // Add Razor Views + Azure Identity UI
 builder.Services.AddControllersWithViews();
 //.AddMicrosoftIdentityUI();
@@ -182,7 +197,26 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+
+app.UseSession();
+
+// ✅ Detect expired session
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        // Session expired
+        if (!context.Session.Keys.Contains("LoginLogged"))
+        {
+            context.Items["SessionExpired"] = true;
+        }
+    }
+
+    await next();
+});
+
 app.UseRouting();
+
 
 app.UseAuthentication();
 app.UseAuthorization();

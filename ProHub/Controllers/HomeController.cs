@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ProHub.Data;
+using ProHub.Data.Repositories;
 using System.Security.Claims;
 using MySql.Data.MySqlClient;
 using System;
+using PROHUB.Data;
 
 namespace ProHub.Controllers
 {
@@ -14,19 +16,42 @@ namespace ProHub.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly EmployeeRepository _employeeRepository;
         private readonly IConfiguration _configuration;
+        private readonly IRecentlyLaunchedService _recentlyLaunchedService;
+        private readonly IInternalSolutionInprogressService _inprogressService;
+        private readonly IInternalSolutionsActivitiesService _activityService;
+        private readonly IExternalSolutionsActivitiesService _extActivityService;
+        private readonly NextWeekPlanRepository _nextWeekRepo;
 
-        public HomeController(ILogger<HomeController> logger, EmployeeRepository employeeRepository, IConfiguration configuration)
+        public HomeController(
+            ILogger<HomeController> logger, 
+            EmployeeRepository employeeRepository, 
+            IConfiguration configuration, 
+            IRecentlyLaunchedService recentlyLaunchedService, 
+            IInternalSolutionInprogressService inprogressService, 
+            IInternalSolutionsActivitiesService activityService,
+            IExternalSolutionsActivitiesService extActivityService,
+            NextWeekPlanRepository nextWeekRepo)
         {
             _logger = logger;
             _employeeRepository = employeeRepository;
             _configuration = configuration;
+            _recentlyLaunchedService = recentlyLaunchedService;
+            _inprogressService = inprogressService;
+            _activityService = activityService;
+            _extActivityService = extActivityService;
+            _nextWeekRepo = nextWeekRepo;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             // ===============================
             // 1️⃣ User info (DisplayName, Email)
             // ===============================
+            string fullName = "Unknown User";
+            string empIdStr = User.FindFirst("EmployeeId")?.Value;
+            int? empId = null;
+            if (int.TryParse(empIdStr, out int parsedId)) empId = parsedId;
+
             if (User.Identity.IsAuthenticated)
             {
                 var email = User.FindFirst("preferred_username")?.Value
@@ -37,7 +62,7 @@ namespace ProHub.Controllers
 
                 if (!string.IsNullOrEmpty(email))
                 {
-                    var fullName = _employeeRepository.GetEmployeeNameByEmail(email);
+                    fullName = _employeeRepository.GetEmployeeNameByEmail(email);
                     if (!string.IsNullOrEmpty(fullName) && fullName != "Unknown User")
                     {
                         displayName = fullName.Split(' ')[0];
@@ -47,20 +72,147 @@ namespace ProHub.Controllers
                         displayName = User.FindFirst("name")?.Value ?? "User";
                         if (displayName.Contains(" "))
                             displayName = displayName.Split(' ')[0];
+                            
+                        fullName = User.FindFirst("name")?.Value ?? "Unknown User";
                     }
                 }
                 else
                 {
                     displayName = User.FindFirst("name")?.Value ?? "User";
+                    fullName = User.FindFirst("name")?.Value ?? "Unknown User";
                 }
 
                 ViewBag.DisplayName = displayName;
                 ViewBag.Email = email ?? "Unknown";
+                ViewBag.FullUserName = fullName;
+                
+                // Fetch Count of Recently Launched Projects for User
+                try 
+                {
+                    var allProjects = await _recentlyLaunchedService.GetRecentlyLaunchedAsync();
+                    if (allProjects != null)
+                    {
+                        var myCount = allProjects.Count(x => !string.IsNullOrEmpty(x.DevelopedByName) && x.DevelopedByName.Equals(fullName, StringComparison.OrdinalIgnoreCase));
+                        ViewBag.MyLaunchedCount = myCount;
+                    }
+                    else
+                    {
+                        ViewBag.MyLaunchedCount = 0;
+                    }
+                }
+                catch(Exception ex)
+                {
+                     _logger.LogError(ex, "Error fetching recently launched count");
+                     ViewBag.MyLaunchedCount = 0;
+                }
+
+                // Fetch Count of In-Progress Projects for User
+                try
+                {
+                    // Fetch both tabs to get total count
+                    var level1Projects = await _inprogressService.GetInProgressSolutionsAsync("", "level1") ?? new List<ProHub.Models.InternalPlatform>();
+                    var otherProjects = await _inprogressService.GetInProgressSolutionsAsync("", "other") ?? new List<ProHub.Models.InternalPlatform>();
+                    
+                    var allInProgress = level1Projects.Concat(otherProjects);
+
+                    var myInProgressCount = allInProgress.Count(x => x.DevelopedBy != null && 
+                                                                     !string.IsNullOrEmpty(x.DevelopedBy.EmpName) && 
+                                                                     x.DevelopedBy.EmpName.Equals(fullName, StringComparison.OrdinalIgnoreCase));
+                    
+                    ViewBag.MyInProgressCount = myInProgressCount;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error fetching in-progress count");
+                    ViewBag.MyInProgressCount = 0;
+                }
+
+                // Fetch Count of INTERNAL Activities Assigned to User
+                try
+                {
+                    var platforms = await _activityService.GetMainPlatformsAsync();
+                    var platform = platforms.FirstOrDefault(p =>
+                        p.Platforms != null &&
+                        p.Platforms.Contains("Internal", StringComparison.OrdinalIgnoreCase));
+
+                    int? internalSolutionId = platform?.ID;
+
+                    var allActivities = await _activityService.GetAllAsync(
+                        filterPlatformId: internalSolutionId);
+
+                    var myActivitiesCount = allActivities.Count(x => 
+                        (empId.HasValue && x.AssignedTo == empId.Value) ||
+                        (!string.IsNullOrEmpty(x.AssignedToName) && x.AssignedToName.Equals(fullName, StringComparison.OrdinalIgnoreCase))
+                    );
+
+                    ViewBag.MyActivityCount = myActivitiesCount;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error fetching internal activities count");
+                    ViewBag.MyActivityCount = 0;
+                }
+
+                 // Fetch Count of EXTERNAL Activities Assigned to User
+                try
+                {
+                    // Look explicitly for "External" platform similar to Internal logic
+                    // If not found, fallback to ID 2 as per controller code 
+                    var platforms = await _extActivityService.GetMainPlatformsAsync();
+                    var platform = platforms.FirstOrDefault(p =>
+                        p.Platforms != null &&
+                        p.Platforms.Contains("External", StringComparison.OrdinalIgnoreCase));
+
+                    int? externalSolutionId = platform?.ID ?? 2; 
+
+                    var allExtActivities = await _extActivityService.GetAllAsync(
+                        filterPlatformId: externalSolutionId);
+
+                    var myExtActivitiesCount = allExtActivities.Count(x => 
+                        (empId.HasValue && x.AssignedTo == empId.Value) ||
+                        (!string.IsNullOrEmpty(x.AssignedToName) && x.AssignedToName.Equals(fullName, StringComparison.OrdinalIgnoreCase))
+                    );
+
+                    ViewBag.MyExtActivityCount = myExtActivitiesCount;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error fetching external activities count");
+                    ViewBag.MyExtActivityCount = 0;
+                }
+
+                // Fetch Count of User's Plans for THIS WEEK
+                try
+                {
+                    var today = DateTime.Today;
+                    int daysToMonday = ((int)today.DayOfWeek - 1 + 7) % 7;
+                    var weekStart = today.AddDays(-daysToMonday);
+
+                    var plans = _nextWeekRepo.GetByWeek(weekStart);
+                    
+                    // Filter by user name (UpdatedByName) or UpdatedBy (ID)
+                    var myWeekPlansCount = plans.Count(x => 
+                        (empId.HasValue && x.UpdatedBy == empId.Value) ||
+                        (!string.IsNullOrEmpty(x.UpdatedByName) && x.UpdatedByName.Equals(fullName, StringComparison.OrdinalIgnoreCase))
+                    );
+
+                     ViewBag.MyWeekPlanCount = myWeekPlansCount;
+                }
+                 catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error fetching week plan count");
+                    ViewBag.MyWeekPlanCount = 0;
+                }
             }
             else
             {
                 ViewBag.DisplayName = "Guest";
                 ViewBag.Email = "Not logged in";
+                ViewBag.MyLaunchedCount = 0;
+                ViewBag.MyInProgressCount = 0;
+                ViewBag.MyActivityCount = 0;
+                ViewBag.MyExtActivityCount = 0;
+                ViewBag.MyWeekPlanCount = 0;
             }
 
 

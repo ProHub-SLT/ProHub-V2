@@ -298,7 +298,15 @@
                         @foreach (var item in Model)
                         {
                             var isOwner = User.FindFirst("EmployeeId")?.Value == item.UpdatedBy?.ToString();
-                            var canEditDelete = User.IsInRole(AppRoles.Admin) || isOwner;
+                            var isAdmin = User.IsInRole(AppRoles.Admin);
+                            
+                            // FILTER: Show only if Admin OR Owner
+                            if (!isAdmin && !isOwner)
+                            {
+                                continue;
+                            }
+
+                            var canEditDelete = isAdmin || isOwner;
 
                             <tr data-plan-id="@item.ID" data-status="active">
                                 <td>
@@ -363,8 +371,6 @@
                                             </a>
                                         }
 
-                                       
-
                                         <!-- DELETE: Only Admin or Owner -->
                                         @if (canEditDelete)
                                         {
@@ -377,18 +383,6 @@
                                                     title="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
-                                        }
-                                        else
-                                        {
-                                            <!-- <CHANGE> Styled lock icon badge for permission restriction -->
-                                            <span class="permission-badge" title="Only owner or admin can edit">
-                                                <i class="bi bi-lock-fill"></i>
-                                            </span>
-
-                                            <!-- <CHANGE> Styled lock icon badge for permission restriction -->
-                                            <span class="permission-badge2" title="Only owner or admin can delete">
-                                                <i class="bi bi-lock-fill"></i>
-                                            </span>
                                         }
                                     </div>
                                 </td>

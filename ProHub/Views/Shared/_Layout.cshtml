@@ -1026,7 +1026,7 @@
                   
 
 
-                    @if (isIshamp || isDPO || isPrivileged || isNonDeveloper)
+                    @if (isIshamp || isDPO || isPrivileged || isNonDeveloper || isViewOnly)
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -1057,7 +1057,7 @@
                     }
 
 
-                    @if ( isPrivileged || isNonDeveloper)
+                    @if ( isPrivileged || isNonDeveloper || isViewOnly)
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -1070,7 +1070,7 @@
                         </li>
                     }
 
-                    @if ( isPrivileged || isNonDeveloper)
+                    @if ( isPrivileged || isNonDeveloper || isViewOnly)
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -1102,7 +1102,7 @@
                     }
                   
 
-                    @if (isPrivileged || isNonDeveloper)
+                    @if (isPrivileged || isNonDeveloper || isViewOnly)
                     {
                         <li class="nav-item">
                             <a class="nav-link nav-link-prohub" href="@Url.Action("Index", "Partner")">
@@ -1280,7 +1280,7 @@
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5 class="footer-heading">Quick Access</h5>
                     <ul class="footer-links">
-                        <li><a href="@Url.Action("Index")" class="footer-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li><a href="@Url.Action("Index", "Home")" class="footer-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
                         <li><a href="@Url.Action("Index", "NextWeekPlans")" class="footer-link"><i class="bi bi-calendar-week"></i> Weekly Plan</a></li>
                         <li><a href="@Url.Action("List", "Freelancer")" class="footer-link"><i class="bi bi-journal-text"></i> Freelancer</a></li>
                         <li><a href="@Url.Action("Index", "Trainee")" class="footer-link"><i class="bi bi-person-badge"></i>  Trainees</a></li>
@@ -1301,7 +1301,7 @@
                     <h5 class="footer-heading">Support</h5>
                     <div class="footer-contact">
                         <i class="bi bi-telephone-fill"></i>
-                        <span>IT Help Desk: 076 - 9166548 </span>
+                        <span>IT Help Desk: 076-9166548 </span>
                     </div>
                     <div class="footer-contact">
                         <i class="bi bi-envelope-fill"></i>

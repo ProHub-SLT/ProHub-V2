@@ -417,7 +417,7 @@
                             <span class="badge-count">@ViewBag.MyWeekPlanCount</span>
                         }
                     </div>
-                    <span class="shortcut-label">Week Plan</span>
+                    <span class="shortcut-label">My Week <br /> Plan</span>
                 </a>
 
                 <a href="@Url.Action("Index", "RecentlyLaunched", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My Recently Launched Projects">
@@ -428,7 +428,7 @@
                             <span class="badge-count">@ViewBag.MyLaunchedCount</span>
                         }
                     </div>
-                    <span class="shortcut-label">Launched</span>
+                    <span class="shortcut-label">Launched <br /> Project</span>
                 </a>
 
                 <a href="@Url.Action("Index", "InternalSolutionInprogress", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My In-Progress Projects">
@@ -439,7 +439,7 @@
                             <span class="badge-count">@ViewBag.MyInProgressCount</span>
                         }
                     </div>
-                    <span class="shortcut-label">In Progress</span>
+                    <span class="shortcut-label">In Progress Project</span>
                 </a>
 
                 <a href="@Url.Action("Index", "InternalSolutionsActivities", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My Assigned Activities">
@@ -450,7 +450,7 @@
                             <span class="badge-count">@ViewBag.MyActivityCount</span>
                         }
                     </div>
-                    <span class="shortcut-label">Activities</span>
+                    <span class="shortcut-label">Internal <br />Activities</span>
                 </a>
 
                 <a href="@Url.Action("Index", "ExternalSolutionsActivities", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My External Assigned Activities">
@@ -461,7 +461,7 @@
                             <span class="badge-count">@ViewBag.MyExtActivityCount</span>
                         }
                     </div>
-                    <span class="shortcut-label">External</span>
+                    <span class="shortcut-label">External Activities</span>
                 </a>
             </div>
         </div>

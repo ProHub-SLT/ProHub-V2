@@ -365,16 +365,32 @@ namespace PROHUB.Data
         public async Task<List<Employee>> GetEmployeesAsync()
         {
             var list = new List<Employee>();
+
             using var connection = GetConnection();
             await connection.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT Emp_ID, Emp_Name FROM Employee ORDER BY Emp_Name", connection);
+
+            using var cmd = new MySqlCommand(@"
+                SELECT e.Emp_ID, e.Emp_Name
+                FROM Employee e
+                LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+                WHERE g.GroupName IS NULL
+                   OR g.GroupName <> 'Inactive'
+                ORDER BY e.Emp_Name
+            ", connection);
+
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                list.Add(new Employee { EmpId = GetInt32Safe(reader, "Emp_ID"), EmpName = GetNullableString(reader, "Emp_Name") ?? "" });
+                list.Add(new Employee
+                {
+                    EmpId = GetInt32Safe(reader, "Emp_ID"),
+                    EmpName = GetNullableString(reader, "Emp_Name") ?? string.Empty
+                });
             }
+
             return list;
         }
+
 
         public async Task<List<Company>> GetCompanyAsync()
         {

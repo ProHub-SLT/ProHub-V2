@@ -283,7 +283,20 @@ namespace PROHUB.Data
         }
 
         // --- Dropdowns 
-        public async Task<List<Employee>> GetEmployeesAsync() => await GetDropdownListAsync("SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name", r => new Employee { EmpId = r.GetInt32(0), EmpName = r.GetString(1) });
+        public async Task<List<Employee>> GetEmployeesAsync() =>
+        await GetDropdownListAsync(
+            @"SELECT e.Emp_ID, e.Emp_Name
+          FROM Employee e
+          LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+          WHERE g.GroupName IS NULL
+             OR g.GroupName <> 'Inactive'
+          ORDER BY e.Emp_Name",
+            r => new Employee
+            {
+                EmpId = r.GetInt32(0),
+                EmpName = r.IsDBNull(1) ? string.Empty : r.GetString(1)
+            });
+
         public async Task<List<SDLCPhase>> GetSdlcPhasesAsync() => await GetDropdownListAsync("SELECT ID, Phase FROM sdlcphas ORDER BY OrderSeq, Phase", r => new SDLCPhase { Id = r.GetInt32(0), Phase = r.GetString(1) });
         public async Task<List<TargetEndUser>> GetEndUserTypesAsync() => await GetDropdownListAsync("SELECT ID, EndUserType FROM targetenduser ORDER BY EndUserType", r => new TargetEndUser { ID = r.GetInt32(0), EndUserType = r.GetString(1) });
         public async Task<List<ParentProject>> GetParentProjectsAsync() => await GetDropdownListAsync("SELECT ParentProjectID, ParentProjectGroup FROM parentproject ORDER BY ParentProjectGroup", r => new ParentProject { ParentProjectID = r.GetInt32(0), ParentProjectGroup = r.GetString(1) });

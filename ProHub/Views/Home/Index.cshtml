@@ -408,62 +408,84 @@
             <h1 class="hero-title">Your Digital Workspace, Elevated</h1>
             <p class="hero-subtitle">Streamline collaboration, boost productivity, and transform how your team works with PROHUB's integrated platform.</p>
 
-            <div class="shortcut-container">
-                <a href="@Url.Action("Index", "NextWeekPlans")" class="shortcut-icon-btn" title="View Current Week Plan">
-                    <div class="icon-circle">
-                        <i class="bi bi-calendar-week"></i>
-                        @if (ViewBag.MyWeekPlanCount != null && ViewBag.MyWeekPlanCount > 0)
-                        {
-                            <span class="badge-count">@ViewBag.MyWeekPlanCount</span>
-                        }
-                    </div>
-                    <span class="shortcut-label">My Week <br /> Plan</span>
-                </a>
 
-                <a href="@Url.Action("Index", "RecentlyLaunched", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My Recently Launched Projects">
-                    <div class="icon-circle">
-                        <i class="bi bi-rocket-takeoff"></i>
-                        @if (ViewBag.MyLaunchedCount != null && ViewBag.MyLaunchedCount > 0)
-                        {
-                            <span class="badge-count">@ViewBag.MyLaunchedCount</span>
-                        }
-                    </div>
-                    <span class="shortcut-label">Launched <br /> Project</span>
-                </a>
 
-                <a href="@Url.Action("Index", "InternalSolutionInprogress", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My In-Progress Projects">
-                    <div class="icon-circle">
-                        <i class="bi bi-hourglass-split"></i>
-                        @if (ViewBag.MyInProgressCount != null && ViewBag.MyInProgressCount > 0)
-                        {
-                            <span class="badge-count">@ViewBag.MyInProgressCount</span>
-                        }
-                    </div>
-                    <span class="shortcut-label">In Progress Project</span>
-                </a>
 
-                <a href="@Url.Action("Index", "InternalSolutionsActivities", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My Assigned Activities">
-                    <div class="icon-circle">
-                        <i class="bi bi-list-check"></i>
-                        @if (ViewBag.MyActivityCount != null && ViewBag.MyActivityCount > 0)
-                        {
-                            <span class="badge-count">@ViewBag.MyActivityCount</span>
-                        }
-                    </div>
-                    <span class="shortcut-label">Internal <br />Activities</span>
-                </a>
+            @{
+     
+                // Get current user's roles
+                var roles = User.Claims
+                .Where(c => c.Type == "app_role")
+                .Select(c => c.Value)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-                <a href="@Url.Action("Index", "ExternalSolutionsActivities", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My External Assigned Activities">
-                    <div class="icon-circle">
-                        <i class="bi bi-globe"></i>
-                        @if (ViewBag.MyExtActivityCount != null && ViewBag.MyExtActivityCount > 0)
-                        {
-                            <span class="badge-count">@ViewBag.MyExtActivityCount</span>
-                        }
-                    </div>
-                    <span class="shortcut-label">External Activities</span>
-                </a>
-            </div>
+                bool canSeeShortcuts = roles.Contains("Admin") || roles.Contains("Developer");
+            }
+
+
+            @if (canSeeShortcuts)
+            {
+                <div class="shortcut-container">
+                    <a href="@Url.Action("Index", "NextWeekPlans")" class="shortcut-icon-btn" title="View Current Week Plan">
+                        <div class="icon-circle">
+                            <i class="bi bi-calendar-week"></i>
+                            @if (ViewBag.MyWeekPlanCount != null && ViewBag.MyWeekPlanCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyWeekPlanCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">My Week <br /> Plan</span>
+                    </a>
+
+                    <a href="@Url.Action("Index", "RecentlyLaunched", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My Recently Launched Projects">
+                        <div class="icon-circle">
+                            <i class="bi bi-rocket-takeoff"></i>
+                            @if (ViewBag.MyLaunchedCount != null && ViewBag.MyLaunchedCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyLaunchedCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">Launched <br /> Project</span>
+                    </a>
+
+                    <a href="@Url.Action("Index", "InternalSolutionInprogress", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My In-Progress Projects">
+                        <div class="icon-circle">
+                            <i class="bi bi-hourglass-split"></i>
+                            @if (ViewBag.MyInProgressCount != null && ViewBag.MyInProgressCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyInProgressCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">In Progress Project</span>
+                    </a>
+
+                    <a href="@Url.Action("Index", "InternalSolutionsActivities", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My Assigned Activities">
+                        <div class="icon-circle">
+                            <i class="bi bi-list-check"></i>
+                            @if (ViewBag.MyActivityCount != null && ViewBag.MyActivityCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyActivityCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">Internal <br />Activities</span>
+                    </a>
+
+                    <a href="@Url.Action("Index", "ExternalSolutionsActivities", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My External Assigned Activities">
+                        <div class="icon-circle">
+                            <i class="bi bi-globe"></i>
+                            @if (ViewBag.MyExtActivityCount != null && ViewBag.MyExtActivityCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyExtActivityCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">External Activities</span>
+                    </a>
+                </div>
+                
+            }
+
+           
         </div>
     </section>
 

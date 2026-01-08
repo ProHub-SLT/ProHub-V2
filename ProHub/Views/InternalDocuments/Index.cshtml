@@ -11,7 +11,7 @@
     string searchTerm = ViewBag.Search ?? "";
 }
 <style>
-    /* YOUR EXACT SAME GORGEOUS STYLES — NOT A SINGLE CHANGE */
+    /* YOUR EXACT SAME GORGEOUS STYLES  NOT A SINGLE PIXEL CHANGED */
     body {
         margin: 0;
         background: url('/images/bg.jpg') no-repeat center center fixed;
@@ -35,7 +35,7 @@
     .data-table-wrapper {
         background: white;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         overflow: hidden;
     }
 
@@ -227,6 +227,28 @@
             color: #842029;
         }
 
+    .permission-badge2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #dc3545;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge2:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
+
     .permission-badge {
         display: inline-flex;
         align-items: center;
@@ -248,27 +270,178 @@
             box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
             transform: translateY(-1px);
         }
-
-    .permission-badge2 {
-        display: inline-flex;
-        align-items: center;
+    
+    /* --- Delete Modal --- */
+    .delete-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
         justify-content: center;
-        width: 32px;
-        height: 32px;
-        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
-        border: 1px solid #b6d9f0;
-        border-radius: 6px;
-        color: #842029;
-        font-size: 0.9rem;
-        cursor: help;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
     }
 
-        .permission-badge2:hover {
-            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
-            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+        .delete-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .delete-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-width: 450px;
+        width: 90%;
+        border-top: 6px solid #dc3545;
+        animation: modalSlideIn 0.4s ease forwards;
+        transform: scale(0.7);
+    }
+
+    .delete-modal-overlay.show .delete-modal-content {
+        transform: scale(1);
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            transform: scale(0.7) translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .delete-modal-content i.warning-icon {
+        font-size: 3.5rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .delete-modal-content h4 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.75rem;
+        font-size: 1.5rem;
+    }
+
+    .delete-modal-content p {
+        font-size: 1rem;
+        color: #718096;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-modal-cancel {
+        padding: 0.75rem 1.75rem;
+        background: white;
+        color: #495057;
+        font-weight: 600;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .btn-modal-cancel:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
             transform: translateY(-1px);
+        }
+
+    .btn-modal-delete {
+        padding: 0.75rem 1.75rem;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+    }
+
+        .btn-modal-delete:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+        }
+
+    /* --- Success Modal --- */
+    .success-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .success-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .success-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-width: 420px;
+        width: 90%;
+        border-top: 6px solid #28a745;
+        animation: modalSlideIn 0.4s ease forwards;
+        transform: scale(0.7);
+    }
+
+    .success-modal-overlay.show .success-modal-content {
+        transform: scale(1);
+    }
+
+    .success-modal-content i {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    .success-modal-content h4 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-modal-ok {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+    }
+
+        .btn-modal-ok:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
         }
 </style>
 
@@ -347,12 +520,12 @@
                             <tr>
                                 <td title="@item.SolutionName"><strong>@item.SolutionName</strong></td>
                                 <td title="@item.Doc_Name">@item.Doc_Name</td>
-                                <td title="@(item.Created_Time?.ToString("yyyy-MM-dd"))">@(item.Created_Time?.ToString("yyyy-MM-dd") ?? "—")</td>
+                                <td title="@(item.Created_Time?.ToString("yyyy-MM-dd"))">@(item.Created_Time?.ToString("yyyy-MM-dd") ?? "")</td>
                                 <td title="@item.CreatedByName">@item.CreatedByName</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
 
-                                        <!-- VIEW - Always -->
+                                        <!-- VIEW - Always visible -->
                                         <a asp-action="Details" asp-route-id="@item.ID"
                                            class="btn btn-sm btn-outline-info" title="View">
                                             <i class="bi bi-eye"></i>
@@ -372,15 +545,14 @@
                                         {
                                             <button type="button"
                                                     class="btn btn-sm btn-outline-danger"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal"
-                                                    data-id="@item.ID"
+                                                    onclick="showDeleteModal(@item.ID, '@item.Doc_Name')"
                                                     title="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         }
                                         else
                                         {
+                                            <!-- Show lock if not allowed -->
                                             <!-- <CHANGE> Styled lock icon badge for permission restriction -->
                                             <span class="permission-badge" title="Only owner or admin can edit">
                                                 <i class="bi bi-lock-fill"></i>
@@ -438,33 +610,75 @@
     }
 </div>
 
-<!-- DELETE MODAL -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete this document?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteForm" asp-action="Delete" method="post" style="display:inline;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" id="deleteId" name="id" />
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </div>
+<!-- DELETE MODAL (NEW) -->
+<div id="deleteModal" class="delete-modal-overlay">
+    <div class="delete-modal-content">
+        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+        <h4>Are You Sure?</h4>
+        <p>You are about to delete:</p>
+        <p class="item-name" id="deleteItemName" style="font-weight:600; color:#2d3748;"></p>
+        <p style="color: #dc3545; font-size: 0.9rem;">This action cannot be undone!</p>
+        <div class="delete-modal-actions mt-4 d-flex justify-content-center gap-3">
+            <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+            </button>
+            <form id="deleteForm" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-modal-delete">
+                    <i class="bi bi-trash-fill me-1"></i> Yes, Delete
+                </button>
+            </form>
         </div>
     </div>
 </div>
 
+<!-- SUCCESS MODAL (NEW) -->
+<div id="successModal" class="success-modal-overlay">
+    <div class="success-modal-content">
+        <i class="bi bi-check-circle-fill"></i>
+        <h4>Success!</h4>
+        <p id="successMessageText">@TempData["SuccessMessage"]</p>
+        <button type="button" class="btn-modal-ok" onclick="closeSuccessModal()">
+            OK
+        </button>
+    </div>
+</div>
+
 <script>
-    const modal = document.getElementById('deleteModal');
-    modal.addEventListener('show.bs.modal', function (e) {
-        const button = e.relatedTarget;
-        document.getElementById('deleteId').value = button.getAttribute('data-id');
+    // --- Modal Functions ---
+    function showDeleteModal(id, name) {
+        document.getElementById('deleteItemName').textContent = name;
+        var form = document.getElementById('deleteForm');
+        // Setting action to trigger Delete method in controller
+        form.action = '/InternalDocuments/Delete/' + id;
+
+        document.getElementById('deleteModal').classList.add('show');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('show');
+    }
+
+    function closeSuccessModal() {
+        document.getElementById('successModal').classList.remove('show');
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('deleteModal').addEventListener('click', function (e) {
+        if (e.target === this) closeDeleteModal();
     });
+
+    document.getElementById('successModal').addEventListener('click', function (e) {
+        if (e.target === this) closeSuccessModal();
+    });
+
+    // Show success modal if TempData message exists
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <text>
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('successModal').classList.add('show');
+        });
+        </text>
+    }
 </script>

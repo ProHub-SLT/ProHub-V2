@@ -110,8 +110,18 @@ namespace ProHub.Controllers
             if (ModelState.IsValid)
             {
                 _docRepo.Insert(model);
-                TempData["Success"] = "External document created successfully!";
-                return RedirectToAction(nameof(Index));
+                // Set success message to trigger modal in View
+                TempData["SuccessMessage"] = "External document created successfully!";
+                
+                // Repopulate ViewBagh for the view since we are not redirecting yet
+                ViewBag.ExternalPlatforms = _externalRepo.GetAll();
+                ViewBag.CreatedByName = GetCurrentUserName();
+                ViewBag.AuthenticatedEmployeeId = GetCurrentEmployeeId();
+                var main = _externalRepo.GetAllMainPlatforms().FirstOrDefault(p => p.Platforms?.ToLower() == "external");
+                ViewBag.ExternalPlatformName = main?.Platforms ?? "External";
+                ViewBag.ExternalPlatformId = main?.ID ?? 2;
+
+                return View(model);
             }
 
             ViewBag.ExternalPlatforms = _externalRepo.GetAll();
@@ -165,7 +175,7 @@ namespace ProHub.Controllers
             }
 
             _docRepo.Update(model);
-            TempData["Success"] = "Document updated successfully!";
+            TempData["SuccessMessage"] = "Document updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -181,11 +191,12 @@ namespace ProHub.Controllers
         public IActionResult Delete(int id)
         {
             var doc = _docRepo.GetById(id);
-            if (doc == null) return Json(new { success = false, message = "Not found" });
+            if (doc == null) return NotFound();
             if (!IsOwnerOrAdmin(doc.Created_By)) return Forbid();
 
             _docRepo.Delete(id);
-            return Json(new { success = true });
+            TempData["SuccessMessage"] = "Document deleted successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         private string GetCurrentUserName() =>

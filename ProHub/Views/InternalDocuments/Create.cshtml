@@ -166,6 +166,86 @@
     .col-form-label.disabled {
         color: #6c757d;
     }
+
+    /* --- Success Modal Styles --- */
+    .success-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .success-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .success-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        max-width: 420px;
+        width: 90%;
+        border-top: 6px solid #28a745;
+        animation: modalSlideIn 0.4s ease forwards;
+        transform: scale(0.7);
+    }
+
+    .success-modal-overlay.show .success-modal-content {
+        transform: scale(1);
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            transform: scale(0.7) translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .success-modal-content i {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    .success-modal-content h4 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-modal-ok {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+    }
+
+        .btn-modal-ok:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+        }
 </style>
 
 <div class="container-fluid mt-4">
@@ -174,14 +254,9 @@
             <h2 class="bi bi-file-earmark-plus me-2">@ViewData["Title"]</h2>
         </div>
 
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">@TempData["Success"]</div>
-        }
-
         @if (TempData["Error"] != null)
         {
-            <div class="alert alert-danger">@TempData["Error"]</div>
+            <div class="alert alert-danger m-4">@TempData["Error"]</div>
         }
 
         <form asp-action="Create" method="post" enctype="multipart/form-data">
@@ -263,8 +338,35 @@
     </div>
 </div>
 
+<!-- SUCCESS MODAL -->
+<div id="successModal" class="success-modal-overlay">
+    <div class="success-modal-content">
+        <i class="bi bi-check-circle-fill"></i>
+        <h4>Success!</h4>
+        <p id="successMessageText">@TempData["SuccessMessage"]</p>
+        <button type="button" class="btn-modal-ok" onclick="redirectToIndex()">
+            OK
+        </button>
+    </div>
+</div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    
+    <script>
+        function redirectToIndex() {
+            window.location.href = '@Url.Action("Index", "InternalDocuments")';
+        }
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            window.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('successModal').classList.add('show');
+            });
+            </text>
+        }
+    </script>
 }

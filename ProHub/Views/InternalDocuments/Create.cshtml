@@ -1,6 +1,6 @@
 @model ProHub.Models.Document
 @{
-    ViewData["Title"] = "Add - New Document";
+    ViewData["Title"] = "Create - Internal Document";
 }
 
 <style>
@@ -12,18 +12,18 @@
         position: relative;
     }
 
-        /* Blur overlay */
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            min-height: 100%;
-            background: inherit;
-            filter: blur(1px);
-            z-index: -1;
-        }
+    /* Blur overlay */
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 100%;
+        background: inherit;
+        filter: blur(1px);
+        z-index: -1;
+    }
 
     .form-container {
         background: white;
@@ -40,12 +40,12 @@
         color: white;
     }
 
-        .form-header h2 {
-            margin: 0;
-            font-size: 1.75rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-        }
+    .form-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
 
     .form-body {
         padding: 2.5rem;
@@ -77,11 +77,11 @@
         cursor: pointer;
     }
 
-        .btn-modern-primary:hover {
-            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
-        }
+    .btn-modern-primary:hover {
+        background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+    }
 
     .btn-modern-secondary {
         display: inline-flex;
@@ -99,12 +99,12 @@
         cursor: pointer;
     }
 
-        .btn-modern-secondary:hover {
-            background: #f8f9fa;
-            border-color: #adb5bd;
-            color: #212529;
-            transform: translateY(-1px);
-        }
+    .btn-modern-secondary:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+        color: #212529;
+        transform: translateY(-1px);
+    }
 
     .form-control-modern {
         width: 100%;
@@ -116,12 +116,12 @@
         background-color: #f8f9fa;
     }
 
-        .form-control-modern:focus {
-            outline: none;
-            border-color: #28A745;
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
-        }
+    .form-control-modern:focus {
+        outline: none;
+        border-color: #28A745;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
 
     .form-select-modern {
         width: 100%;
@@ -133,12 +133,12 @@
         background-color: #f8f9fa;
     }
 
-        .form-select-modern:focus {
-            outline: none;
-            border-color: #28A745;
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
-        }
+    .form-select-modern:focus {
+        outline: none;
+        border-color: #28A745;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
 
     .col-form-label {
         font-weight: 500;
@@ -165,87 +165,8 @@
     /* Disabled field label styling */
     .col-form-label.disabled {
         color: #6c757d;
+        font-style: italic;
     }
-
-    /* --- Success Modal Styles --- */
-    .success-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.45);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-    }
-
-        .success-modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-    .success-modal-content {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem 3rem;
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        max-width: 420px;
-        width: 90%;
-        border-top: 6px solid #28a745;
-        animation: modalSlideIn 0.4s ease forwards;
-        transform: scale(0.7);
-    }
-
-    .success-modal-overlay.show .success-modal-content {
-        transform: scale(1);
-    }
-
-    @@keyframes modalSlideIn {
-        from {
-            transform: scale(0.7) translateY(-50px);
-            opacity: 0;
-        }
-
-        to {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .success-modal-content i {
-        font-size: 3rem;
-        color: #28a745;
-        margin-bottom: 1rem;
-    }
-
-    .success-modal-content h4 {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-    }
-
-    .btn-modal-ok {
-        padding: 0.75rem 2rem;
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        border: none;
-        border-radius: 8px;
-        color: #fff;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
-    }
-
-        .btn-modal-ok:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
-        }
 </style>
 
 <div class="container-fluid mt-4">
@@ -254,9 +175,14 @@
             <h2 class="bi bi-file-earmark-plus me-2">@ViewData["Title"]</h2>
         </div>
 
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success mt-3 mx-4">@TempData["Success"]</div>
+        }
+        
         @if (TempData["Error"] != null)
         {
-            <div class="alert alert-danger m-4">@TempData["Error"]</div>
+            <div class="alert alert-danger mt-3 mx-4">@TempData["Error"]</div>
         }
 
         <form asp-action="Create" method="post" enctype="multipart/form-data">
@@ -265,7 +191,6 @@
                     <label class="col-sm-4 col-form-label disabled">Platform</label>
                     <div class="col-sm-8">
                         <input type="text" class="form-control-modern" value="@(ViewBag.InternalPlatformName ?? "Internal")" readonly disabled />
-                        <input type="hidden" asp-for="Platform_ID" value="@(ViewBag.InternalPlatformId ?? 1)" />
                     </div>
                 </div>
 
@@ -282,7 +207,7 @@
                 <div class="form-group row">
                     <label asp-for="Doc_Name" class="col-sm-4 col-form-label">Document Name</label>
                     <div class="col-sm-8">
-                        <input asp-for="Doc_Name" class="form-control-modern" required />
+                        <input asp-for="Doc_Name" class="form-control-modern" required placeholder="Enter document name" />
                         <span asp-validation-for="Doc_Name" class="text-danger"></span>
                     </div>
                 </div>
@@ -291,39 +216,38 @@
                     <label class="col-sm-4 col-form-label disabled">Uploaded By</label>
                     <div class="col-sm-8">
                         <input type="text" class="form-control-modern" value="@(ViewBag.CreatedByName ?? "Unknown User")" readonly disabled />
-                        <input type="hidden" name="Created_By" value="@(ViewBag.AuthenticatedEmployeeId ?? 5)" />
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label asp-for="Doc_Classification" class="col-sm-4 col-form-label">Document Classification</label>
                     <div class="col-sm-8">
-                        <input asp-for="Doc_Classification" class="form-control-modern" />
+                        <input asp-for="Doc_Classification" class="form-control-modern" placeholder="e.g. Secret, Public" />
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label asp-for="Tags" class="col-sm-4 col-form-label">Tags</label>
                     <div class="col-sm-8">
-                        <input asp-for="Tags" class="form-control-modern" placeholder="e.g. UAT, Architecture" />
+                        <input asp-for="Tags" class="form-control-modern" placeholder="e.g. UAT, Architecture, Proposal" />
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label class="col-sm-4 col-form-label">Confidentiality</label>
                     <div class="col-sm-8">
-                        <select class="form-select-modern">
-                            <option>Low</option>
-                            <option>Medium</option>
-                            <option>High</option>
+                        <select class="form-select-modern" asp-for="Confidential">
+                            <option value="false">Low</option>
+                            <option value="true">High</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">ImagePath</label>
+                    <label class="col-sm-4 col-form-label">Upload Document</label>
                     <div class="col-sm-8">
                         <input type="file" name="ImagePath" class="form-control-modern" accept=".pdf,.docx,.xlsx,.png,.jpg" required />
+                        <small class="text-muted">Allowed files: .pdf, .docx, .xlsx, .png, .jpg</small>
                     </div>
                 </div>
             </div>
@@ -331,42 +255,13 @@
             <div class="form-footer">
                 <a asp-action="Index" class="btn-modern-secondary">Back to List</a>
                 <button type="submit" class="btn-modern-primary">
-                    <i class="bi bi-check-circle"></i> Create
+                    <i class="bi bi-cloud-arrow-up"></i> Create Document
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- SUCCESS MODAL -->
-<div id="successModal" class="success-modal-overlay">
-    <div class="success-modal-content">
-        <i class="bi bi-check-circle-fill"></i>
-        <h4>Success!</h4>
-        <p id="successMessageText">@TempData["SuccessMessage"]</p>
-        <button type="button" class="btn-modal-ok" onclick="redirectToIndex()">
-            OK
-        </button>
-    </div>
-</div>
-
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-    
-    <script>
-        function redirectToIndex() {
-            window.location.href = '@Url.Action("Index", "InternalDocuments")';
-        }
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <text>
-            window.addEventListener('DOMContentLoaded', () => {
-                document.getElementById('successModal').classList.add('show');
-            });
-            </text>
-        }
-    </script>
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

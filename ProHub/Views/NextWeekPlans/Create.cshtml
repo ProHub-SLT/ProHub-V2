@@ -344,18 +344,21 @@
             <div class="form-body">
                 <!-- Week Selection -->
                 <div class="mb-3 row">
-                    <label asp-for="StartDate" class="col-sm-4 col-form-label">Week</label>
+                    <label class="col-sm-4 col-form-label">Week</label>
                     <div class="col-sm-8">
-                        <select asp-for="StartDate" class="form-select" id="weekSelect" style="cursor: not-allowed;" disabled>
+                        <select class="form-select" id="weekSelector">
                             <option value="">Select a Week</option>
                             @foreach (var week in upcomingWeeks)
                             {
-                                <option value="@week.Value"
-                                    selected="@(week.Value == defaultWeekValue ? "selected" : null)">@week.Text</option>
+                                var sDate = DateTime.Parse(week.Value);
+                                var eDate = sDate.AddDays(4).ToString("yyyy-MM-dd");
+                                <option value="@week.Value" data-end-date="@eDate"
+                                        selected="@(week.Value == defaultWeekValue ? "selected" : null)">@week.Text</option>
                             }
                         </select>
-                        <input type="hidden" asp-for="StartDate" value="@defaultWeekValue" />
-                        <input type="hidden" asp-for="EndDate" value="@nextWeekEnd.ToString("yyyy-MM-dd")" />
+                        <!-- Hidden inputs acting as the true model binders -->
+                        <input type="hidden" asp-for="StartDate" id="StartDateInput" value="@defaultWeekValue" />
+                        <input type="hidden" asp-for="EndDate" id="EndDateInput" value="@nextWeekEnd.ToString("yyyy-MM-dd")" />
                         <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
                 </div>
@@ -481,6 +484,24 @@
         let projectWorkPlans = {};
 
         document.addEventListener('DOMContentLoaded', function () {
+            // Week Selector Logic
+            const weekSelector = document.getElementById('weekSelector');
+            const startDateInput = document.getElementById('StartDateInput');
+            const endDateInput = document.getElementById('EndDateInput');
+
+            if(weekSelector) {
+                weekSelector.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const start = selectedOption.value;
+                    const end = selectedOption.getAttribute('data-end-date');
+                    
+                    if(start && end) {
+                        startDateInput.value = start;
+                        endDateInput.value = end;
+                    }
+                });
+            }
+
             const externalCheckboxes = document.querySelectorAll('input[name="ExternalProjectIds"]');
             const internalCheckboxes = document.querySelectorAll('input[name="InternalProjectIds"]');
             const externalDropdownText = document.querySelector('#externalProjectsDropdown .dropdown-text');

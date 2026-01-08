@@ -110,18 +110,8 @@ namespace ProHub.Controllers
             if (ModelState.IsValid)
             {
                 _docRepo.Insert(model);
-                // Set success message to trigger modal in View
-                TempData["SuccessMessage"] = "External document created successfully!";
-                
-                // Repopulate ViewBagh for the view since we are not redirecting yet
-                ViewBag.ExternalPlatforms = _externalRepo.GetAll();
-                ViewBag.CreatedByName = GetCurrentUserName();
-                ViewBag.AuthenticatedEmployeeId = GetCurrentEmployeeId();
-                var main = _externalRepo.GetAllMainPlatforms().FirstOrDefault(p => p.Platforms?.ToLower() == "external");
-                ViewBag.ExternalPlatformName = main?.Platforms ?? "External";
-                ViewBag.ExternalPlatformId = main?.ID ?? 2;
-
-                return View(model);
+                TempData["Success"] = "External document created successfully!";
+                return RedirectToAction(nameof(Index));
             }
 
             ViewBag.ExternalPlatforms = _externalRepo.GetAll();
@@ -175,7 +165,7 @@ namespace ProHub.Controllers
             }
 
             _docRepo.Update(model);
-            TempData["SuccessMessage"] = "Document updated successfully!";
+            TempData["Success"] = "Document updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -195,7 +185,7 @@ namespace ProHub.Controllers
             if (!IsOwnerOrAdmin(doc.Created_By)) return Forbid();
 
             _docRepo.Delete(id);
-            TempData["SuccessMessage"] = "Document deleted successfully.";
+            TempData["SuccessMessage"] = "External document deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
 

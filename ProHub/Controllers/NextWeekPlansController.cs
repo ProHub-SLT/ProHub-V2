@@ -63,122 +63,27 @@ namespace ProHub.Controllers
         // ================================
         // 1.5 DETAILS – Everyone can view
         // ================================
-        public IActionResult Details(int id)
+        public IActionResult Details(int? id)
         {
-            var currentPlan = _nextWeekPlanRepo.GetById(id);
-            if (currentPlan == null) return NotFound();
+            if (id == null) return NotFound();
 
-            // Aggregate: Get ALL plans for this week and this user
-            // This ensures that if the 'Plan' was split into multiple DB rows, we show them all together.
-            var weekStart = currentPlan.StartDate ?? DateTime.Today;
-            // Note: GetByWeek fetches all plans for the week. We filter by matching UpdatedBy (EmployeeId).
-            var allPlans = _nextWeekPlanRepo.GetByWeek(weekStart);
-            var userPlans = allPlans.Where(p => p.UpdatedBy == currentPlan.UpdatedBy).ToList();
+            var plan = _nextWeekPlanRepo.GetById(id.Value);
+            if (plan == null) return NotFound();
 
-            var model = new ProjectDetailsViewModel
-            {
-                PlanId = currentPlan.ID,
-                WeekStart = currentPlan.StartDate,
-                WeekEnd = currentPlan.EndDate,
-                UpdatedBy = currentPlan.UpdatedByName,
-                WorkPlanDesc = currentPlan.WorkPlanDesc, // Taking description from the clicked record
-                UpdatedOn = currentPlan.UpdatedOn
-            };
-
-            // Use HashSets to prevent duplicates (e.g. Cartesian product creating same External Proj multiple times)
-            var processedExternalIds = new HashSet<int>();
-            var processedInternalIds = new HashSet<int>();
-
-            foreach (var plan in userPlans)
-            {
-                // 1. Check External
-                if (plan.ExternalPlatform.HasValue && !processedExternalIds.Contains(plan.ExternalPlatform.Value))
-                {
-                    processedExternalIds.Add(plan.ExternalPlatform.Value);
-                    var ext = _extRepo.GetExternalPlatformByIdFull(plan.ExternalPlatform.Value);
-                    if (ext != null)
-                    {
-                        model.Projects.Add(new ProjectDetailItem
-                        {
-                            ApplicationName = ext.PlatformName,
-                            ProjectType = "External Solution",
-                            DevelopedBy = ext.DevelopedBy?.EmpName,
-                            DevelopedTeam = ext.DevelopedTeam,
-                            BackupPerson1 = ext.BackupOfficer1Id.HasValue ? _empRepo.GetNameById(ext.BackupOfficer1Id.Value) : "-",
-                            BackupPerson2 = ext.BackupOfficer2Id.HasValue ? _empRepo.GetNameById(ext.BackupOfficer2Id.Value) : "-",
-                            StartDate = ext.StartDate,
-                            TargetDate = ext.TargetDate,
-                            SDLCPhase = ext.SDLCStage?.Phase,
-                            PercentageDone = ext.PercentageDone,
-                            IntegratedApps = ext.IntegratedApps,
-                            BitBucketRepo = !string.IsNullOrEmpty(ext.BITBucketRepo) ? ext.BITBucketRepo : ext.BitBucket,
-                            DRAvailability = ext.DR,
-                            ApplicationURL = "-",
-                            HostedServerIP = "-",
-                            BusinessOwner = ext.PlatformOwner,
-                            EndUsers = "-",
-                            UATDate = ext.UATDate,
-                            VADate = ext.VADate,
-                            LaunchedDate = ext.LaunchedDate,
-                            ExposedThroughWAF = "-",
-                            SolutionValue = ext.SoftwareValue,
-                            SupportAvailability = ext.SLA
-                        });
-                    }
-                }
-
-                // 2. Check Internal
-                if (plan.InternalApp.HasValue && !processedInternalIds.Contains(plan.InternalApp.Value))
-                {
-                    processedInternalIds.Add(plan.InternalApp.Value);
-                    var intr = _intRepo.GetConsumerPlatformById(plan.InternalApp.Value);
-                    if (intr != null)
-                    {
-                        model.Projects.Add(new ProjectDetailItem
-                        {
-                            ApplicationName = intr.AppName,
-                            ProjectType = "Internal Solution",
-                            DevelopedBy = intr.DevelopedBy?.EmpName,
-                            DevelopedTeam = intr.DevelopedTeam,
-                            BackupPerson1 = intr.BackupOfficer1?.EmpName ?? (intr.BackupOfficer1Id.HasValue ? _empRepo.GetNameById(intr.BackupOfficer1Id.Value) : "-"),
-                            BackupPerson2 = intr.BackupOfficer2?.EmpName ?? (intr.BackupOfficer2Id.HasValue ? _empRepo.GetNameById(intr.BackupOfficer2Id.Value) : "-"),
-                            StartDate = intr.StartDate,
-                            TargetDate = intr.TargetDate,
-                            SDLCPhase = intr.SDLCPhase?.Phase,
-                            PercentageDone = intr.PercentageDone,
-                            IntegratedApps = intr.IntegratedApps,
-                            BitBucketRepo = !string.IsNullOrEmpty(intr.BitBucketRepo) ? intr.BitBucketRepo : intr.BitBucket,
-                            DRAvailability = intr.DR,
-                            HostedServerIP = intr.AppIP,
-                            ApplicationURL = intr.AppURL,
-                            BusinessOwner = intr.BusOwner,
-                            EndUsers = intr.EndUserType?.EndUserType ?? intr.AppUsers,
-                            UserSpecificSection = intr.Scope,
-                            UATDate = intr.UATDate,
-                            VADate = intr.VADate,
-                            LaunchedDate = intr.LaunchedDate,
-                            ExposedThroughWAF = intr.WAF,
-                            SolutionValue = intr.Price,
-                            SupportAvailability = intr.SLA
-                        });
-                    }
-                }
-            }
-
-            return View(model);
+            return View(plan);
         }
 
         private List<dynamic> GenerateWeeks()
         {
             var weeks = new List<dynamic>();
-        var today = DateTime.Today;
-        var monday = today.AddDays(-(((int)today.DayOfWeek - 1 + 7) % 7));
+            var today = DateTime.Today;
+            var monday = today.AddDays(-(((int)today.DayOfWeek - 1 + 7) % 7));
 
             for (int i = -6; i <= 1; i++) // 6 past weeks + current + next
             {
                 var start = monday.AddDays(i * 7);
-        var end = start.AddDays(4);
-        weeks.Add(new
+                var end = start.AddDays(4);
+                weeks.Add(new
                 {
                     Value = start.ToString("yyyy-MM-dd"),
                     Text = $"{start:dd/MM/yyyy} - {end:dd/MM/yyyy}"
@@ -231,57 +136,20 @@ namespace ProHub.Controllers
                     var allRecords = new List<NextWeekPlan>();
 
                     // Create records for combinations
-                    if (externalIds.Any() && internalIds.Any())
+                    // Create a SINGLE record
+                    // valid: The WorkPlanDesc JSON contains all the projects. 
+                    // We link the first available project to the DB columns for basic querying.
+                    var plan = new NextWeekPlan
                     {
-                        foreach (var ext in externalIds)
-                        {
-                            foreach (var intr in internalIds)
-                            {
-                                var plan = new NextWeekPlan
-                                {
-                                    ExternalPlatform = ext,
-                                    InternalApp = intr,
-                                    StartDate = model.StartDate,
-                                    EndDate = model.EndDate,
-                                    WorkPlanDesc = model.WorkPlanDetails
-                                };
-                                SetUserInformation(plan);
-                                allRecords.Add(plan);
-                            }
-                        }
-                    }
-                    else if (externalIds.Any())
-                    {
-                        foreach (var ext in externalIds)
-                        {
-                            var plan = new NextWeekPlan
-                            {
-                                ExternalPlatform = ext,
-                                InternalApp = null,
-                                StartDate = model.StartDate,
-                                EndDate = model.EndDate,
-                                WorkPlanDesc = model.WorkPlanDetails
-                            };
-                            SetUserInformation(plan);
-                            allRecords.Add(plan);
-                        }
-                    }
-                    else if (internalIds.Any())
-                    {
-                        foreach (var intr in internalIds)
-                        {
-                            var plan = new NextWeekPlan
-                            {
-                                ExternalPlatform = null,
-                                InternalApp = intr,
-                                StartDate = model.StartDate,
-                                EndDate = model.EndDate,
-                                WorkPlanDesc = model.WorkPlanDetails
-                            };
-                            SetUserInformation(plan);
-                            allRecords.Add(plan);
-                        }
-                    }
+                        StartDate = model.StartDate,
+                        EndDate = model.EndDate,
+                        WorkPlanDesc = model.WorkPlanDetails,
+                        ExternalPlatform = externalIds.Any() ? externalIds.First() : null,
+                        InternalApp = internalIds.Any() ? internalIds.First() : null
+                    };
+
+                    SetUserInformation(plan);
+                    allRecords.Add(plan);
 
                     // Save all
                     foreach (var record in allRecords)
@@ -314,14 +182,59 @@ namespace ProHub.Controllers
 
             plan.ExternalPlatforms = _extRepo.GetAll();
             plan.InternalPlatforms = _intRepo.GetAll();
+            plan.ExternalProjectIds = new List<int>();
+            plan.InternalProjectIds = new List<int>();
 
-            plan.ExternalProjectIds = plan.ExternalPlatform.HasValue
-                ? new List<int> { plan.ExternalPlatform.Value }
-                : new List<int>();
+            // Parse existing projects from WorkPlanDesc JSON
+            bool jsonParsed = false;
+            if (!string.IsNullOrEmpty(plan.WorkPlanDesc))
+            {
+                try
+                {
+                    var workPlanDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(plan.WorkPlanDesc);
+                    if (workPlanDict != null)
+                    {
+                        foreach (var kvp in workPlanDict)
+                        {
+                            if (kvp.Value != null)
+                            {
+                                if (int.TryParse(kvp.Key, out int projectId))
+                                {
+                                    // dynamic properties lookup can be fragile, check for nulls if necessary
+                                    string type = (string)kvp.Value.type;
+                                    
+                                    if (!string.IsNullOrEmpty(type))
+                                    {
+                                        if ("External".Equals(type, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            plan.ExternalProjectIds.Add(projectId);
+                                        }
+                                        else if ("Internal".Equals(type, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            plan.InternalProjectIds.Add(projectId);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        jsonParsed = true;
+                    }
+                }
+                catch
+                {
+                    // Fallback if not valid JSON
+                }
+            }
 
-            plan.InternalProjectIds = plan.InternalApp.HasValue
-                ? new List<int> { plan.InternalApp.Value }
-                : new List<int>();
+            // Fallback for legacy records (single project)
+            if (!jsonParsed || (!plan.ExternalProjectIds.Any() && !plan.InternalProjectIds.Any()))
+            {
+                if (plan.ExternalPlatform.HasValue) 
+                    plan.ExternalProjectIds.Add(plan.ExternalPlatform.Value);
+                
+                if (plan.InternalApp.HasValue) 
+                    plan.InternalProjectIds.Add(plan.InternalApp.Value);
+            }
 
             ViewBag.EmployeeName = GetCurrentEmployeeName();
             return View(plan);
@@ -355,12 +268,15 @@ namespace ProHub.Controllers
             {
                 try
                 {
-                    // Update first record only for simplicity
+                    // Update record
+                    // We link the first available project to the DB columns for basic querying/dashboard
                     existing.StartDate = model.StartDate;
                     existing.EndDate = model.EndDate;
                     existing.WorkPlanDesc = model.WorkPlanDetails;
-                    existing.ExternalPlatform = model.ExternalProjectIds?.FirstOrDefault();
-                    existing.InternalApp = model.InternalProjectIds?.FirstOrDefault();
+                    existing.ExternalPlatform = (model.ExternalProjectIds != null && model.ExternalProjectIds.Any()) 
+                        ? model.ExternalProjectIds.First() : null;
+                    existing.InternalApp = (model.InternalProjectIds != null && model.InternalProjectIds.Any()) 
+                        ? model.InternalProjectIds.First() : null;
                     existing.UpdatedOn = DateTime.Now;
 
                     _nextWeekPlanRepo.Update(existing);

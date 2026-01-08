@@ -263,11 +263,11 @@
             <!-- Week Selection -->
             <div class="form-body">
                 <div class="mb-3 row">
-                    <label asp-for="StartDate" class="col-sm-4 col-form-label">Week</label>
+                    <label class="col-sm-4 col-form-label">Week</label>
                     <div class="col-sm-8">
-                        <input asp-for="StartDate" class="form-control" readonly />
-                        <input type="hidden" asp-for="EndDate" />
-                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                        <input type="text" class="form-control" value="@(Model.StartDate?.ToString("dd/MM/yyyy") ?? "") - @(Model.EndDate?.ToString("dd/MM/yyyy") ?? "")" readonly />
+                        <input type="hidden" asp-for="StartDate" value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" asp-for="EndDate" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
                     </div>
                 </div>
 

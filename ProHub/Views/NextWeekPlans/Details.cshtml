@@ -1,13 +1,6 @@
-@model ProHub.Models.ProjectDetailsViewModel
-
+@model ProHub.Models.NextWeekPlan
 @{
-    var mainTitle = Model.Projects.FirstOrDefault()?.ApplicationName ?? "Unknown Plan";
-    if (Model.Projects.Count > 1)
-    {
-        // Concatenate all project names with a comma separator
-        mainTitle = string.Join(", ", Model.Projects.Select(p => p.ApplicationName));
-    }
-    ViewData["Title"] = "Details - " + mainTitle;
+    ViewData["Title"] = "Next Week Plan Details";
 }
 
 <style>
@@ -19,367 +12,491 @@
         position: relative;
     }
 
+    /* Blur overlay */
     body::before {
         content: "";
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
-        min-height: 100%;
-        background: inherit;
+        height: 100%;
+        background: url('/images/bg.jpg') no-repeat center center fixed;
+        background-size: cover;
         filter: blur(1px);
         z-index: -1;
     }
 
+    :root {
+        --primary: #1D9BF0;
+        --secondary: #536471;
+        --background: #FFFFFF;
+        --background-dark: #15202B;
+        --card-bg: #F7F9F9;
+        --card-bg-dark: #1E2A3C;
+        --text-primary: #0F1419;
+        --text-primary-dark: #E7E9EA;
+        --text-secondary: #536471;
+        --accent: #00BA7C;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --border-radius: 12px;
+        --transition: all 0.2s ease;
+    }
+
+    /* Dark mode adjustments */
+    @@media (prefers-color-scheme: dark) {
+        :root {
+            --background: var(--background-dark);
+            --card-bg: var(--card-bg-dark);
+            --text-primary: var(--text-primary-dark);
+            --shadow: var(--shadow-dark);
+        }
+    }
+
     .details-container {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        padding: 2.5rem;
-        max-width: 1000px;
-        margin: 2rem auto;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        min-height: 100vh;
     }
 
-    .page-header {
-        margin-bottom: 2rem;
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 1rem;
+    .section-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
     }
 
-    .page-title {
-        color: #1a202c;
-        font-weight: 700;
-        font-size: 1.75rem;
-        margin-bottom: 0.5rem;
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .back-link {
-        color: #007bff;
-        text-decoration: none;
+    .section-header {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+    }
+
+    .section-header i {
+        color: var(--accent);
+        font-size: 1.125rem;
+    }
+    
+    .section-header-blue i {
+         color: var(--primary);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
         font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        word-wrap: break-word;
+    }
+
+    .empty-value {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .mini-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+
+    .mini-card {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+    }
+
+    .mini-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .mini-card h4 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .mini-card p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+    .hero h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .hero small {
+        opacity: 0.85;
+        font-size: 0.875rem;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 16px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    .badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+    
+    .bg-success { background-color: var(--accent) !important; color: #fff !important; }
+    .bg-warning { background-color: #F5C33B !important; color: var(--text-primary) !important; }
+    .text-primary { color: var(--primary) !important; }
+    
+    .description-block {
+        background-color: rgba(0,0,0,0.03);
+        border-radius: 8px;
+        padding: 15px;
         font-size: 0.95rem;
+        white-space: pre-wrap;
+        line-height: 1.6;
+    }
+
+    .back-btn {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        transition: color 0.2s;
+        transition: var(--transition);
     }
 
-    .back-link:hover {
-        color: #0056b3;
-        text-decoration: underline;
-    }
-
-    .detail-row {
-        display: flex;
-        padding: 0.85rem 0;
-        border-bottom: 1px solid #f7fafc;
-        align-items: flex-start;
-    }
-
-    .detail-row:last-child {
-        border-bottom: none;
-    }
-
-    .detail-label {
-        font-weight: 600;
-        color: #4a5568;
-        width: 35%;
-        flex-shrink: 0;
-        text-align: right;
-        padding-right: 2rem;
-    }
-
-    .detail-value {
-        color: #2d3748;
-        flex-grow: 1;
-        font-weight: 500;
-    }
-
-    /* Work Plan Section */
-    .work-plan-section {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border-left: 4px solid #007bff;
-    }
-
-    .section-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .project-entry {
-        background: white;
-        padding: 1rem;
-        border-radius: 6px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        margin-bottom: 0.75rem;
+    .back-btn:hover {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(29, 155, 240, 0.3);
     }
     
-    .project-entry:last-child {
-        margin-bottom: 0;
-    }
-    
-    .project-meta {
-        font-size: 0.85rem;
-        color: #718096;
-        margin-bottom: 0.25rem;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    
-    .project-desc {
-        color: #2d3748;
-        line-height: 1.5;
-    }
-
-    /* Project Card (for displaying multiple projects) */
-    .project-card {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-        overflow: hidden;
-    }
-
-    .project-card-header {
-        background: linear-gradient(90deg, #f7fafc 0%, #edf2f7 100%);
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .project-card-title {
-        font-weight: 700;
-        color: #2d3748;
-        font-size: 1.1rem;
-        margin: 0;
-    }
-
-    .project-card-type {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-        color: #718096;
-        background: #e2e8f0;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-    }
-
-    .project-card-body {
-        padding: 1.5rem;
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .details-container { padding: 1rem; }
+        .hero h1 { font-size: 1.25rem; }
+        .info-grid { grid-template-columns: 1fr; }
+        .mini-card-grid { grid-template-columns: 1fr; }
     }
 </style>
 
-<div class="container-fluid">
-    <div class="details-container">
-        
-        <div class="page-header">
-            <h1 class="page-title">
-                Details - @mainTitle
-            </h1>
-            <div>
-                <a asp-action="Index" class="back-link">
-                    <i class="bi bi-arrow-left"></i> Back to List
-                </a>
-            </div>
-        </div>
-
-        <!-- Weekly Plan Information -->
-        <div class="work-plan-section">
-            <h4 class="section-title"><i class="bi bi-calendar-event"></i> Plan Overview</h4>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <span class="text-muted small d-block">WEEK START</span>
-                    <span class="fw-bold">@Model.WeekStart?.ToString("dd MMM yyyy")</span>
-                </div>
-                <div class="col-md-6">
-                    <span class="text-muted small d-block">WEEK END</span>
-                    <span class="fw-bold">@Model.WeekEnd?.ToString("dd MMM yyyy")</span>
-                </div>
-            </div>
-             <div class="row mb-3">
-                 <div class="col-md-6">
-                    <span class="text-muted small d-block">UPDATED BY</span>
-                    <span class="fw-bold">@Model.UpdatedBy</span>
+<div class="details-container">
+    <div class="hero">
+        <div class="d-flex justify-content-between flex-wrap">
+             <div>
+                <h1 aria-label="Plan Title">Next Week Plan</h1>
+                <small>@Model.StartDate?.ToString("MMMM dd, yyyy") - @Model.EndDate?.ToString("MMMM dd, yyyy")</small><br />
+                <div class="status-badge">
+                     <i class="bi bi-person-fill"></i> @(string.IsNullOrEmpty(Model.UpdatedByName) ? "Unknown Employee" : Model.UpdatedByName)
                 </div>
              </div>
-
-            <div class="mt-3">
-                <span class="text-muted small d-block mb-2">WORK PLAN DETAILS</span>
-                 @if (!string.IsNullOrEmpty(Model.WorkPlanDesc))
-                {
-                    try
-                    {
-                        var workPlanDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(Model.WorkPlanDesc);
-                        
-                        @foreach (var projectPlan in workPlanDict)
-                        {
-                            if (projectPlan.Value != null)
-                            {
-                                var projectInfo = projectPlan.Value;
-                                <div class="project-entry">
-                                    <div class="project-meta">@projectInfo.name (@projectInfo.type)</div>
-                                    <div class="project-desc">@projectInfo.details</div>
-                                </div>
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        <div class="p-3 bg-white rounded border">@Model.WorkPlanDesc</div>
-                    }
-                }
-                else
-                {
-                    <span class="text-muted fst-italic">No details provided.</span>
-                }
-            </div>
+             <div class="text-end mt-3 mt-md-0">
+                  <div class="mb-2">
+                       <i class="bi bi-clock-history"></i> Last Updated
+                  </div>
+                  <div style="font-weight: 600;">
+                       @(Model.UpdatedOn?.ToString("MMM dd, yyyy h:mm tt") ?? "N/A")
+                  </div>
+             </div>
         </div>
+    </div>
 
-        <!-- Loop through projects -->
-        @if (Model.Projects != null && Model.Projects.Any())
+    <!-- Data Logic to extract projects -->
+    @{
+        Dictionary<string, dynamic> workPlanDict = null;
+        if (!string.IsNullOrEmpty(Model.WorkPlanDesc))
         {
-            foreach (var project in Model.Projects)
+            try
             {
-                <div class="project-card">
-                    <div class="project-card-header">
-                        <h5 class="project-card-title">@project.ApplicationName</h5>
-                        <span class="project-card-type">@project.ProjectType</span>
-                    </div>
-                    <div class="project-card-body">
-                        
-                        <div class="detail-row">
-                            <div class="detail-label">Application Name</div>
-                            <div class="detail-value">@(project.ApplicationName ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Developed By</div>
-                            <div class="detail-value">@(project.DevelopedBy ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Developed Team</div>
-                            <div class="detail-value">@(project.DevelopedTeam ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Backup Person (Primary)</div>
-                            <div class="detail-value">@(project.BackupPerson1 ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Backup Person (Secondary)</div>
-                            <div class="detail-value">@(project.BackupPerson2 ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Start Date</div>
-                            <div class="detail-value">@(project.StartDate?.ToString("dd/MM/yyyy") ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Target Date</div>
-                            <div class="detail-value">@(project.TargetDate?.ToString("dd/MM/yyyy") ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">SDLC Phase</div>
-                            <div class="detail-value">
-                                <span class="badge bg-secondary">@(project.SDLCPhase ?? "-")</span>
-                            </div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Percentage Done</div>
-                            <div class="detail-value">@(project.PercentageDone?.ToString("0") ?? "0")%</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Integrated Applications</div>
-                            <div class="detail-value">@(project.IntegratedApps ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">BitBucket Repository Name</div>
-                            <div class="detail-value font-monospace text-primary">@(project.BitBucketRepo ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">DR Availability</div>
-                            <div class="detail-value">@(project.DRAvailability ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Hosted Server IP/Name</div>
-                            <div class="detail-value font-monospace">@(project.HostedServerIP ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Application URL</div>
-                            <div class="detail-value">
-                                @if (!string.IsNullOrEmpty(project.ApplicationURL) && project.ApplicationURL != "-")
-                                {
-                                    <a href="@project.ApplicationURL" target="_blank">@project.ApplicationURL</a>
-                                }
-                                else
-                                {
-                                    <span>-</span>
-                                }
-                            </div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Business Owner</div>
-                            <div class="detail-value">@(project.BusinessOwner ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Application End Users</div>
-                            <div class="detail-value">@(project.EndUsers ?? "-")</div>
-                        </div>
-                        
-                        @if(project.ProjectType == "Internal Solution") {
-                            <div class="detail-row">
-                                <div class="detail-label">User Specific Section/Division/Group</div>
-                                <div class="detail-value">@(project.UserSpecificSection ?? "-")</div>
-                            </div>
-                        }
-
-                        <div class="detail-row">
-                            <div class="detail-label">UAT Date</div>
-                            <div class="detail-value">@(project.UATDate?.ToString("dd/MM/yyyy") ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">VA Date</div>
-                            <div class="detail-value">@(project.VADate?.ToString("dd/MM/yyyy") ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Launched Date</div>
-                            <div class="detail-value">@(project.LaunchedDate?.ToString("dd/MM/yyyy") ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Exposed Through WAF?</div>
-                            <div class="detail-value">@(project.ExposedThroughWAF ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Solution Value</div>
-                            <div class="detail-value">@(project.SolutionValue?.ToString("C") ?? "-")</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Support Availability</div>
-                            <div class="detail-value">@(project.SupportAvailability ?? "-")</div>
-                        </div>
-
-                    </div>
-                </div>
+                workPlanDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(Model.WorkPlanDesc);
             }
+            catch {}
+        }
+    }
+    
+    @if (workPlanDict != null)
+    {
+        foreach (var kvp in workPlanDict)
+        {
+            if (kvp.Value == null) continue;
+            
+            int projectId = 0;
+            int.TryParse(kvp.Key, out projectId);
+            string type = (string)kvp.Value.type;
+            
+            if (projectId == 0) continue;
+
+            if ("External".Equals(type, StringComparison.OrdinalIgnoreCase))
+            {
+                var ext = Model.ExternalPlatforms?.FirstOrDefault(x => x.Id == projectId);
+                if (ext != null)
+                {
+                    <div class="section-card">
+                        <div class="section-header section-header-blue"><i class="bi bi-globe"></i> External Project: @ext.PlatformName</div>
+                        
+                        <!-- Basic Info Grid -->
+                        <div class="info-grid mb-4">
+                            <div class="info-item">
+                                <div class="info-label">Application Name</div>
+                                <div class="info-value">@ext.PlatformName</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Developed By</div>
+                                <div class="info-value">@ext.DevelopedByName</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Developed Team</div>
+                                <div class="info-value">@ext.DevelopedTeam</div>
+                            </div>
+                             <div class="info-item">
+                                <div class="info-label">SDLC Phase</div>
+                                <div class="info-value"><span class="badge bg-success">@ext.SdlcPhaseName</span></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Percentage Done</div>
+                                <div class="info-value">@(ext.PercentageDone)%</div>
+                            </div>
+                             <div class="info-item">
+                                <div class="info-label">Business Owner</div>
+                                <div class="info-value">@ext.PlatformOwner</div>
+                            </div>
+                        </div>
+
+                        <!-- Technical Grid -->
+                         <div class="info-grid mb-4" style="background: rgba(0,0,0,0.02); padding: 15px; border-radius: 8px;">
+                            <div class="info-item">
+                                <div class="info-label">Integrated Apps</div>
+                                <div class="info-value">@ext.IntegratedApps</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">BitBucket Repo</div>
+                                <div class="info-value text-break"><code>@ext.BITBucketRepo</code></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">DR Availability</div>
+                                <div class="info-value">@ext.DR</div>
+                            </div>
+                            <div class="info-item">
+                                 <div class="info-label">Backup Officer (1)</div>
+                                 <div class="info-value">@(ext.BackupOfficer1?.EmpName ?? "N/A")</div>
+                            </div>
+                            <div class="info-item">
+                                 <div class="info-label">Backup Officer (2)</div>
+                                 <div class="info-value">@(ext.BackupOfficer2?.EmpName ?? "N/A")</div>
+                            </div>
+                        </div>
+
+                        <!-- Mini Cards for Dates -->
+                        <div class="mini-card-grid">
+                             <div class="mini-card">
+                                <h4>@(ext.StartDate?.ToString("MMM dd") ?? "—")</h4>
+                                <p>Start Date</p>
+                            </div>
+                            <div class="mini-card">
+                                <h4>@(ext.TargetDate?.ToString("MMM dd") ?? "—")</h4>
+                                <p>Target Date</p>
+                            </div>
+                             <div class="mini-card">
+                                <h4>@(ext.UATDate?.ToString("MMM dd") ?? "—")</h4>
+                                <p>UAT Date</p>
+                            </div>
+                             <div class="mini-card">
+                                <h4>@(ext.LaunchedDate?.ToString("MMM dd") ?? "—")</h4>
+                                <p>Launched Date</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else if ("Internal".Equals(type, StringComparison.OrdinalIgnoreCase))
+            {
+                var intern = Model.InternalPlatforms?.FirstOrDefault(x => x.Id == projectId);
+                if (intern != null)
+                {
+                     <div class="section-card">
+                        <div class="section-header"><i class="bi bi-laptop"></i> Internal Project: @intern.AppName</div>
+                        
+                        <!-- Basic Info Grid -->
+                        <div class="info-grid mb-4">
+                            <div class="info-item">
+                                <div class="info-label">Application Name</div>
+                                <div class="info-value">@intern.AppName</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Developed By</div>
+                                <div class="info-value">@intern.DevelopedByName</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Developed Team</div>
+                                <div class="info-value">@intern.DevelopedTeam</div>
+                            </div>
+                             <div class="info-item">
+                                <div class="info-label">SDLC Phase</div>
+                                <div class="info-value"><span class="badge bg-success">@intern.SDLCPhaseName</span></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Percentage Done</div>
+                                <div class="info-value">@(intern.PercentageDone)%</div>
+                            </div>
+                             <div class="info-item">
+                                <div class="info-label">Business Owner</div>
+                                <div class="info-value">@intern.BusOwner</div>
+                            </div>
+                        </div>
+
+                         <!-- Technical Grid -->
+                         <div class="info-grid mb-4" style="background: rgba(0,0,0,0.02); padding: 15px; border-radius: 8px;">
+                            <div class="info-item">
+                                <div class="info-label">Hosted IP</div>
+                                <div class="info-value font-monospace">@intern.AppIP</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">App URL</div>
+                                <div class="info-value">
+                                     @if (!string.IsNullOrEmpty(intern.AppURL))
+                                     {
+                                         <a href="@intern.AppURL" target="_blank" class="text-primary">Link <i class="bi bi-box-arrow-up-right"></i></a>
+                                     }
+                                     else { <span class="empty-value">N/A</span> }
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">BitBucket</div>
+                                <div class="info-value text-break"><code>@intern.BitBucketRepo</code></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">DR Availability</div>
+                                <div class="info-value">@intern.DR</div>
+                            </div>
+                             <div class="info-item">
+                                 <div class="info-label">Backup Officer (1)</div>
+                                 <div class="info-value">@(intern.BackupOfficer1?.EmpName ?? "N/A")</div>
+                            </div>
+                            <div class="info-item">
+                                 <div class="info-label">Backup Officer (2)</div>
+                                 <div class="info-value">@(intern.BackupOfficer2?.EmpName ?? "N/A")</div>
+                            </div>
+                        </div>
+
+                        <!-- Mini Cards for Dates -->
+                        <div class="mini-card-grid">
+                             <div class="mini-card">
+                                <h4>@(intern.StartDate?.ToString("MMM dd") ?? "—")</h4>
+                                <p>Start Date</p>
+                            </div>
+                            <div class="mini-card">
+                                <h4>@(intern.TargetDate?.ToString("MMM dd") ?? "—")</h4>
+                                <p>Target Date</p>
+                            </div>
+                             <div class="mini-card">
+                                <h4>@(intern.UATDate?.ToString("MMM dd") ?? "—")</h4>
+                                <p>UAT Date</p>
+                            </div>
+                             <div class="mini-card">
+                                <h4>@(intern.LaunchedDate?.ToString("MMM dd") ?? "—")</h4>
+                                <p>Launched Date</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    }
+
+
+    <!-- Plan Details Description -->
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-file-text"></i> Work Plan Details</div>
+        
+        @if (workPlanDict != null)
+        {
+             <div style="display: flex; flex-direction: column; gap: 20px;">
+             @foreach (var kvp in workPlanDict)
+             {
+                 var p = kvp.Value;
+                 if(p!=null)
+                 {
+                     <div>
+                         <h5 style="color: var(--primary); margin-bottom: 8px;">@p.name <span style="font-size: 0.8em; color: var(--text-secondary); font-weight: 400;">(@p.type)</span></h5>
+                         <div class="description-block">@p.details</div>
+                     </div>
+                 }
+             }
+             </div>
         }
         else
         {
-            <div class="alert alert-warning">
-                No project details found for this plan.
-            </div>
+             <div class="description-block">
+                @Model.WorkPlanDesc
+             </div>
         }
-
-        <div class="mt-4 text-end">
-            <span class="text-muted small">@DateTime.Now.ToString("yyyy") - Digital Platform</span>
-        </div>
     </div>
+
+    <!-- Actions -->
+    <div class="text-start mt-4">
+        <a asp-action="Index" class="back-btn">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+
 </div>

@@ -87,17 +87,8 @@ namespace ProHub.Controllers
             if (ModelState.IsValid)
             {
                 _docRepo.Insert(model);
-                TempData["SuccessMessage"] = "Internal document created successfully!";
-                
-                // Reload data for the view
-                ViewBag.InternalPlatforms = _internalRepo.GetAll();
-                ViewBag.CreatedByName = GetCurrentUserName();
-                ViewBag.AuthenticatedEmployeeId = GetCurrentEmployeeId();
-                var main = _internalRepo.GetAllMainPlatforms().FirstOrDefault(p => p.Platforms?.ToLower() == "internal");
-                ViewBag.InternalPlatformName = main?.Platforms ?? "Internal";
-                ViewBag.InternalPlatformId = main?.ID ?? 1;
-
-                return View(model);
+                TempData["Success"] = "Internal document created successfully!";
+                return RedirectToAction(nameof(Index));
             }
 
             ViewBag.InternalPlatforms = _internalRepo.GetAll();
@@ -152,7 +143,7 @@ namespace ProHub.Controllers
             }
 
             _docRepo.Update(model);
-            TempData["SuccessMessage"] = "Document updated successfully!";
+            TempData["Success"] = "Document updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -174,7 +165,7 @@ namespace ProHub.Controllers
             if (!IsOwnerOrAdmin(doc.Created_By)) return Forbid();
 
             _docRepo.Delete(id);
-            TempData["SuccessMessage"] = "Document deleted successfully.";
+            TempData["SuccessMessage"] = "Internal document deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
 

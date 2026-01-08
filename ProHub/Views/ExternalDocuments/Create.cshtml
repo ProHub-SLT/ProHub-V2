@@ -1,6 +1,6 @@
 @model ProHub.Models.Document
 @{
-    ViewData["Title"] = "Add - New External Document";
+    ViewData["Title"] = "Create - External Document";
 }
 
 <style>
@@ -176,12 +176,12 @@
 
         @if (TempData["Success"] != null)
         {
-            <div class="alert alert-success">@TempData["Success"]</div>
+            <div class="alert alert-success mt-3 mx-4">@TempData["Success"]</div>
         }
 
         @if (TempData["Error"] != null)
         {
-            <div class="alert alert-danger">@TempData["Error"]</div>
+            <div class="alert alert-danger mt-3 mx-4">@TempData["Error"]</div>
         }
 
         <form asp-action="Create" method="post" enctype="multipart/form-data">
@@ -190,7 +190,6 @@
                     <label class="col-sm-4 col-form-label disabled">Platform</label>
                     <div class="col-sm-8">
                         <input type="text" class="form-control-modern" value="@(ViewBag.ExternalPlatformName ?? "External")" readonly disabled />
-                        <input type="hidden" asp-for="Platform_ID" value="@(ViewBag.ExternalPlatformId ?? 2)" />
                     </div>
                 </div>
 
@@ -207,7 +206,7 @@
                 <div class="form-group row">
                     <label asp-for="Doc_Name" class="col-sm-4 col-form-label">Document Name</label>
                     <div class="col-sm-8">
-                        <input asp-for="Doc_Name" class="form-control-modern" required />
+                        <input asp-for="Doc_Name" class="form-control-modern" required placeholder="Enter document name" />
                         <span asp-validation-for="Doc_Name" class="text-danger"></span>
                     </div>
                 </div>
@@ -216,39 +215,38 @@
                     <label class="col-sm-4 col-form-label disabled">Uploaded By</label>
                     <div class="col-sm-8">
                         <input type="text" class="form-control-modern" value="@(ViewBag.CreatedByName ?? "Unknown User")" readonly disabled />
-                        <input type="hidden" name="Created_By" value="@(ViewBag.AuthenticatedEmployeeId ?? 5)" />
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label asp-for="Doc_Classification" class="col-sm-4 col-form-label">Document Classification</label>
                     <div class="col-sm-8">
-                        <input asp-for="Doc_Classification" class="form-control-modern" />
+                        <input asp-for="Doc_Classification" class="form-control-modern" placeholder="e.g. Secret, Public" />
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label asp-for="Tags" class="col-sm-4 col-form-label">Tags</label>
                     <div class="col-sm-8">
-                        <input asp-for="Tags" class="form-control-modern" placeholder="e.g. UAT, Architecture" />
+                        <input asp-for="Tags" class="form-control-modern" placeholder="e.g. UAT, Architecture, Proposal" />
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label class="col-sm-4 col-form-label">Confidentiality</label>
                     <div class="col-sm-8">
-                        <select class="form-select-modern">
-                            <option>Low</option>
-                            <option>Medium</option>
-                            <option>High</option>
+                        <select class="form-select-modern" asp-for="Confidential">
+                            <option value="false">Low</option>
+                            <option value="true">High</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">ImagePath</label>
+                    <label class="col-sm-4 col-form-label">Upload Document</label>
                     <div class="col-sm-8">
                         <input type="file" name="ImagePath" class="form-control-modern" accept=".pdf,.docx,.xlsx,.png,.jpg" required />
+                        <small class="text-muted">Allowed files: .pdf, .docx, .xlsx, .png, .jpg</small>
                     </div>
                 </div>
             </div>
@@ -256,7 +254,7 @@
             <div class="form-footer">
                 <a asp-action="Index" class="btn-modern-secondary">Back to List</a>
                 <button type="submit" class="btn-modern-primary">
-                    <i class="bi bi-check-circle"></i> Create
+                    <i class="bi bi-cloud-arrow-up"></i> Create Document
                 </button>
             </div>
         </form>

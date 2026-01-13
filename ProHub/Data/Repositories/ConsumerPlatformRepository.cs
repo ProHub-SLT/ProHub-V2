@@ -53,7 +53,7 @@ namespace ProHub.Data
             using var conn = GetConnection();
             conn.Open();
 
-           
+
             string query = @"
         SELECT 
             ip.ID AS Id,
@@ -422,38 +422,44 @@ namespace ProHub.Data
             conn.Open();
 
             string query = @"
-        SELECT 
-            ip.ID AS Id,
-            ip.App_Name AS AppName,
-            ip.App_URL AS AppURL,
-            ip.App_IP AS AppIP,
-            ip.StartDate AS StartDate,
-            ip.TargetDate AS TargetDate,
-            ip.VADate AS VADate,
-            ip.PercentageDone AS PercentageDone,
-            ip.Status AS Status,
-            ip.LaunchedDate AS LaunchedDate,
-            ip.Price AS Price,
-            e.Emp_Name AS DevelopedByName,
-            sp.Phase AS SDLCPhase,
-            pp.ParentProjectGroup AS ParentProjectName,
-            ma.App_Name AS MainAppName,
-            ipc.Comment AS Comment
-        FROM internal_platforms ip
-        LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
-        LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
-        LEFT JOIN ParentProject pp ON ip.ParentProjectID = pp.ParentProjectID
-        LEFT JOIN internal_platforms ma ON ip.MainAppID = ma.ID 
-        LEFT JOIN (
-            SELECT Solution_ID, Comment
-            FROM Internal_Project_Comments
-            WHERE ID IN (
-                SELECT MAX(ID)
-                FROM Internal_Project_Comments
-                GROUP BY Solution_ID
-            )
-        ) ipc ON ip.ID = ipc.Solution_ID
-        WHERE sp.Phase = 'Retired'";
+       SELECT 
+    ip.ID AS Id,
+    ip.App_Name AS AppName,
+    ip.App_URL AS AppURL,
+    ip.App_IP AS AppIP,
+    ip.StartDate AS StartDate,
+    ip.TargetDate AS TargetDate,
+    ip.VADate AS VADate,
+    ip.PercentageDone AS PercentageDone,
+    ip.Status AS Status,
+    ip.LaunchedDate AS LaunchedDate,
+    ip.Price AS Price,
+    e.Emp_Name AS DevelopedByName,
+    sp.Phase AS SDLCPhase,
+    pp.ParentProjectGroup AS ParentProjectName,
+    ma.App_Name AS MainAppName,
+    ipc.Comment AS Comment
+FROM internal_platforms ip
+LEFT JOIN Employee e 
+    ON ip.Developed_By = e.Emp_ID
+LEFT JOIN SDLCPhas sp 
+    ON ip.SDLCPhase = sp.ID
+LEFT JOIN ParentProject pp 
+    ON ip.ParentProjectID = pp.ParentProjectID
+LEFT JOIN internal_platforms ma 
+    ON ip.MainAppID = ma.ID
+LEFT JOIN (
+    SELECT Solution_ID, Comment
+    FROM Internal_Project_Comments
+    WHERE ID IN (
+        SELECT MAX(ID)
+        FROM Internal_Project_Comments
+        GROUP BY Solution_ID
+    )
+) ipc 
+    ON ip.ID = ipc.Solution_ID
+WHERE sp.Phase = 'Retired';";
+
 
             if (!string.IsNullOrEmpty(search))
                 query += " AND (ip.App_Name LIKE @search OR e.Emp_Name LIKE @search)";
@@ -570,16 +576,49 @@ namespace ProHub.Data
 
             string query = @"
         SELECT 
-            ip.*,
+            ip.ID AS Id,
+            ip.App_Name AS AppName,
+            ip.App_URL AS AppURL,
+            ip.App_IP AS AppIP,
+            ip.StartDate AS StartDate,
+            ip.TargetDate AS TargetDate,
+            ip.VADate AS VADate,
+            ip.PercentageDone AS PercentageDone,
+            ip.Status AS Status,
+            ip.LaunchedDate AS LaunchedDate,
+            ip.Price AS Price,
             e.Emp_Name AS DevelopedByName,
-            bo.Emp_Name AS BackupOfficer1Name,
-            bo2.Emp_Name AS BackupOfficer2Name,
-            sp.Phase AS SDLCPhaseName
+            sp.Phase AS SDLCPhase,
+            pp.ParentProjectGroup AS ParentProjectName,
+            ma.App_Name AS MainAppName,
+            ipc.Comment AS Comment,
+            bo1.Emp_Name AS Backup1Name, 
+            bo1.Emp_Email AS Backup1Email,
+            bo2.Emp_Name AS Backup2Name, 
+            bo2.Emp_Email AS Backup2Email
         FROM internal_platforms ip
-        LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
-        LEFT JOIN Employee bo ON ip.BackupOfficer_1 = bo.Emp_ID
-        LEFT JOIN Employee bo2 ON ip.BackupOfficer_2 = bo2.Emp_ID
-        LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
+        LEFT JOIN Employee e 
+            ON ip.Developed_By = e.Emp_ID
+        LEFT JOIN SDLCPhas sp 
+            ON ip.SDLCPhase = sp.ID
+        LEFT JOIN ParentProject pp 
+            ON ip.ParentProjectID = pp.ParentProjectID
+        LEFT JOIN internal_platforms ma 
+            ON ip.MainAppID = ma.ID
+        LEFT JOIN Employee bo1 
+            ON ip.BackupOfficer_1 = bo1.Emp_ID
+        LEFT JOIN Employee bo2 
+            ON ip.BackupOfficer_2 = bo2.Emp_ID
+        LEFT JOIN (
+            SELECT Solution_ID, Comment
+            FROM Internal_Project_Comments
+            WHERE ID IN (
+                SELECT MAX(ID)
+                FROM Internal_Project_Comments
+                GROUP BY Solution_ID
+            )
+        ) ipc 
+            ON ip.ID = ipc.Solution_ID
         WHERE ip.ID = @id";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -588,46 +627,59 @@ namespace ProHub.Data
             using var r = cmd.ExecuteReader();
             if (r.Read())
             {
+                // Helper function to safely get dates avoiding IsDBNull crashes if column exists
+                DateTime? GetDateSafe(string colName)
+                {
+                    int ord = r.GetOrdinal(colName);
+                    return r.IsDBNull(ord) ? (DateTime?)null : r.GetDateTime(ord);
+                }
+
                 item = new InternalPlatform
                 {
-                    Id = GetValueOrDefault(r, "ID", 0),
-                    AppName = GetValueOrDefault(r, "App_Name", ""),
+                    Id = GetValueOrDefault(r, "Id", 0),
+                    AppName = GetValueOrDefault(r, "AppName", ""),
+                    AppURL = GetValueOrDefault(r, "AppURL", ""),
+                    AppIP = GetValueOrDefault(r, "AppIP", ""),
+                    StartDate = GetDateSafe("StartDate"),
+                    TargetDate = GetDateSafe("TargetDate"),
+                    VADate = GetDateSafe("VADate"),
+                    LaunchedDate = GetDateSafe("LaunchedDate"),
+                    PercentageDone = GetValueOrDefault(r, "PercentageDone", (decimal?)null),
+                    Status = GetValueOrDefault(r, "Status", ""),
+                    Price = GetValueOrDefault(r, "Price", (decimal?)null),
+
+                    // Complex Objects & Display Names
+                    DevelopedByName = GetValueOrDefault(r, "DevelopedByName", ""),
                     DevelopedBy = new Employee
                     {
                         EmpName = GetValueOrDefault(r, "DevelopedByName", "")
                     },
-                    DevelopedTeam = GetValueOrDefault(r, "DevelopedTeam", ""),
-                    StartDate = GetValueOrDefault(r, "StartDate", (DateTime?)null),
-                    TargetDate = GetValueOrDefault(r, "TargetDate", (DateTime?)null),
-                    LaunchedDate = GetValueOrDefault(r, "LaunchedDate", (DateTime?)null),
-                    UATDate = GetValueOrDefault(r, "UATDate", (DateTime?)null),
-                    Status = GetValueOrDefault(r, "Status", ""),
-                    StatusDate = GetValueOrDefault(r, "StatusDate", (DateTime?)null),
-                    BitBucket = GetValueOrDefault(r, "BitBucket", ""),
-                    BitBucketRepo = GetValueOrDefault(r, "BitBucketRepo", ""),
-                    AppURL = GetValueOrDefault(r, "AppURL", ""),
-                    AppIP = GetValueOrDefault(r, "AppIP", ""),
-                    AppUsers = GetValueOrDefault(r, "AppUsers", ""),
-                    IntegratedApps = GetValueOrDefault(r, "Integrated_apps", ""),
-                    WAF = GetValueOrDefault(r, "WAF", ""),
-                    BusOwner = GetValueOrDefault(r, "Bus_Owner", ""),
-                    AppBusinessOwner = GetValueOrDefault(r, "App_Business_Owner", ""),
-                    AppCategory = GetValueOrDefault(r, "App_Category", ""),
-                    Scope = GetValueOrDefault(r, "Scope", ""),
-                    Price = GetValueOrDefault(r, "Price", (decimal?)null),
+
+                    SDLCPhaseName = GetValueOrDefault(r, "SDLCPhase", ""),
                     SDLCPhase = new SDLCPhase
                     {
-                        Phase = GetValueOrDefault(r, "SDLCPhaseName", "")
+                        Phase = GetValueOrDefault(r, "SDLCPhase", "")
                     },
-                    SSLCertificateExpDate = GetValueOrDefault(r, "SSLCertificateExpDate", (DateTime?)null),
-                    DPOHandoverDate = GetValueOrDefault(r, "DPO_Handover_Date", (DateTime?)null),
-                    DPOHandoverComment = GetValueOrDefault(r, "DPO_Handover_Comment", ""),
-                    BackupOfficer1 = string.IsNullOrEmpty(GetValueOrDefault(r, "BackupOfficer1Name", ""))
+
+                    ParentProjectGroupName = GetValueOrDefault(r, "ParentProjectName", ""),
+                    MainAppName = GetValueOrDefault(r, "MainAppName", ""),
+                    Comment = GetValueOrDefault(r, "Comment", ""),
+
+                    // Backup Officers
+                    BackupOfficer1 = string.IsNullOrEmpty(GetValueOrDefault(r, "Backup1Name", ""))
                         ? null
-                        : new Employee { EmpName = GetValueOrDefault(r, "BackupOfficer1Name", "") },
-                    BackupOfficer2 = string.IsNullOrEmpty(GetValueOrDefault(r, "BackupOfficer2Name", ""))
+                        : new Employee
+                        {
+                            EmpName = GetValueOrDefault(r, "Backup1Name", ""),
+                            EmpEmail = GetValueOrDefault(r, "Backup1Email", "")
+                        },
+                    BackupOfficer2 = string.IsNullOrEmpty(GetValueOrDefault(r, "Backup2Name", ""))
                         ? null
-                        : new Employee { EmpName = GetValueOrDefault(r, "BackupOfficer2Name", "") }
+                        : new Employee
+                        {
+                            EmpName = GetValueOrDefault(r, "Backup2Name", ""),
+                            EmpEmail = GetValueOrDefault(r, "Backup2Email", "")
+                        }
                 };
             }
 

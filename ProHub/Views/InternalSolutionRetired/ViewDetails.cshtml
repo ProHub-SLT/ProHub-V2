@@ -1,7 +1,7 @@
 @model ProHub.Models.InternalPlatform
 
 @{
-    ViewData["Title"] = "External Solution Abandoned Details";
+    ViewData["Title"] = "Internal Solution Retired Details";
 }
 
 <style>
@@ -13,20 +13,18 @@
         position: relative;
     }
 
-        /* Blur overlay */
-        body::before {
-            content: "";
-            position: absolute;
-            /* changed from fixed */
-            top: 0;
-            left: 0;
-            width: 100%;
-            min-height: 100%;
-            /* ensures it stretches with content */
-            background: inherit;
-            filter: blur(1px);
-            z-index: -1;
-        }
+    /* Blur overlay */
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 100%;
+        background: inherit;
+        filter: blur(1px);
+        z-index: -1;
+    }
 
 
     :root {
@@ -117,6 +115,7 @@
         font-size: 0.9375rem;
         color: var(--text-primary);
         font-weight: 500;
+        word-break: break-all;
     }
 
     .empty-value {
@@ -350,6 +349,15 @@
         text-align: left !important;
     }
 
+    .comment-box {
+        background-color: rgba(0, 0, 0, 0.03);
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid var(--accent);
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
     /* Responsive adjustments */
     @@media (max-width: 768px) {
         .details-container {
@@ -375,20 +383,16 @@
     <div class="hero">
         <div class="d-flex justify-content-between flex-wrap">
             <div>
-                <h1 aria-label="Platform Name">@(string.IsNullOrEmpty(Model.PlatformName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.PlatformName)</h1>
-                <small>
-                    @(string.IsNullOrEmpty(Model.PlatformType) ? "External Platform" :
-                                        Model.PlatformType)
-                </small><br />
+                <h1 aria-label="Platform Name">@(string.IsNullOrEmpty(Model.AppName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppName)</h1>
+                <small>Internal Solution</small><br />
                 <div class="status-badge" role="status">
-                    <i class="bi bi-exclamation-triangle-fill"></i> @(string.IsNullOrEmpty(Model.Status) ? "Abandoned" :
-                                        Model.Status)
+                    <i class="bi bi-info-circle-fill"></i> @(string.IsNullOrEmpty(Model.Status) ? "Retired" : Model.Status)
                 </div>
             </div>
             <div class="text-end mt-3 mt-md-0">
                 <div class="mb-2">
-                    <i class="bi bi-building"></i>
-                    @(Model.Company?.CompanyName ?? "N/A")
+                    <i class="bi bi-person-fill"></i>
+                    @(string.IsNullOrEmpty(Model.DevelopedBy?.EmpName) ? "N/A" : Model.DevelopedBy.EmpName)
                 </div>
                 @if (Model.PercentageDone.HasValue && Model.PercentageDone > 0)
                 {
@@ -407,157 +411,61 @@
         <div class="section-header"><i class="bi bi-card-list"></i> Basic Information</div>
         <div class="info-grid">
             <div class="info-item">
-                <div class="info-label">Platform Name</div>
+                <div class="info-label">Application Name</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.PlatformName) ? Html.Raw("<span class='empty-value'>Not                   specified</span>") : Model.PlatformName)
+                    @(string.IsNullOrEmpty(Model.AppName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppName)
                 </div>
             </div>
             <div class="info-item">
-                <div class="info-label">Platform Type</div>
+                <div class="info-label">Main Application</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.PlatformType) ? Html.Raw("<span class='empty-value'>Not              specified</span>") : Model.PlatformType)
+                    @(string.IsNullOrEmpty(Model.MainAppName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.MainAppName)
                 </div>
             </div>
             <div class="info-item">
-                <div class="info-label">Company / Customer</div>
+                <div class="info-label">Parent Project</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.Company?.CompanyName) ? Html.Raw("<span class='empty-value'>Not         specified</span>") : Model.Company.CompanyName)
+                    @(string.IsNullOrEmpty(Model.ParentProjectGroupName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.ParentProjectGroupName)
                 </div>
             </div>
-            <div class="info-item">
-                <div class="info-label">Status</div>
-                <div class="info-value">
-                    <span class="badge bg-warning">
-                        @(string.IsNullOrEmpty(Model.Status) ? Html.Raw("<span class='empty-value'>Not        specified</span>") : Model.Status)
-                    </span>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Status Date</div>
-                <div class="info-value">
-                    @(
-                                        Html.Raw(Model.StatusDate != null
-                                        ? Model.StatusDate.Value.ToString("MMM dd, yyyy")
-                                        : "<span class='empty-value'>Not specified</span>")
-                                        )
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Platform Configuration -->
-    <div class="section-card">
-        <div class="section-header"><i class="bi bi-gear-fill"></i> Platform Configuration</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Integrated Apps</div>
-                <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.IntegratedApps) ? Html.Raw("<span class='empty-value'>Not                   specified</span>") : Model.IntegratedApps)
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Disaster Recovery</div>
-                <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.DR) ? Html.Raw("<span class='empty-value'>Not specified</span>") :
-                                        Model.DR)
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Proposal Uploaded</div>
-                <div class="info-value">
-                    @if (!string.IsNullOrEmpty(Model.ProposalUploaded))
-                    {
-                        <a href="@Model.ProposalUploaded" target="_blank" class="text-primary">@Model.ProposalUploaded</a>
-                    }
-                    else
-                    {
-                        @Html.Raw("<span class='empty-value'>Not specified</span>")
-                    }
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">SLA</div>
-                <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.SLA) ? Html.Raw("<span class='empty-value'>Not specified</span>") :
-                                        Model.SLA)
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Development Information -->
-    <div class="section-card">
-        <div class="section-header"><i class="bi bi-braces"></i> Development Information</div>
-        <div class="info-grid">
             <div class="info-item">
                 <div class="info-label">Developed By</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.DevelopedBy?.EmpName) ? Html.Raw("<span class='empty-value'>Not            specified</span>") : Model.DevelopedBy.EmpName)
+                    @(string.IsNullOrEmpty(Model.DevelopedBy?.EmpName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.DevelopedBy.EmpName)
                 </div>
             </div>
             <div class="info-item">
-                <div class="info-label">Developer Email</div>
-                <div class="info-value">
-                    @if (!string.IsNullOrEmpty(Model.DevelopedBy?.EmpEmail))
-                    {
-                        <a href="mailto:@Model.DevelopedBy.EmpEmail" class="text-primary">@Model.DevelopedBy.EmpEmail</a>
-                    }
-                    else
-                    {
-                        @Html.Raw("<span class='empty-value'>Not specified</span>")
-                    }
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Developer Phone</div>
-                <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.DevelopedBy?.EmpPhone) ? Html.Raw("<span class='empty-value'>Not               specified</span>") : Model.DevelopedBy.EmpPhone)
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">SDLC Stage</div>
+                <div class="info-label">SDLC Phase</div>
                 <div class="info-value">
                     <span class="badge bg-success">
-                        @(string.IsNullOrEmpty(Model.SDLCPhase?.Phase) ? Html.Raw("<span class='empty-value'>Not              specified</span>") : Model.SDLCPhase.Phase)
+                        @(string.IsNullOrEmpty(Model.SDLCPhase?.Phase) ? "Retired" : Model.SDLCPhase.Phase)
                     </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Owners & Sales Team -->
+    <!-- Technical Information -->
     <div class="section-card">
-        <div class="section-header"><i class="bi bi-people-fill"></i> Owners & Sales Team</div>
+        <div class="section-header"><i class="bi bi-hdd-network-fill"></i> Technical Information</div>
         <div class="info-grid">
             <div class="info-item">
-                <div class="info-label">Platform Owner</div>
+                <div class="info-label">Application IP</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.PlatformOwner) ? Html.Raw("<span class='empty-value'>Not         specified</span>") : Model.PlatformOwner)
+                    @(string.IsNullOrEmpty(Model.AppIP) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppIP)
                 </div>
             </div>
             <div class="info-item">
-                <div class="info-label">Application Owner</div>
+                <div class="info-label">Application URL</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.APP_Owner) ? Html.Raw("<span class='empty-value'>Not specified</span>")
-                                        : Model.APP_Owner)
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Sales Team Name</div>
-                <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.SalesTeam?.SalesTeamName) ? Html.Raw("<span class='empty-value'>Not            specified</span>") : Model.SalesTeam.SalesTeamName)
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Sales Team Group</div>
-                <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.SalesTeam?.SalesTeamGroup) ? Html.Raw("<span class='empty-value'>Not                    specified</span>") : Model.SalesTeam.SalesTeamGroup)
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Sales Team Head</div>
-                <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.SalesTeam?.SalesTeamHead) ? Html.Raw("<span class='empty-value'>Not               specified</span>") : Model.SalesTeam.SalesTeamHead)
+                    @if (!string.IsNullOrEmpty(Model.AppURL))
+                    {
+                        <a href="@Model.AppURL" target="_blank" class="text-primary">@Model.AppURL</a>
+                    }
+                    else
+                    {
+                        @Html.Raw("<span class='empty-value'>Not specified</span>")
+                    }
                 </div>
             </div>
         </div>
@@ -576,10 +484,6 @@
                 <p>Target Date</p>
             </div>
             <div class="mini-card">
-                <h4>@(Model.UATDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
-                <p>UAT Date</p>
-            </div>
-            <div class="mini-card">
                 <h4>@(Model.VADate?.ToString("MMM dd, yyyy") ?? "—")</h4>
                 <p>VA Date</p>
             </div>
@@ -587,66 +491,29 @@
                 <h4>@(Model.LaunchedDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
                 <p>Launched Date</p>
             </div>
-            <div class="mini-card">
-                <h4>@(Model.BillingDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
-                <p>Billing Date</p>
-            </div>
-            <div class="mini-card">
-                <h4>@(Model.SSLCertificateExpDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
-                <p>SSL Certificate Expiry</p>
-            </div>
-            <div class="mini-card">
-                <h4>@(Model.DPOHandoverDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
-                <p>DPO Handover Date</p>
-            </div>
-            <div class="mini-card">
-                <h4>@(Model.ContractPeriod ?? "—")</h4>
-                <p>Contract Period</p>
-            </div>
-            @if (Model.StartDate.HasValue && Model.DPOHandoverDate.HasValue)
-            {
-                var duration = (Model.DPOHandoverDate.Value - Model.StartDate.Value).Days;
-                <div class="mini-card">
-                    <h4>@duration days</h4>
-                    <p>Total Duration</p>
-                </div>
-            }
         </div>
-        @if (!string.IsNullOrEmpty(Model.DPOHandoverComment))
-        {
-            <div class="info-item mt-3">
-                <div class="info-label">DPO Handover Comment</div>
-                <div class="info-value">
-                    @Model.DPOHandoverComment
-                </div>
-            </div>
-        }
     </div>
 
-    <!-- Financial Details -->
+    <!-- Financial & Comments -->
     <div class="section-card">
-        <div class="section-header"><i class="bi bi-cash-stack"></i> Financial Details</div>
-        <div class="mini-card-grid">
-            <div class="mini-card">
-                <h4>Rs. @(Model.PlatformOTC?.ToString("N0") ?? "0")</h4>
-                <p>Platform OTC</p>
+        <div class="section-header"><i class="bi bi-cash-stack"></i> Other Information</div>
+        <div class="info-grid" style="grid-template-columns: 1fr;">
+            <div class="info-item mb-2">
+                <div class="info-label">Price</div>
+                <div class="info-value fs-5 fw-bold text-primary">
+                    @(Model.Price.HasValue ? string.Format("Rs. {0:N0}", Model.Price.Value) : "Not specified")
+                </div>
             </div>
-            <div class="mini-card">
-                <h4>Rs. @(Model.PlatformMRC?.ToString("N0") ?? "0")</h4>
-                <p>Platform MRC</p>
-            </div>
-            <div class="mini-card">
-                <h4>Rs. @(Model.IncentiveEarned?.ToString("N0") ?? "0")</h4>
-                <p>Incentive Earned</p>
-            </div>
-            <div class="mini-card">
-                <h4>Rs. @(Model.IncentiveShare?.ToString("N0") ?? "0")</h4>
-                <p>Incentive Share</p>
-            </div>
-            <div class="mini-card">
-                <h4>Rs. @(Model.SoftwareValue?.ToString("N0") ?? "0")</h4>
-                <p>Software Value</p>
-            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Comment))
+            {
+                <div class="info-item">
+                    <div class="info-label">Closing Comment</div>
+                    <div class="info-value comment-box">
+                        @Model.Comment
+                    </div>
+                </div>
+            }
         </div>
     </div>
 
@@ -664,12 +531,11 @@
                             @(string.IsNullOrEmpty(Model.BackupOfficer1.EmpName) ? "N/A" : Model.BackupOfficer1.EmpName)
                         </div>
                         <div class="text-muted small">
-                            Primary Backup Officer - @(string.IsNullOrEmpty(Model.BackupOfficer1.EmpEmail) ? "No email" :
-                                                Model.BackupOfficer1.EmpEmail)
+                            Primary Backup Officer - @(string.IsNullOrEmpty(Model.BackupOfficer1.EmpEmail) ? "No email" : Model.BackupOfficer1.EmpEmail)
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-                }
+            }
             @if (Model.BackupOfficer2 != null)
             {
                 <div class="team-member">
@@ -679,12 +545,11 @@
                             @(string.IsNullOrEmpty(Model.BackupOfficer2.EmpName) ? "N/A" : Model.BackupOfficer2.EmpName)
                         </div>
                         <div class="text-muted small">
-                            Secondary Backup Officer - @(string.IsNullOrEmpty(Model.BackupOfficer2.EmpEmail) ? "No email" :
-                                                Model.BackupOfficer2.EmpEmail)
+                            Secondary Backup Officer - @(string.IsNullOrEmpty(Model.BackupOfficer2.EmpEmail) ? "No email" : Model.BackupOfficer2.EmpEmail)
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-                }
+            }
         }
         else
         {
@@ -696,7 +561,7 @@
 
     <!-- Back Button -->
     <div class="text-start mt-4">
-        <a asp-controller="Abandoned" asp-action="Index" class="back-btn" aria-label="Return to Dashboard">
+        <a asp-controller="InternalSolutionRetired" asp-action="Index" class="back-btn" aria-label="Return to Dashboard">
             <i class="bi bi-arrow-left"></i> Back to Dashboard
         </a>
     </div>

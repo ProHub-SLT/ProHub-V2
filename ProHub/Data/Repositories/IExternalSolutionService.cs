@@ -322,6 +322,10 @@ namespace PROHUB.Data
             {
                 Id = GetInt32Safe(reader, "ID"),
                 PlatformName = GetNullableString(reader, "Platform_Name") ?? string.Empty,
+                PlatformType = GetNullableString(reader, "Platform_Type"),
+                Status = GetNullableString(reader, "Status"),
+                PlatformOwner = GetNullableString(reader, "Platform_Owner"),
+                APP_Owner = GetNullableString(reader, "APP_OP_Owner") ?? GetNullableString(reader, "APP_Owner"),
                 CompanyId = GetNullableInt32(reader, "Company_ID"),
                 DevelopedById = GetNullableInt32(reader, "Developed_By"),
                 DevelopedTeam = GetNullableString(reader, "Developed_Team"),
@@ -338,8 +342,6 @@ namespace PROHUB.Data
                 UATDate = GetNullableDateTime(reader, "UATDate"),
                 VADate = GetNullableDateTime(reader, "VADate"),
                 LaunchedDate = GetNullableDateTime(reader, "LaunchedDate"),
-                PlatformOwner = GetNullableString(reader, "PlatformOwner"),
-                APP_Owner = GetNullableString(reader, "APP_Owner"),
 
                 // 1. Get relevant values ​​(OTC and MRC)
                 PlatformOTC = GetNullableDecimal(reader, "Platform_OTC"),

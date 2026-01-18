@@ -104,18 +104,25 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             // Step A: Get Main Solution Data
-           
+
             const string query = @"
                 SELECT ip.*, 
                        e.Emp_Name AS DevelopedByName, 
+                       e.Emp_Email AS DeveloperEmail,
                        sp.Phase AS SDLCPhaseName, 
                        pr.ParentProjectGroup AS ParentProjectName,
-                       parent.App_Name AS MainAppName -- <--- අලුතෙන් එකතු කළ කොටස
+                       parent.App_Name AS MainAppName,
+                       teu.EndUserType AS EndUserTypeName, -- Added EndUserType
+                       bo1.Emp_Name AS BackupOfficer1Name, -- Added Backup Officer 1
+                       bo2.Emp_Name AS BackupOfficer2Name  -- Added Backup Officer 2
                 FROM internal_platforms ip
                 LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
                 LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
                 LEFT JOIN parentproject pr ON ip.ParentProjectID = pr.ParentProjectID
-                LEFT JOIN internal_platforms parent ON ip.MainAppID = parent.ID -- <--- අලුතෙන් එකතු කළ කොටස
+                LEFT JOIN internal_platforms parent ON ip.MainAppID = parent.ID
+                LEFT JOIN targetenduser teu ON ip.EndUserType = teu.ID -- Join for End User
+                LEFT JOIN Employee bo1 ON ip.BackupOfficer_1 = bo1.Emp_ID -- Join for BO1
+                LEFT JOIN Employee bo2 ON ip.BackupOfficer_2 = bo2.Emp_ID -- Join for BO2
                 WHERE ip.ID = @Id";
 
             using (var command = new MySqlCommand(query, connection))
@@ -125,6 +132,11 @@ namespace PROHUB.Data
                 if (await reader.ReadAsync())
                 {
                     solution = MapReaderToModel(reader);
+
+                    solution.DeveloperEmail = reader.IsDBNull(reader.GetOrdinal("DeveloperEmail")) ? "Not specified" : reader.GetString("DeveloperEmail");
+                    solution.EndUserTypeName = reader.IsDBNull(reader.GetOrdinal("EndUserTypeName")) ? "Not specified" : reader.GetString("EndUserTypeName");
+                    solution.BackupOfficer1Name = reader.IsDBNull(reader.GetOrdinal("BackupOfficer1Name")) ? null : reader.GetString("BackupOfficer1Name");
+                    solution.BackupOfficer2Name = reader.IsDBNull(reader.GetOrdinal("BackupOfficer2Name")) ? null : reader.GetString("BackupOfficer2Name");
                 }
             }
 
@@ -323,6 +335,8 @@ namespace PROHUB.Data
                 MainAppName = GetNullableString(r, "MainAppName"), 
                 DevelopedById = GetNullableInt32(r, "Developed_By"),
                 DevelopedTeam = GetNullableString(r, "Developed_Team"),
+                DevelopedByName = GetNullableString(r, "DevelopedByName"), // Fixes "Developed By"
+                SDLCPhaseName = GetNullableString(r, "SDLCPhaseName"),     // Fixes "SDLC Stage" & Header Badge
                 StartDate = GetNullableDateTime(r, "StartDate"),
                 TargetDate = GetNullableDateTime(r, "TargetDate"),
                 BitBucket = GetNullableString(r, "BitBucket"),

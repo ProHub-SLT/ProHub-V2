@@ -1,5 +1,333 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model ProHub.Models.ExternalPlatform
 @{
+    ViewData["Title"] = "External Solution Details";
 }
+
+<style>
+    :root {
+        --primary: #1D9BF0;
+        --secondary: #536471;
+        --background: #FFFFFF;
+        --background-dark: #15202B;
+        --card-bg: #F7F9F9;
+        --card-bg-dark: #1E2A3C;
+        --text-primary: #0F1419;
+        --text-primary-dark: #E7E9EA;
+        --text-secondary: #536471;
+        --accent: #00BA7C;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --border-radius: 12px;
+        --transition: all 0.2s ease;
+    }
+
+
+    @@media (prefers-color-scheme: dark) {
+        :root {
+            --background: var(--background-dark);
+            /* Force a white background */
+            --card-bg: #FFFFFF;
+            /* Force dark text on the white background */
+            --text-primary: #0F1419;
+            --text-secondary: #536471;
+            --shadow: var(--shadow-dark);
+        }
+    }
+    /* === END OF FIX === */
+
+    .details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        min-height: 100vh;
+    }
+
+    .section-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .section-header {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #dee2e6; /* Lightened border */
+        margin-bottom: 1rem;
+    }
+
+        .section-header i {
+            color: var(--accent);
+            font-size: 1.125rem;
+        }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .empty-value {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .mini-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .mini-card {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #dee2e6; /* Lightened border */
+        transition: var(--transition);
+    }
+
+        .mini-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mini-card h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .mini-card p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+    .team-member {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--card-bg);
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        transition: var(--transition);
+    }
+
+        .team-member:hover {
+            background: #f1f1f1; /* Light hover */
+        }
+
+    .team-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .back-btn {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(29, 155, 240, 0.3);
+        }
+
+    .hero {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+        .hero h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero small {
+            opacity: 0.85;
+            font-size: 0.875rem;
+        }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 16px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+        .status-badge i {
+            margin-right: 0.25rem;
+        }
+</style>
+
+<div class="details-container">
+    <div class="hero">
+        <div class="d-flex justify-content-between flex-wrap">
+            <div>
+                <h1>@Model.PlatformName</h1>
+                <small>@(string.IsNullOrEmpty(Model.PlatformType) ? "External Platform" : Model.PlatformType)</small><br />
+                <div class="status-badge" role="status">
+                    <i class="bi @(Model.SdlcPhaseName == "Launched" ? "bi-check-circle-fill" : "bi-gear-fill")"></i>
+                    @(string.IsNullOrEmpty(Model.SdlcPhaseName) ? "N/A" : Model.SdlcPhaseName)
+                </div>
+            </div>
+            <div class="text-end mt-3 mt-md-0">
+                <div class="mb-2">
+                    <i class="bi bi-building"></i>
+                    @(string.IsNullOrEmpty(Model.CompanyName) ? "N/A" : Model.CompanyName)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-card-list"></i> Basic Information</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Platform Name</div>
+                <div class="info-value">@Model.PlatformName</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Platform Type</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.PlatformType) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.PlatformType)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Company / Customer</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.CompanyName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.CompanyName)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.Status) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.Status)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-people-fill"></i> Owners & Sales Team</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Platform Owner</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.PlatformOwner) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.PlatformOwner)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Application Owner</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.APP_Owner) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.APP_Owner)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Sales Team Name</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.SalesTeamName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.SalesTeamName)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Sales AM</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.SalesAM) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.SalesAM)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-calendar-event"></i> Timeline & Dates</div>
+        <div class="mini-card-grid">
+            <div class="mini-card">
+                <h4>@(Model.StartDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>Start Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@(Model.TargetDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>Target Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@(Model.LaunchedDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>Launched Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@(string.IsNullOrEmpty(Model.ContractPeriod) ? "—" : Model.ContractPeriod)</h4>
+                <p>Contract Period</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-cash-stack"></i> Financial Details</div>
+        <div class="mini-card-grid">
+            <div class="mini-card">
+                <h4>Rs. @(Model.PlatformOTC?.ToString("N0") ?? "0")</h4>
+                <p>Platform OTC</p>
+            </div>
+            <div class="mini-card">
+                <h4>Rs. @(Model.PlatformMRC?.ToString("N0") ?? "0")</h4>
+                <p>Platform MRC</p>
+            </div>
+            <div class="mini-card">
+                <h4>Rs. @(Model.SoftwareValue?.ToString("N0") ?? "0")</h4>
+                <p>Software Value</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-start mt-4">
+        <a asp-controller="ExternalPlatforms" asp-action="Index" class="back-btn">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>

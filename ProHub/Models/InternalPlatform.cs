@@ -81,6 +81,7 @@ namespace ProHub.Models
 
         // --- Properties for JOINed data (for display) ---
         public string? DevelopedByName { get; set; }
+        public string? DeveloperEmail { get; set; }
         public string? SDLCPhaseName { get; set; }
         public string? ParentProjectName { get; set; }
         public string? EndUserTypeName { get; set; }

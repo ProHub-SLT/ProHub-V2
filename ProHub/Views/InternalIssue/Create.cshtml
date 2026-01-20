@@ -272,6 +272,19 @@
             .success-popup-content button:hover {
                 background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
             }
+    /* Custom Scrollable Dropdown */
+    .dropdown-menu-scrollable {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+    .search-item {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1000;
+        padding: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -306,18 +319,42 @@
                         <label asp-for="InternalAppId" class="form-label-modern">
                             <i class="bi bi-app-indicator me-1"></i> Internal Platform/Solution
                         </label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-pc-display"></i>
-                            <select asp-for="InternalAppId" class="form-control-modern">
-                                <option value="">Select Platform</option>
-                                @if (ViewBag.InternalApps != null)
-                                {
-                                    foreach (var platform in (List<InternalPlatform>)ViewBag.InternalApps)
+                        <div class="input-icon-wrapper position-relative">
+                            <!-- Hidden Input -->
+                            <input type="hidden" asp-for="InternalAppId" id="InternalAppId" />
+                            
+                            <!-- Custom Dropdown Trigger -->
+                             <div class="dropdown">
+                                <button class="form-control-modern text-start d-flex justify-content-between align-items-center" type="button"
+                                    id="platformDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="padding-left: 2.75rem;">
+                                    <span id="platformDropdownText">Select Platform</span>
+                                </button>
+                                <i class="bi bi-pc-display" style="z-index: 5;"></i>
+
+                                <!-- Dropdown Menu -->
+                                <ul class="dropdown-menu w-100 shadow border-0 dropdown-menu-scrollable" aria-labelledby="platformDropdown">
+                                    <li class="search-item">
+                                        <input type="text" class="form-control-modern form-control-sm" id="platformSearch" 
+                                               placeholder="Search platforms..." onclick="event.stopPropagation()" style="padding-left: 1rem;">
+                                    </li>
+                                    @if (ViewBag.InternalApps != null)
                                     {
-                                        <option value="@platform.Id">@platform.AppName</option>
+                                        foreach (var platform in (List<InternalPlatform>)ViewBag.InternalApps)
+                                        {
+                                            <li>
+                                                <button class="dropdown-item platform-option" type="button" 
+                                                        data-id="@platform.Id" data-name="@platform.AppName">
+                                                    @platform.AppName
+                                                </button>
+                                            </li>
+                                        }
                                     }
-                                }
-                            </select>
+                                    else
+                                    {
+                                        <li><span class="dropdown-item text-muted">No platforms available</span></li>
+                                    }
+                                </ul>
+                            </div>
                         </div>
                         <span asp-validation-for="InternalAppId" class="helper-text"></span>
                     </div>
@@ -590,5 +627,47 @@
 
         // Initial call to set immediately
         updateLiveTime();
+
+        // --- Custom Searchable Dropdown Logic ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownText = document.getElementById('platformDropdownText');
+            const hiddenInput = document.getElementById('InternalAppId');
+            const searchInput = document.getElementById('platformSearch');
+
+            // Handle Selection
+            document.querySelectorAll('.platform-option').forEach(item => {
+                item.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const name = this.getAttribute('data-name');
+                    
+                    hiddenInput.value = id;
+                    dropdownText.textContent = name;
+                    dropdownText.style.color = "#000"; // Reset text color
+                });
+            });
+
+            // Handle Search
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function () {
+                    const value = this.value.toLowerCase();
+                    const items = this.closest('.dropdown-menu').querySelectorAll('.platform-option');
+
+                    items.forEach(btn => {
+                        const text = btn.textContent.toLowerCase();
+                        const li = btn.closest('li');
+                        if (text.includes(value)) {
+                            li.style.display = '';
+                        } else {
+                            li.style.display = 'none';
+                        }
+                    });
+                });
+
+                // Prevent close on click
+                searchInput.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
     </script>
 }

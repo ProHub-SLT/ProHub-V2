@@ -1,5 +1,395 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model ProHub.Models.InternalPlatform
 @{
+    ViewData["Title"] = "Internal Solution Details";
 }
+
+<style>
+    :root {
+        --primary: #1D9BF0;
+        --secondary: #536471;
+        --background: #FFFFFF;
+        --background-dark: #15202B;
+        --card-bg: #F7F9F9;
+        --card-bg-dark: #1E2A3C;
+        --text-primary: #0F1419;
+        --text-primary-dark: #E7E9EA;
+        --text-secondary: #536471;
+        --accent: #00BA7C;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --border-radius: 12px;
+        --transition: all 0.2s ease;
+    }
+
+    
+    @@media (prefers-color-scheme: dark) {
+        :root {
+            --background: var(--background-dark);
+            /* Force a white background */
+            --card-bg: #FFFFFF;
+            /* Force dark text on the white background */
+            --text-primary: #0F1419;
+            --text-secondary: #536471;
+            --shadow: var(--shadow-dark);
+        }
+    }
+
+    .details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        min-height: 100vh;
+    }
+
+    .section-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .section-header {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #dee2e6; /* Lightened border */
+        margin-bottom: 1rem;
+    }
+
+        .section-header i {
+            color: var(--accent);
+            font-size: 1.125rem;
+        }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .empty-value {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .mini-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .mini-card {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #dee2e6; /* Lightened border */
+        transition: var(--transition);
+    }
+
+        .mini-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mini-card h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .mini-card p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+    .team-member {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--card-bg);
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        transition: var(--transition);
+    }
+
+        .team-member:hover {
+            background: #f1f1f1; /* Light hover */
+        }
+
+    .team-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .back-btn {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(29, 155, 240, 0.3);
+        }
+
+    .hero {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+        .hero h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero small {
+            opacity: 0.85;
+            font-size: 0.875rem;
+        }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 16px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+        .status-badge i {
+            margin-right: 0.25rem;
+        }
+</style>
+
+<div class="details-container">
+    <div class="hero">
+        <div class="d-flex justify-content-between flex-wrap">
+            <div>
+                <h1>@Model.AppName</h1>
+                <small>@(string.IsNullOrEmpty(Model.AppCategory) ? "Internal Platform" : Model.AppCategory)</small><br />
+                <div class="status-badge" role="status">
+                    <i class="bi @(Model.SDLCPhaseName == "Launched" ? "bi-check-circle-fill" : "bi-gear-fill")"></i>
+                    @(string.IsNullOrEmpty(Model.SDLCPhaseName) ? "N/A" : Model.SDLCPhaseName)
+                </div>
+            </div>
+            <div class="text-end mt-3 mt-md-0">
+                <div class="mb-2">
+                    <i class="bi bi-person-workspace"></i>
+                    @(string.IsNullOrEmpty(Model.BusOwner) ? "N/A" : Model.BusOwner)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-card-list"></i> Basic Information</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Application Name</div>
+                <div class="info-value">@Model.AppName</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Application Group</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.ParentProjectName) ? (string.IsNullOrEmpty(Model.AppCategory) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppCategory) : Model.ParentProjectName)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">End User Type</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.EndUserTypeName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.EndUserTypeName)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.Status) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.Status)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-gear-fill"></i> Platform Configuration</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">App URL</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.AppURL) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppURL)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">App IP</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.AppIP) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppIP)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Integrated Apps</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.IntegratedApps) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.IntegratedApps)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Disaster Recovery</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.DR) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.DR)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-braces"></i> Development Information</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Developed Team</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.DevelopedTeam) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.DevelopedTeam)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Developed By</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.DevelopedByName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.DevelopedByName)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Developer Email</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.DeveloperEmail) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.DeveloperEmail)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">SDLC Stage</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.SDLCPhaseName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.SDLCPhaseName)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-people-fill"></i> Owners</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Business Owner</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.BusOwner) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.BusOwner)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">App Business Owner</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.AppBusinessOwner) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppBusinessOwner)</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Application OP Owner</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.APPOwner) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.APPOwner)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-calendar-event"></i> Timeline & Dates</div>
+        <div class="mini-card-grid">
+            <div class="mini-card">
+                <h4>@(Model.StartDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>Start Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@(Model.TargetDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>Target Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@(Model.UATDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>UAT Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@(Model.VADate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>VA Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@(Model.LaunchedDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>Launched Date</p>
+            </div>
+            <div class="mini-card">
+                <h4>@(Model.SSLCertificateExpDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>SSL Certificate Expiry</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-person-badge-fill"></i> Backup Officers</div>
+        @if (!string.IsNullOrEmpty(Model.BackupOfficer1Name) || !string.IsNullOrEmpty(Model.BackupOfficer2Name))
+        {
+            @if (!string.IsNullOrEmpty(Model.BackupOfficer1Name))
+            {
+                <div class="team-member">
+                    <div class="team-avatar">1</div>
+                    <div>
+                        <div class="fw-bold">@Model.BackupOfficer1Name</div>
+                        <div class="text-muted small">Primary Backup</div>
+                    </div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.BackupOfficer2Name))
+            {
+                <div class="team-member">
+                    <div class="team-avatar">2</div>
+                    <div>
+                        <div class="fw-bold">@Model.BackupOfficer2Name</div>
+                        <div class="text-muted small">Secondary Backup</div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center text-muted py-3">
+                <i class="bi bi-person-x fs-4 me-1"></i> No backup officers assigned
+            </p>
+        }
+    </div>
+
+    <div class="text-start mt-4">
+        <a asp-controller="InternalSolutionInprogress" asp-action="Index" class="back-btn">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>

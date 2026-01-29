@@ -1,0 +1,46 @@
+name: Deploy to Proxmox VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          # Adjust this to the version your app targets (e.g. '6.0', '7.0', '8.0')
+          dotnet-version: '7.0'
+
+      - name: Publish
+        run: dotnet publish ProHub/ProHub.csproj -c Release -o publish
+
+      - name: Add SSH key to agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.PROXMOX_SSH_KEY }}
+
+      - name: Copy published files to server
+        env:
+          HOST: ${{ secrets.PROXMOX_HOST }}
+          PORT: ${{ secrets.PROXMOX_PORT }}
+          USER: ${{ secrets.PROXMOX_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          # Copy the publish output to the server. 'publish' is created above.
+          scp -o StrictHostKeyChecking=no -P "$PORT" -r ./publish/* "$USER"@"$HOST":"$DEPLOY_PATH"
+
+      - name: Restart service on server
+        env:
+          HOST: ${{ secrets.PROXMOX_HOST }}
+          PORT: ${{ secrets.PROXMOX_PORT }}
+          USER: ${{ secrets.PROXMOX_USER }}
+          SERVICE: ${{ secrets.SERVICE_NAME }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -p "$PORT" "$USER"@"$HOST" "sudo systemctl restart $SERVICE"

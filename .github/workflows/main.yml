@@ -25,6 +25,14 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.PROXMOX_SSH_KEY }}
+    
+      - name: Test SSH connectivity
+        env:
+          HOST: ${{ secrets.PROXMOX_HOST }}
+          PORT: ${{ secrets.PROXMOX_PORT }}
+        run: |
+          echo "Testing connection to $HOST on port $PORT"
+          nc -zv $HOST $PORT
 
       - name: Copy published files to server
         env:

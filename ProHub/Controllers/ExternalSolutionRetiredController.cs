@@ -70,7 +70,7 @@ namespace ProHub.Controllers
         public IActionResult ViewDetails(int id)
         {
             if (id <= 0) return BadRequest("Invalid ID.");
-            ExternalPlatform? item = _repo.GetRetiredSolutionById(id);
+            ExternalPlatform? item = _repo.GetRetiredSolutionByIdFull(id);
             return item is null ? NotFound($"Retired external platform with ID {id} not found.") : View(item);
         }
 

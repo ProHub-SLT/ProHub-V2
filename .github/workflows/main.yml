@@ -24,6 +24,10 @@ jobs:
         with:
           ssh-private-key: |
             ${{ secrets.PROXMOX_SSH_KEY }}
+      - name: Test SSH connection
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.PROXMOX_PORT }} \
+          ${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }} "echo SSH_OK"
       - name: Copy published files to server
         env:
           HOST: '${{ secrets.PROXMOX_HOST }}'

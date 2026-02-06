@@ -20,7 +20,13 @@ namespace ProHub.Data.Repositories
             using var conn = new MySqlConnection(_connectionString);
             conn.Open();
 
-            string query = "SELECT * FROM Employee WHERE Emp_Email = @Email LIMIT 1";
+            // Join with EmpGroup to get the group/roles
+            string query = @"
+                SELECT e.*, g.GroupID, g.GroupName
+                FROM Employee e
+                LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+                WHERE e.Emp_Email = @Email
+                LIMIT 1";
 
             using var cmd = new MySqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@Email", email);
@@ -35,7 +41,11 @@ namespace ProHub.Data.Repositories
                     EmpName = reader.GetString("Emp_Name"),
                     EmpEmail = reader.GetString("Emp_Email"),
                     EmpPhone = reader["Emp_Phone"]?.ToString(),
-                    Section = reader["Section"]?.ToString()
+                    Section = reader["Section"]?.ToString(),
+                    GroupID = reader["GroupID"] != DBNull.Value ? reader.GetInt32("GroupID") : (int?)null,
+                    Group = reader["GroupName"] != DBNull.Value
+                        ? new EmpGroup { GroupID = reader.GetInt32("GroupID"), GroupName = reader.GetString("GroupName") }
+                        : null
                 };
             }
 

@@ -19,34 +19,50 @@ jobs:
         run: dotnet build ProHub/ProHub.csproj -c Release --no-restore
       - name: Publish
         run: dotnet publish ProHub/ProHub.csproj -c Release -o publish --no-build
-      - name: Add SSH key
+      - name: Start ssh-agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: '${{ secrets.PROXMOX_SSH_KEY }}'
       - name: Add server to known_hosts
-        run: >
+        env:
+          HOST: '${{ secrets.PROXMOX_HOST }}'
+          PORT: '${{ secrets.PROXMOX_PORT }}'
+        run: |
           mkdir -p ~/.ssh
-
-          ssh-keyscan -p "${{ secrets.PROXMOX_PORT }}" "${{ secrets.PROXMOX_HOST
-          }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -p "$PORT" -H "$HOST" >> ~/.ssh/known_hosts
       - name: Test SSH connection
+        env:
+          HOST: '${{ secrets.PROXMOX_HOST }}'
+          PORT: '${{ secrets.PROXMOX_PORT }}'
+          USER: '${{ secrets.PROXMOX_USER }}'
         run: |
-          ssh -p "${{ secrets.PROXMOX_PORT }}" \
-            "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}" \
-            "echo SSH_OK"
+          ssh -p "$PORT" "$USER@$HOST" "echo SSH_OK"
       - name: Ensure deploy directory exists
+        env:
+          HOST: '${{ secrets.PROXMOX_HOST }}'
+          PORT: '${{ secrets.PROXMOX_PORT }}'
+          USER: '${{ secrets.PROXMOX_USER }}'
+          DEPLOY_PATH: '${{ secrets.DEPLOY_PATH }}'
         run: |
-          ssh -p "${{ secrets.PROXMOX_PORT }}" \
-            "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}" \
-            "mkdir -p '${{ secrets.DEPLOY_PATH }}'"
+          ssh -p "$PORT" "$USER@$HOST" "mkdir -p '$DEPLOY_PATH'"
       - name: Sync published files to server (fast)
-        run: |
-          rsync -az --delete \
-            -e "ssh -p ${{ secrets.PROXMOX_PORT }}" \
-            publish/ \
-            "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}:${{ secrets.DEPLOY_PATH }}/"
+        env:
+          HOST: '${{ secrets.PROXMOX_HOST }}'
+          PORT: '${{ secrets.PROXMOX_PORT }}'
+          USER: '${{ secrets.PROXMOX_USER }}'
+          DEPLOY_PATH: '${{ secrets.DEPLOY_PATH }}'
+        run: >
+          rsync -az --delete -e "ssh -p $PORT" publish/
+          "$USER@$HOST:$DEPLOY_PATH/"
       - name: Restart service (no password)
-        run: |
-          ssh -p "${{ secrets.PROXMOX_PORT }}" \
-            "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}" \
-            "sudo -n systemctl restart '${{ secrets.SERVICE_NAME }}' && sudo -n systemctl is-active '${{ secrets.SERVICE_NAME }}'"
+        env:
+          HOST: '${{ secrets.PROXMOX_HOST }}'
+          PORT: '${{ secrets.PROXMOX_PORT }}'
+          USER: '${{ secrets.PROXMOX_USER }}'
+          SERVICE: '${{ secrets.SERVICE_NAME }}'
+        run: >
+          ssh -p "$PORT" "$USER@$HOST" "sudo -n /usr/bin/systemctl restart
+          '$SERVICE'"
+
+          ssh -p "$PORT" "$USER@$HOST" "/usr/bin/systemctl is-active --quiet
+          '$SERVICE' && echo SERVICE_OK"

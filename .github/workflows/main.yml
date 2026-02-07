@@ -39,12 +39,14 @@ jobs:
           ssh -p "${{ secrets.PROXMOX_PORT }}" \
             "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}" \
             "mkdir -p '${{ secrets.DEPLOY_PATH }}'"
-      - name: Copy published files to server
+      - name: Sync published files to server (fast)
         run: |
-          scp -P "${{ secrets.PROXMOX_PORT }}" -r publish/* \
+          rsync -az --delete \
+            -e "ssh -p ${{ secrets.PROXMOX_PORT }}" \
+            publish/ \
             "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}:${{ secrets.DEPLOY_PATH }}/"
-      - name: Restart service
+      - name: Restart service (no password)
         run: |
           ssh -p "${{ secrets.PROXMOX_PORT }}" \
             "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}" \
-            "sudo systemctl restart '${{ secrets.SERVICE_NAME }}' && sudo systemctl status '${{ secrets.SERVICE_NAME }}' --no-pager"
+            "sudo -n systemctl restart '${{ secrets.SERVICE_NAME }}' && sudo -n systemctl is-active '${{ secrets.SERVICE_NAME }}'"

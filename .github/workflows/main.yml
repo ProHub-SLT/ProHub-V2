@@ -22,33 +22,29 @@ jobs:
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: |
-            ${{ secrets.PROXMOX_SSH_KEY }}
+          ssh-private-key: '${{ secrets.PROXMOX_SSH_KEY }}'
+      - name: Add server to known_hosts
+        run: >
+          mkdir -p ~/.ssh
+
+          ssh-keyscan -p "${{ secrets.PROXMOX_PORT }}" "${{ secrets.PROXMOX_HOST
+          }}" >> ~/.ssh/known_hosts
       - name: Test SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=no -p ${{ secrets.PROXMOX_PORT }} \
-          ${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }} "echo SSH_OK"
+          ssh -p "${{ secrets.PROXMOX_PORT }}" \
+            "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}" \
+            "echo SSH_OK"
+      - name: Ensure deploy directory exists
+        run: |
+          ssh -p "${{ secrets.PROXMOX_PORT }}" \
+            "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}" \
+            "mkdir -p '${{ secrets.DEPLOY_PATH }}'"
       - name: Copy published files to server
-        env:
-          HOST: '${{ secrets.PROXMOX_HOST }}'
-          PORT: '${{ secrets.PROXMOX_PORT }}'
-          USER: '${{ secrets.PROXMOX_USER }}'
-          DEPLOY_PATH: '${{ secrets.DEPLOY_PATH }}'
-        run: >
-          ssh -o StrictHostKeyChecking=no -p "$PORT" "$USER@$HOST" "mkdir -p
-          $DEPLOY_PATH"
-
-          scp -o StrictHostKeyChecking=no -P "$PORT" -r publish/*
-          "$USER@$HOST:$DEPLOY_PATH"
+        run: |
+          scp -P "${{ secrets.PROXMOX_PORT }}" -r publish/* \
+            "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}:${{ secrets.DEPLOY_PATH }}/"
       - name: Restart service
-        env:
-          HOST: '${{ secrets.PROXMOX_HOST }}'
-          PORT: '${{ secrets.PROXMOX_PORT }}'
-          USER: '${{ secrets.PROXMOX_USER }}'
-          SERVICE: '${{ secrets.SERVICE_NAME }}'
-        run: >
-          ssh -o StrictHostKeyChecking=no -p "$PORT" "$USER@$HOST" "sudo
-          systemctl restart $SERVICE"
-
-          ssh -o StrictHostKeyChecking=no -p "$PORT" "$USER@$HOST" "sudo
-          systemctl status $SERVICE --no-pager"
+        run: |
+          ssh -p "${{ secrets.PROXMOX_PORT }}" \
+            "${{ secrets.PROXMOX_USER }}@${{ secrets.PROXMOX_HOST }}" \
+            "sudo systemctl restart '${{ secrets.SERVICE_NAME }}' && sudo systemctl status '${{ secrets.SERVICE_NAME }}' --no-pager"

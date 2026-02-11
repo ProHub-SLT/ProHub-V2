@@ -1,32 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\ProHub.csproj": {}
+    "/home/abc/ProHub-v3/ProHub/ProHub.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\ProHub.csproj": {
+    "/home/abc/ProHub-v3/ProHub/ProHub.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\ProHub.csproj",
+        "projectUniqueName": "/home/abc/ProHub-v3/ProHub/ProHub.csproj",
         "projectName": "ProHub",
-        "projectPath": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\ProHub.csproj",
-        "packagesPath": "C:\\Users\\Tharuka\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Tharuka\\Downloads\\ProHub-main (2)\\ProHub-main\\ProHub\\obj\\",
+        "projectPath": "/home/abc/ProHub-v3/ProHub/ProHub.csproj",
+        "packagesPath": "/home/abc/.nuget/packages/",
+        "outputPath": "/home/abc/ProHub-v3/ProHub/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Tharuka\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/abc/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -39,11 +32,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -102,7 +90,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.122/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

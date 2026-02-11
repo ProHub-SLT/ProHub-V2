@@ -1,68 +1,68 @@
-name: Deploy ProHub-V2 to VM
-'on':
+name: Deploy to Proxmox VM
+
+on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
 jobs:
-  build-and-deploy:
+  build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0.x
-      - name: Restore
+          dotnet-version: '8.0'
+
+      - name: Restore dependencies
         run: dotnet restore ProHub/ProHub.csproj
+
       - name: Build
         run: dotnet build ProHub/ProHub.csproj -c Release --no-restore
-      - name: Publish
-        run: dotnet publish ProHub/ProHub.csproj -c Release -o publish --no-build
-      - name: Start ssh-agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: '${{ secrets.PROXMOX_SSH_KEY }}'
-      - name: Add server to known_hosts
-        env:
-          HOST: '${{ secrets.PROXMOX_HOST }}'
-          PORT: '${{ secrets.PROXMOX_PORT }}'
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p "$PORT" -H "$HOST" >> ~/.ssh/known_hosts
-      - name: Test SSH connection
-        env:
-          HOST: '${{ secrets.PROXMOX_HOST }}'
-          PORT: '${{ secrets.PROXMOX_PORT }}'
-          USER: '${{ secrets.PROXMOX_USER }}'
-        run: |
-          ssh -p "$PORT" "$USER@$HOST" "echo SSH_OK"
-      - name: Ensure deploy directory exists
-        env:
-          HOST: '${{ secrets.PROXMOX_HOST }}'
-          PORT: '${{ secrets.PROXMOX_PORT }}'
-          USER: '${{ secrets.PROXMOX_USER }}'
-          DEPLOY_PATH: '${{ secrets.DEPLOY_PATH }}'
-        run: |
-          ssh -p "$PORT" "$USER@$HOST" "mkdir -p '$DEPLOY_PATH'"
-      - name: Sync published files to server (fast)
-        env:
-          HOST: '${{ secrets.PROXMOX_HOST }}'
-          PORT: '${{ secrets.PROXMOX_PORT }}'
-          USER: '${{ secrets.PROXMOX_USER }}'
-          DEPLOY_PATH: '${{ secrets.DEPLOY_PATH }}'
-        run: >
-          rsync -az --delete -e "ssh -p $PORT" publish/
-          "$USER@$HOST:$DEPLOY_PATH/"
-      - name: Restart service (no password)
-        env:
-          HOST: '${{ secrets.PROXMOX_HOST }}'
-          PORT: '${{ secrets.PROXMOX_PORT }}'
-          USER: '${{ secrets.PROXMOX_USER }}'
-          SERVICE: '${{ secrets.SERVICE_NAME }}'
-        run: >
-          ssh -p "$PORT" "$USER@$HOST" "sudo -n /usr/bin/systemctl restart
-          '$SERVICE'"
 
-          ssh -p "$PORT" "$USER@$HOST" "/usr/bin/systemctl is-active --quiet
-          '$SERVICE' && echo SERVICE_OK"
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: \${{ secrets.PROXMOX_HOST }}
+          port: \${{ secrets.PROXMOX_PORT }}
+          username: \${{ secrets.PROXMOX_USER }}
+          key: \${{ secrets.PROXMOX_SSH_KEY }}
+          script: |
+            echo "🚀 Starting ProHub Deployment"
+            echo "Time: \$(date)"
+            
+            # 1. Navigate to project directory
+            cd /home/abc/ProHub-v3
+            
+            # 2. Pull latest code from GitHub
+            echo "📥 Pulling latest code from GitHub..."
+            git fetch origin
+            git reset --hard origin/main
+            
+            # 3. Publish application
+            echo "🏗️ Building and Publishing..."
+            # Using the deployment path defined in your GitHub Secrets
+            dotnet publish ProHub/ProHub.csproj -c Release -o \${{ secrets.DEPLOY_PATH }}
+            
+            # 4. Restart service
+            echo "🔄 Restarting service..."
+            # Note: Ensure the user 'abc' has NOPASSWD sudo for systemctl restart
+            sudo systemctl restart \${{ secrets.SERVICE_NAME }}
+            
+            # 5. Verify status
+            echo "�� Checking status..."
+            systemctl status \${{ secrets.SERVICE_NAME }} --no-pager | grep "Active:"
+            
+            echo "🎉 Deployment Complete!"

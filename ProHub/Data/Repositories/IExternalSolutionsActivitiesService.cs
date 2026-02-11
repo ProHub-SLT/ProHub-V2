@@ -61,14 +61,14 @@ namespace PROHUB.Data
                        e1.Emp_Name AS CreatedByName, 
                        e2.Emp_Name AS AssignedToName, 
                        e3.Emp_Name AS UpdatedByName,
-                       (SELECT Comment FROM Project_Comments pc WHERE pc.Activity_ID = pa.ID ORDER BY pc.ID DESC LIMIT 1) AS LatestComment
-                FROM Project_Activities pa
-                LEFT JOIN Main_Platforms mp ON pa.Platform_ID = mp.ID
-                LEFT JOIN External_Platforms ep ON pa.Platform_ID = ep.ID
-                LEFT JOIN External_Platforms esol ON pa.Solution_ID = esol.ID
-                LEFT JOIN Employee e1 ON pa.Created_By = e1.Emp_ID
-                LEFT JOIN Employee e2 ON pa.Assigned_To = e2.Emp_ID
-                LEFT JOIN Employee e3 ON pa.Updated_By = e3.Emp_ID";
+                       (SELECT Comment FROM project_comments pc WHERE pc.Activity_ID = pa.ID ORDER BY pc.ID DESC LIMIT 1) AS LatestComment
+                FROM project_activities pa
+                LEFT JOIN main_platforms mp ON pa.Platform_ID = mp.ID
+                LEFT JOIN external_platforms ep ON pa.Platform_ID = ep.ID
+                LEFT JOIN external_platforms esol ON pa.Solution_ID = esol.ID
+                LEFT JOIN employee e1 ON pa.Created_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON pa.Assigned_To = e2.Emp_ID
+                LEFT JOIN employee e3 ON pa.Updated_By = e3.Emp_ID";
 
             // --- WHERE Clause Logic ---
             var conditions = new List<string>();
@@ -81,11 +81,11 @@ namespace PROHUB.Data
             if (!string.IsNullOrEmpty(search))
             {
                 conditions.Add(@"(
-                    COALESCE(esol.Platform_Name, ep.Platform_Name) LIKE @Search 
-                    OR pa.Description LIKE @Search
-                    OR e1.Emp_Name LIKE @Search
-                    OR e2.Emp_Name LIKE @Search
-                    OR e3.Emp_Name LIKE @Search
+                    COALESCE(esol.Platform_Name, ep.Platform_Name) COLLATE utf8mb4_general_ci LIKE @Search 
+                    OR pa.Description COLLATE utf8mb4_general_ci LIKE @Search
+                    OR e1.Emp_Name COLLATE utf8mb4_general_ci LIKE @Search
+                    OR e2.Emp_Name COLLATE utf8mb4_general_ci LIKE @Search
+                    OR e3.Emp_Name COLLATE utf8mb4_general_ci LIKE @Search
                 )");
             }
 
@@ -146,14 +146,14 @@ namespace PROHUB.Data
                        e1.Emp_Name AS CreatedByName, 
                        e2.Emp_Name AS AssignedToName, 
                        e3.Emp_Name AS UpdatedByName,
-                       (SELECT Comment FROM Project_Comments pc WHERE pc.Activity_ID = pa.ID ORDER BY pc.ID DESC LIMIT 1) AS LatestComment
-                FROM Project_Activities pa
-                LEFT JOIN Main_Platforms mp ON pa.Platform_ID = mp.ID
-                LEFT JOIN External_Platforms ep ON pa.Platform_ID = ep.ID
-                LEFT JOIN External_Platforms esol ON pa.Solution_ID = esol.ID
-                LEFT JOIN Employee e1 ON pa.Created_By = e1.Emp_ID
-                LEFT JOIN Employee e2 ON pa.Assigned_To = e2.Emp_ID
-                LEFT JOIN Employee e3 ON pa.Updated_By = e3.Emp_ID
+                       (SELECT Comment FROM project_comments pc WHERE pc.Activity_ID = pa.ID ORDER BY pc.ID DESC LIMIT 1) AS LatestComment
+                FROM project_activities pa
+                LEFT JOIN main_platforms mp ON pa.Platform_ID = mp.ID
+                LEFT JOIN external_platforms ep ON pa.Platform_ID = ep.ID
+                LEFT JOIN external_platforms esol ON pa.Solution_ID = esol.ID
+                LEFT JOIN employee e1 ON pa.Created_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON pa.Assigned_To = e2.Emp_ID
+                LEFT JOIN employee e3 ON pa.Updated_By = e3.Emp_ID
                 WHERE pa.ID = @Id";
 
             using var command = new MySqlCommand(query, connection);
@@ -167,7 +167,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
             const string query = @"
-                INSERT INTO Project_Activities (
+                INSERT INTO project_activities (
                     Platform_ID, Solution_ID, Description, Created_By, Created_Time,
                     Assigned_To, Target_Date, Status, Updated_By, Updated_Date
                 ) VALUES (
@@ -187,7 +187,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
             const string query = @"
-                UPDATE Project_Activities SET
+                UPDATE project_activities SET
                     Platform_ID = @PlatformId, Solution_ID = @SolutionId, Description = @Description,
                     Created_By = @CreatedBy, Created_Time = @CreatedTime, Assigned_To = @AssignedTo,
                     Target_Date = @TargetDate, Status = @Status, Updated_By = @UpdatedBy, UPDATED_Date = @UpdatedDate
@@ -205,7 +205,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                INSERT INTO Project_Comments (Activity_ID, Comment, Updated_By, Updated_Time) 
+                INSERT INTO project_comments (Activity_ID, Comment, Updated_By, Updated_Time) 
                 VALUES (@ActivityId, @Comment, @UpdatedBy, NOW())";
 
             using var command = new MySqlCommand(query, connection);
@@ -220,7 +220,7 @@ namespace PROHUB.Data
         {
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "DELETE FROM Project_Activities WHERE ID = @Id";
+            const string query = "DELETE FROM project_activities WHERE ID = @Id";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
             return await command.ExecuteNonQueryAsync() > 0;
@@ -230,7 +230,7 @@ namespace PROHUB.Data
         {
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT COUNT(1) FROM Project_Activities WHERE ID = @Id";
+            const string query = "SELECT COUNT(1) FROM project_activities WHERE ID = @Id";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
             return Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
@@ -247,8 +247,8 @@ namespace PROHUB.Data
 
             const string query = @"
                 SELECT e.Emp_ID, e.Emp_Name
-                FROM Employee e
-                LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+                FROM employee e
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
                 WHERE g.GroupName IS NULL
                    OR g.GroupName <> 'Inactive'
                 ORDER BY e.Emp_Name
@@ -275,7 +275,7 @@ namespace PROHUB.Data
             var list = new List<MainPlatform>();
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT ID, Platforms AS PlatformName FROM Main_Platforms ORDER BY Platforms";
+            const string query = "SELECT ID, Platforms AS PlatformName FROM main_platforms ORDER BY Platforms";
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -296,7 +296,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
             try
             {
-                const string query = "SELECT ID, Platform_Name FROM External_Platforms ORDER BY Platform_Name";
+                const string query = "SELECT ID, Platform_Name FROM external_platforms ORDER BY Platform_Name";
                 using var command = new MySqlCommand(query, connection);
                 using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
@@ -322,7 +322,7 @@ namespace PROHUB.Data
 
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT * FROM Employee WHERE Emp_Email = @Email LIMIT 1";
+            const string query = "SELECT * FROM employee WHERE Emp_Email = @Email LIMIT 1";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Email", email);
 

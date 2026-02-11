@@ -35,13 +35,13 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.8
         with:
-          host: \${{ secrets.PROXMOX_HOST }}
-          port: \${{ secrets.PROXMOX_PORT }}
-          username: \${{ secrets.PROXMOX_USER }}
-          key: \${{ secrets.PROXMOX_SSH_KEY }}
+          host: ${{ secrets.PROXMOX_HOST }}
+          port: ${{ secrets.PROXMOX_PORT }}
+          username: ${{ secrets.PROXMOX_USER }}
+          key: ${{ secrets.PROXMOX_SSH_KEY }}
           script: |
             echo "🚀 Starting ProHub Deployment"
-            echo "Time: \$(date)"
+            echo "Time: $(date)"
             
             # 1. Navigate to project directory
             cd /home/abc/ProHub-v3
@@ -54,15 +54,15 @@ jobs:
             # 3. Publish application
             echo "🏗️ Building and Publishing..."
             # Using the deployment path defined in your GitHub Secrets
-            dotnet publish ProHub/ProHub.csproj -c Release -o \${{ secrets.DEPLOY_PATH }}
+            dotnet publish ProHub/ProHub.csproj -c Release -o ${{ secrets.DEPLOY_PATH }}
             
             # 4. Restart service
             echo "🔄 Restarting service..."
             # Note: Ensure the user 'abc' has NOPASSWD sudo for systemctl restart
-            sudo systemctl restart \${{ secrets.SERVICE_NAME }}
+            sudo systemctl restart ${{ secrets.SERVICE_NAME }}
             
             # 5. Verify status
-            echo "�� Checking status..."
-            systemctl status \${{ secrets.SERVICE_NAME }} --no-pager | grep "Active:"
+            echo "🔍 Checking status..."
+            systemctl status ${{ secrets.SERVICE_NAME }} --no-pager | grep "Active:"
             
             echo "🎉 Deployment Complete!"

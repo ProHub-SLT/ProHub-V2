@@ -10,8 +10,20 @@ using ProHub.Data.Interfaces;
 using ProHub.Data.Repositories;
 using System.Security.Claims;
 using ProHub.Constants;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ==============================
+// FORWARDED HEADERS (FOR REVERSE PROXY)
+// ==============================
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Clear known networks and proxies to trust the incoming headers from Nginx
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 // ==============================
 // AUTHENTICATION
@@ -197,6 +209,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 ExcelPackage.License.SetNonCommercialPersonal("ProHub Application");
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {

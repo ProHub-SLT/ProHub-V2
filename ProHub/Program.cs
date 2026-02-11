@@ -114,16 +114,16 @@ builder.Services.Configure<OpenIdConnectOptions>(
     // -------------------------
     // ACTIVE USERS ASSIGNMENT
     // -------------------------
-    else if (groupName.Contains("Administrator", StringComparison.OrdinalIgnoreCase))
-        appRole = ProHub.Constants.AppRoles.Admin;
-    else if (groupName.Contains("Developer", StringComparison.OrdinalIgnoreCase))
-        appRole = ProHub.Constants.AppRoles.Developer;
-    else if (groupName.Contains("NonDeveloper", StringComparison.OrdinalIgnoreCase))
-        appRole = ProHub.Constants.AppRoles.NonDeveloper;
-    else if (groupName.Contains("DPOUser", StringComparison.OrdinalIgnoreCase))
-        appRole = ProHub.Constants.AppRoles.DPO;
-    else if (groupName.Contains("IshampUser", StringComparison.OrdinalIgnoreCase))
-        appRole = ProHub.Constants.AppRoles.Ishamp;
+     else if (groupName.Contains("Administrator", StringComparison.OrdinalIgnoreCase))
+         appRole = ProHub.Constants.AppRoles.Admin;
+     else if (groupName.Contains("Non Developer", StringComparison.OrdinalIgnoreCase))
+         appRole = ProHub.Constants.AppRoles.NonDeveloper;
+     else if (groupName.Contains("Developer", StringComparison.OrdinalIgnoreCase))
+         appRole = ProHub.Constants.AppRoles.Developer;
+     else if (groupName.Contains("DPO User", StringComparison.OrdinalIgnoreCase))
+         appRole = ProHub.Constants.AppRoles.DPO;
+     else if (groupName.Contains("Ishamp User", StringComparison.OrdinalIgnoreCase))
+         appRole = ProHub.Constants.AppRoles.Ishamp;
 
     // -------------------------
     // ADD CLAIMS

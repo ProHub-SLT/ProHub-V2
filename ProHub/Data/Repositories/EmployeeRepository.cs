@@ -46,7 +46,7 @@ namespace ProHub.Data
             var sql = $@"
                 SELECT e.Emp_ID, e.Emp_Name
                 FROM employee e
-                LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
                 WHERE e.Emp_ID IN ({placeholders})
                   AND (g.GroupName IS NULL OR g.GroupName <> 'Inactive')
             ";
@@ -74,7 +74,7 @@ namespace ProHub.Data
             using var cmd = new MySqlCommand(@"
                 SELECT e.Emp_ID
                 FROM employee e
-                LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
                 WHERE g.GroupName IS NULL
                    OR g.GroupName <> 'Inactive'
                 ORDER BY e.Emp_Name

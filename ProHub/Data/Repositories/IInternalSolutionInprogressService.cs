@@ -299,7 +299,7 @@ namespace PROHUB.Data
         await GetDropdownListAsync(
             @"SELECT e.Emp_ID, e.Emp_Name
           FROM employee e
-          LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+          LEFT JOIN empgroup g ON e.GroupID = g.GroupID
           WHERE g.GroupName IS NULL
              OR g.GroupName <> 'Inactive'
           ORDER BY e.Emp_Name",

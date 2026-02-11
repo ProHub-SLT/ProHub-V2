@@ -24,7 +24,7 @@ namespace ProHub.Data.Repositories
             string query = @"
                 SELECT e.*, g.GroupID, g.GroupName
                 FROM employee e
-                LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
                 WHERE e.Emp_Email = @Email
                 LIMIT 1";
 

@@ -106,9 +106,9 @@ namespace ProHub.Controllers
             ) AS Revenue
 
         FROM external_platforms ep
-        LEFT JOIN Company c ON ep.Company_ID = c.ID
-        LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-        LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID
+        LEFT JOIN company c ON ep.Company_ID = c.ID
+        LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+        LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID
         LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
 
         WHERE (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')

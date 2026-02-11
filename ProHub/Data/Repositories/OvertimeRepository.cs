@@ -31,9 +31,9 @@ namespace ProHub.Data
                        a.Emp_Name AS ApprovalForName,
                        ap.Emp_Name AS ApprovedByName
                 FROM OverTime_Data o
-                LEFT JOIN Employee c ON o.Created_By = c.Emp_ID
-                LEFT JOIN Employee a ON o.Approval_For = a.Emp_ID
-                LEFT JOIN Employee ap ON o.Approved_By = ap.Emp_ID
+                LEFT JOIN employee c ON o.Created_By = c.Emp_ID
+                LEFT JOIN employee a ON o.Approval_For = a.Emp_ID
+                LEFT JOIN employee ap ON o.Approved_By = ap.Emp_ID
                 WHERE (o.Date LIKE @search OR c.Emp_Name LIKE @search OR a.Emp_Name LIKE @search)
                 ORDER BY o.Created_Date DESC
                 LIMIT @offset, @pageSize";
@@ -71,7 +71,7 @@ namespace ProHub.Data
             using var conn = GetConnection();
             conn.Open();
             string sql = "SELECT COUNT(*) FROM OverTime_Data o " +
-                         "LEFT JOIN Employee c ON o.Created_By = c.Emp_ID " +
+                         "LEFT JOIN employee c ON o.Created_By = c.Emp_ID " +
                          "WHERE o.Date LIKE @search OR c.Emp_Name LIKE @search";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@search", $"%{search}%");
@@ -107,9 +107,9 @@ namespace ProHub.Data
                        a.Emp_Name AS ApprovalForName,
                        ap.Emp_Name AS ApprovedByName
                 FROM OverTime_Data o
-                LEFT JOIN Employee c ON o.Created_By = c.Emp_ID
-                LEFT JOIN Employee a ON o.Approval_For = a.Emp_ID
-                LEFT JOIN Employee ap ON o.Approved_By = ap.Emp_ID
+                LEFT JOIN employee c ON o.Created_By = c.Emp_ID
+                LEFT JOIN employee a ON o.Approval_For = a.Emp_ID
+                LEFT JOIN employee ap ON o.Approved_By = ap.Emp_ID
                 WHERE o.ID = @id";
 
             using var cmd = new MySqlCommand(sql, conn);

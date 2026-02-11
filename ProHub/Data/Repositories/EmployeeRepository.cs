@@ -18,7 +18,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_Name FROM Employee WHERE Emp_ID = @id", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_Name FROM employee WHERE Emp_ID = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
             return cmd.ExecuteScalar()?.ToString() ?? "Unknown";
         }
@@ -27,7 +27,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_ID FROM Employee WHERE Emp_Name = @name", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_ID FROM employee WHERE Emp_Name = @name", conn);
             cmd.Parameters.AddWithValue("@name", name);
             var result = cmd.ExecuteScalar();
             return result != null ? Convert.ToInt32(result) : 0;
@@ -45,7 +45,7 @@ namespace ProHub.Data
 
             var sql = $@"
                 SELECT e.Emp_ID, e.Emp_Name
-                FROM Employee e
+                FROM employee e
                 LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
                 WHERE e.Emp_ID IN ({placeholders})
                   AND (g.GroupName IS NULL OR g.GroupName <> 'Inactive')
@@ -73,7 +73,7 @@ namespace ProHub.Data
 
             using var cmd = new MySqlCommand(@"
                 SELECT e.Emp_ID
-                FROM Employee e
+                FROM employee e
                 LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
                 WHERE g.GroupName IS NULL
                    OR g.GroupName <> 'Inactive'
@@ -92,7 +92,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_Name FROM Employee WHERE Emp_Email = @email", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_Name FROM employee WHERE Emp_Email = @email", conn);
             cmd.Parameters.AddWithValue("@email", email);
             return cmd.ExecuteScalar()?.ToString() ?? "Unknown User";
         }
@@ -101,7 +101,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_ID FROM Employee WHERE Emp_Email = @email", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_ID FROM employee WHERE Emp_Email = @email", conn);
             cmd.Parameters.AddWithValue("@email", email);
             var result = cmd.ExecuteScalar();
             return result != null ? Convert.ToInt32(result) : 0;

@@ -23,7 +23,7 @@ namespace ProHub.Data.Repositories
             // Join with EmpGroup to get the group/roles
             string query = @"
                 SELECT e.*, g.GroupID, g.GroupName
-                FROM Employee e
+                FROM employee e
                 LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
                 WHERE e.Emp_Email = @Email
                 LIMIT 1";

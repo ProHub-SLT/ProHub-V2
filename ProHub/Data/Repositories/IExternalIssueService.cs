@@ -52,11 +52,11 @@ namespace PROHUB.Data
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM External_Issues ei
-                LEFT JOIN External_Platforms ep ON ei.Platform_ID = ep.ID
+                LEFT JOIN external_platforms ep ON ei.Platform_ID = ep.ID
                 LEFT JOIN CustomerContacts cc ON ei.Reported_By = cc.ID
-                LEFT JOIN Employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
+                LEFT JOIN employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
                 ORDER BY ei.Issue_Start_Time DESC";
 
             using var command = new MySqlCommand(query, connection);
@@ -84,11 +84,11 @@ namespace PROHUB.Data
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM External_Issues ei
-                LEFT JOIN External_Platforms ep ON ei.Platform_ID = ep.ID
+                LEFT JOIN external_platforms ep ON ei.Platform_ID = ep.ID
                 LEFT JOIN CustomerContacts cc ON ei.Reported_By = cc.ID
-                LEFT JOIN Employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
+                LEFT JOIN employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
                 WHERE ei.Description LIKE @SearchTerm
                    OR ep.Platform_Name LIKE @SearchTerm
                    OR emp_assigned_to.Emp_Name LIKE @SearchTerm
@@ -123,11 +123,11 @@ namespace PROHUB.Data
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM External_Issues ei
-                LEFT JOIN External_Platforms ep ON ei.Platform_ID = ep.ID
+                LEFT JOIN external_platforms ep ON ei.Platform_ID = ep.ID
                 LEFT JOIN CustomerContacts cc ON ei.Reported_By = cc.ID
-                LEFT JOIN Employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
+                LEFT JOIN employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
                 WHERE ei.ID = @Id";
 
             using var command = new MySqlCommand(query, connection);
@@ -230,7 +230,7 @@ namespace PROHUB.Data
 
             const string query = @"
                 SELECT e.Emp_ID, e.Emp_Name
-                FROM Employee e
+                FROM employee e
                 LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
                 WHERE g.GroupName IS NULL
                    OR g.GroupName <> 'Inactive'
@@ -258,7 +258,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            const string query = "SELECT ID, Platform_Name FROM External_Platforms ORDER BY Platform_Name";
+            const string query = "SELECT ID, Platform_Name FROM external_platforms ORDER BY Platform_Name";
             using var command = new MySqlCommand(query, connection);
 
             using var reader = await command.ExecuteReaderAsync();

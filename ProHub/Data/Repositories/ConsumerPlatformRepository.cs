@@ -81,7 +81,7 @@ namespace ProHub.Data
             ipc.Comment AS Comment
         FROM internal_platforms ip
         INNER JOIN targetenduser e ON ip.EndUserType = e.ID
-        LEFT JOIN Employee dev ON ip.Developed_By = dev.Emp_ID
+        LEFT JOIN employee dev ON ip.Developed_By = dev.Emp_ID
         LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
         LEFT JOIN internal_platforms ma ON ip.MainAppID = ma.ID
         LEFT JOIN ParentProject pp ON ip.ParentProjectID = pp.ParentProjectID
@@ -223,9 +223,9 @@ namespace ProHub.Data
             ip.SSLCertificateExpDate AS SSLCertificateExpDate
         FROM internal_platforms ip
         INNER JOIN targetenduser e ON ip.EndUserType = e.ID
-        LEFT JOIN Employee e1 ON ip.Developed_By = e1.Emp_ID
-        LEFT JOIN Employee e2 ON ip.BackupOfficer_1 = e2.Emp_ID
-        LEFT JOIN Employee e3 ON ip.BackupOfficer_2 = e3.Emp_ID
+        LEFT JOIN employee e1 ON ip.Developed_By = e1.Emp_ID
+        LEFT JOIN employee e2 ON ip.BackupOfficer_1 = e2.Emp_ID
+        LEFT JOIN employee e3 ON ip.BackupOfficer_2 = e3.Emp_ID
         LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
         LEFT JOIN ParentProject pp ON ip.ParentProjectID = pp.ParentProjectID
         LEFT JOIN internal_platforms ma ON ip.MainAppID = ma.ID  
@@ -343,7 +343,7 @@ namespace ProHub.Data
             var list = new List<MainPlatform>();
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID, Platforms FROM Main_Platforms ORDER BY Platforms", conn);
+            using var cmd = new MySqlCommand("SELECT ID, Platforms FROM main_platforms ORDER BY Platforms", conn);
             using var r = cmd.ExecuteReader();
             while (r.Read())
                 list.Add(new MainPlatform { ID = r.GetInt32(0), Platforms = r.IsDBNull(1) ? null : r.GetString(1) });
@@ -356,7 +356,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID FROM Main_Platforms WHERE LOWER(Platforms) LIKE '%internal%' LIMIT 1", conn);
+            using var cmd = new MySqlCommand("SELECT ID FROM main_platforms WHERE LOWER(Platforms) LIKE '%internal%' LIMIT 1", conn);
             using var r = cmd.ExecuteReader();
             if (r.Read())
                 return r.GetInt32(0);
@@ -381,8 +381,8 @@ namespace ProHub.Data
                     e2.Emp_ID AS Backup2EmpId,
                     e2.Emp_Name AS Backup2Name
                 FROM internal_platforms ip
-                LEFT JOIN Employee e1 ON ip.BackupOfficer_1 = e1.Emp_ID
-                LEFT JOIN Employee e2 ON ip.BackupOfficer_2 = e2.Emp_ID
+                LEFT JOIN employee e1 ON ip.BackupOfficer_1 = e1.Emp_ID
+                LEFT JOIN employee e2 ON ip.BackupOfficer_2 = e2.Emp_ID
                 ORDER BY ip.App_Name";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -440,7 +440,7 @@ namespace ProHub.Data
     ma.App_Name AS MainAppName,
     ipc.Comment AS Comment
 FROM internal_platforms ip
-LEFT JOIN Employee e 
+LEFT JOIN employee e 
     ON ip.Developed_By = e.Emp_ID
 LEFT JOIN SDLCPhas sp 
     ON ip.SDLCPhase = sp.ID
@@ -525,9 +525,9 @@ WHERE sp.Phase = 'Retired';";
                     e3.Emp_ID AS Backup2EmpId,
                     e3.Emp_Name AS Backup2Name
                 FROM internal_platforms ip
-                LEFT JOIN Employee e1 ON ip.Developed_By = e1.Emp_ID
-                LEFT JOIN Employee e2 ON ip.BackupOfficer_1 = e2.Emp_ID
-                LEFT JOIN Employee e3 ON ip.BackupOfficer_2 = e3.Emp_ID
+                LEFT JOIN employee e1 ON ip.Developed_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON ip.BackupOfficer_1 = e2.Emp_ID
+                LEFT JOIN employee e3 ON ip.BackupOfficer_2 = e3.Emp_ID
                 WHERE ip.BackupOfficer_1 = @employeeId OR ip.BackupOfficer_2 = @employeeId
                 ORDER BY ip.App_Name";
 
@@ -597,7 +597,7 @@ WHERE sp.Phase = 'Retired';";
             bo2.Emp_Name AS Backup2Name, 
             bo2.Emp_Email AS Backup2Email
         FROM internal_platforms ip
-        LEFT JOIN Employee e 
+        LEFT JOIN employee e 
             ON ip.Developed_By = e.Emp_ID
         LEFT JOIN SDLCPhas sp 
             ON ip.SDLCPhase = sp.ID
@@ -605,9 +605,9 @@ WHERE sp.Phase = 'Retired';";
             ON ip.ParentProjectID = pp.ParentProjectID
         LEFT JOIN internal_platforms ma 
             ON ip.MainAppID = ma.ID
-        LEFT JOIN Employee bo1 
+        LEFT JOIN employee bo1 
             ON ip.BackupOfficer_1 = bo1.Emp_ID
-        LEFT JOIN Employee bo2 
+        LEFT JOIN employee bo2 
             ON ip.BackupOfficer_2 = bo2.Emp_ID
         LEFT JOIN (
             SELECT Solution_ID, Comment

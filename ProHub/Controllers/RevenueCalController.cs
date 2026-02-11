@@ -165,7 +165,7 @@ namespace ProHub.Controllers
             {
                 conn.Open();
                 string query = @"SELECT Platform_Name, Platform_MRC, Platform_OTC, Contract_Period, LaunchedDate
-                                 FROM External_Platforms
+                                 FROM external_platforms
                                  WHERE LaunchedDate IS NOT NULL
                                  ORDER BY LaunchedDate";
 
@@ -229,7 +229,7 @@ namespace ProHub.Controllers
             {
                 conn.Open();
                 string query = @"SELECT Platform_Name, Platform_MRC, Platform_OTC, Contract_Period, LaunchedDate
-                                 FROM External_Platforms
+                                 FROM external_platforms
                                  WHERE LaunchedDate IS NOT NULL AND YEAR(LaunchedDate) = @year";
 
                 using (var cmd = new MySqlCommand(query, conn))
@@ -280,7 +280,7 @@ namespace ProHub.Controllers
             {
                 conn.Open();
                 string query = @"SELECT Platform_Name, Platform_MRC, Platform_OTC, Contract_Period, LaunchedDate
-                                 FROM External_Platforms
+                                 FROM external_platforms
                                  WHERE LaunchedDate IS NOT NULL
                                  ORDER BY LaunchedDate";
 
@@ -375,7 +375,7 @@ namespace ProHub.Controllers
             {
                 conn.Open();
                 string query = @"SELECT Platform_Name, Platform_MRC, Platform_OTC, Contract_Period, LaunchedDate
-                                 FROM External_Platforms
+                                 FROM external_platforms
                                  WHERE LaunchedDate IS NOT NULL 
                                  AND YEAR(LaunchedDate) <= @year 
                                  AND YEAR(LaunchedDate) + Contract_Period >= @year
@@ -559,7 +559,7 @@ namespace ProHub.Controllers
                                     emp.Emp_Name AS DevelopedBy
                                 FROM Internal_Platforms ip
                                 LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
-                                LEFT JOIN Employee emp ON ip.Developed_By = emp.Emp_ID
+                                LEFT JOIN employee emp ON ip.Developed_By = emp.Emp_ID
                                 WHERE ip.LaunchedDate IS NOT NULL
                                   AND ip.Price > 0
                                   AND YEAR(ip.LaunchedDate) <= @year

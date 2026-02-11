@@ -55,7 +55,7 @@ namespace PROHUB.Data
                parent.App_Name AS MainAppName,  
                (SELECT COUNT(*) FROM Internal_Project_Comments WHERE Solution_ID = ip.ID) AS CommentCount
         FROM internal_platforms ip
-        LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
+        LEFT JOIN employee e ON ip.Developed_By = e.Emp_ID
         LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
         LEFT JOIN parentproject pr ON ip.ParentProjectID = pr.ParentProjectID
         LEFT JOIN internal_platforms parent ON ip.MainAppID = parent.ID 
@@ -116,13 +116,13 @@ namespace PROHUB.Data
                        bo1.Emp_Name AS BackupOfficer1Name, -- Added Backup Officer 1
                        bo2.Emp_Name AS BackupOfficer2Name  -- Added Backup Officer 2
                 FROM internal_platforms ip
-                LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
+                LEFT JOIN employee e ON ip.Developed_By = e.Emp_ID
                 LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
                 LEFT JOIN parentproject pr ON ip.ParentProjectID = pr.ParentProjectID
                 LEFT JOIN internal_platforms parent ON ip.MainAppID = parent.ID
                 LEFT JOIN targetenduser teu ON ip.EndUserType = teu.ID -- Join for End User
-                LEFT JOIN Employee bo1 ON ip.BackupOfficer_1 = bo1.Emp_ID -- Join for BO1
-                LEFT JOIN Employee bo2 ON ip.BackupOfficer_2 = bo2.Emp_ID -- Join for BO2
+                LEFT JOIN employee bo1 ON ip.BackupOfficer_1 = bo1.Emp_ID -- Join for BO1
+                LEFT JOIN employee bo2 ON ip.BackupOfficer_2 = bo2.Emp_ID -- Join for BO2
                 WHERE ip.ID = @Id";
 
             using (var command = new MySqlCommand(query, connection))
@@ -147,7 +147,7 @@ namespace PROHUB.Data
                 const string commentQuery = @"
                     SELECT c.ID, c.Comment, c.Updated_Time, e.Emp_Name AS UpdatedByName
                     FROM Internal_Project_Comments c
-                    LEFT JOIN Employee e ON c.Updated_By = e.Emp_ID
+                    LEFT JOIN employee e ON c.Updated_By = e.Emp_ID
                     WHERE c.Solution_ID = @SolutionId
                     ORDER BY c.Updated_Time DESC";
 
@@ -298,7 +298,7 @@ namespace PROHUB.Data
         public async Task<List<Employee>> GetEmployeesAsync() =>
         await GetDropdownListAsync(
             @"SELECT e.Emp_ID, e.Emp_Name
-          FROM Employee e
+          FROM employee e
           LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
           WHERE g.GroupName IS NULL
              OR g.GroupName <> 'Inactive'

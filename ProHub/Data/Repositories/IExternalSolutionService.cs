@@ -82,9 +82,9 @@ namespace PROHUB.Data
                     st.Sales_Team_Name AS SalesTeamName,
                     sdlc.Phase AS SdlcPhaseName
                 FROM external_platforms ex
-                LEFT JOIN Employee emp ON ex.Developed_By = emp.Emp_ID      
-                LEFT JOIN Company c ON ex.Company_ID = c.ID              
-                LEFT JOIN Sales_Team st ON ex.Sales_Team_ID = st.ID    
+                LEFT JOIN employee emp ON ex.Developed_By = emp.Emp_ID      
+                LEFT JOIN company c ON ex.Company_ID = c.ID              
+                LEFT JOIN sales_team st ON ex.Sales_Team_ID = st.ID    
                 LEFT JOIN SDLCPhas sdlc ON ex.SDLCstage = sdlc.ID
                 WHERE sdlc.Phase LIKE '%Maintenance%'
                 ORDER BY ex.ID DESC";
@@ -113,9 +113,9 @@ namespace PROHUB.Data
                     st.Sales_Team_Name AS SalesTeamName,
                     sdlc.Phase AS SdlcPhaseName
                 FROM external_platforms ex
-                LEFT JOIN Employee emp ON ex.Developed_By = emp.Emp_ID    
-                LEFT JOIN Company c ON ex.Company_ID = c.ID             
-                LEFT JOIN Sales_Team st ON ex.Sales_Team_ID = st.ID    
+                LEFT JOIN employee emp ON ex.Developed_By = emp.Emp_ID    
+                LEFT JOIN company c ON ex.Company_ID = c.ID             
+                LEFT JOIN sales_team st ON ex.Sales_Team_ID = st.ID    
                 LEFT JOIN SDLCPhas sdlc ON ex.SDLCstage = sdlc.ID        
                 WHERE ex.ID = @Id";
 
@@ -243,7 +243,7 @@ namespace PROHUB.Data
 
             const string query = @"
                 SELECT e.Emp_ID, e.Emp_Name
-                FROM Employee e
+                FROM employee e
                 LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
                 WHERE g.GroupName IS NULL
                    OR g.GroupName <> 'Inactive'
@@ -266,7 +266,7 @@ namespace PROHUB.Data
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "SELECT ID, Company_Name FROM Company WHERE Company_Name IS NOT NULL AND Company_Name != '' ORDER BY Company_Name";
+            const string query = "SELECT ID, Company_Name FROM company WHERE Company_Name IS NOT NULL AND Company_Name != '' ORDER BY Company_Name";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
@@ -284,7 +284,7 @@ namespace PROHUB.Data
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "SELECT ID, Sales_Team_Name FROM Sales_Team ORDER BY Sales_Team_Name";
+            const string query = "SELECT ID, Sales_Team_Name FROM sales_team ORDER BY Sales_Team_Name";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();

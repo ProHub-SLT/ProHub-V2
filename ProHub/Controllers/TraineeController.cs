@@ -398,7 +398,7 @@ namespace PROHUB.Controllers
             {
                 await connection.OpenAsync();
                 // FIX: The SQL query must use the actual database column names (Emp_ID, Emp_Name)
-                string query = "SELECT Emp_ID, Emp_Name FROM Employee ORDER BY Emp_Name";
+                string query = "SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name";
                 using (var cmd = new MySqlCommand(query, connection))
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {

@@ -202,7 +202,7 @@ namespace ProHub.Controllers
             using (var conn = GetConnection())
             {
                 conn.Open();
-                var cmd = new MySqlCommand("SELECT Id, Platform_Name FROM External_Platforms", conn);
+                var cmd = new MySqlCommand("SELECT Id, Platform_Name FROM external_platforms", conn);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -225,7 +225,7 @@ namespace ProHub.Controllers
             using (var conn = GetConnection())
             {
                 conn.Open();
-                var cmd = new MySqlCommand("SELECT Id, Company_Name FROM Company", conn);
+                var cmd = new MySqlCommand("SELECT Id, Company_Name FROM company", conn);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())

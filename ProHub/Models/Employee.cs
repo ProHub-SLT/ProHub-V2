@@ -16,7 +16,7 @@ namespace ProHub.Models
         public DateTime? DOB { get; set; }
         public string CallingName { get; set; }
         public string Gender { get; set; }
-        public string Section { get; set; }
+        public string? Section { get; set; }
 
         // Navigation for ExternalPlatform
         public ICollection<ExternalPlatform> DevelopedPlatforms { get; set; }

@@ -59,21 +59,58 @@ public class EmployeeController : Controller
     // -------------------------------------------------------
     // CREATE: POST
     // -------------------------------------------------------
-    [Authorize(Roles = $"{AppRoles.Admin}")]
     [HttpPost]
+    [Authorize(Roles = $"{AppRoles.Admin}")]
     public IActionResult Create(Employee emp)
     {
         using (var con = new MySqlConnection(_connectionString))
         {
             con.Open();
 
-            string sql = @"
-                INSERT INTO employee
-                (Emp_Id, Emp_Name, Emp_Email, Emp_Phone, GroupID, DOB, Calling_Name, Gender, Section)
-                VALUES
-                (@EmpId, @EmpName, @EmpEmail, @EmpPhone, @GroupID, @DOB, @CallingName, @Gender, @Section)";
+            // 🔎 CHECK IF EMPID EXISTS
+            string checkSql = "SELECT COUNT(*) FROM employee WHERE Emp_Id = @EmpId";
 
-            using (var cmd = new MySqlCommand(sql, con))
+            using (var checkCmd = new MySqlCommand(checkSql, con))
+            {
+                checkCmd.Parameters.AddWithValue("@EmpId", emp.EmpId);
+
+                int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                if (count > 0)
+                {
+                    ModelState.AddModelError("EmpId", "This Service Number is Already Taken.");
+                    ViewBag.Groups = GetGroups();
+                    return View(emp);
+                }
+            }
+
+
+            // Check duplicate email
+            string emailCheckSql = "SELECT COUNT(*) FROM employee WHERE Emp_Email = @Email";
+
+            using (var emailCmd = new MySqlCommand(emailCheckSql, con))
+            {
+                emailCmd.Parameters.AddWithValue("@Email", emp.EmpEmail);
+
+                int emailCount = Convert.ToInt32(emailCmd.ExecuteScalar());
+
+                if (emailCount > 0)
+                {
+                    ModelState.AddModelError("EmpEmail", "This email is already registered.");
+                    ViewBag.Groups = GetGroups();
+                    return View(emp);
+                }
+            }
+
+
+            // ✅ INSERT IF NOT EXISTS
+            string insertSql = @"
+            INSERT INTO employee
+            (Emp_Id, Emp_Name, Emp_Email, Emp_Phone, GroupID, DOB, Calling_Name, Gender, Section)
+            VALUES
+            (@EmpId, @EmpName, @EmpEmail, @EmpPhone, @GroupID, @DOB, @CallingName, @Gender, @Section)";
+
+            using (var cmd = new MySqlCommand(insertSql, con))
             {
                 cmd.Parameters.AddWithValue("@EmpId", emp.EmpId);
                 cmd.Parameters.AddWithValue("@EmpName", emp.EmpName);
@@ -89,7 +126,7 @@ public class EmployeeController : Controller
             }
         }
 
-        TempData["SuccessMessage"] = "Contact Added Successfully!";
+        TempData["SuccessMessage"] = "Employee created successfully!";
         return RedirectToAction("Create");
     }
 

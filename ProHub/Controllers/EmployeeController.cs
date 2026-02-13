@@ -247,18 +247,41 @@ public class EmployeeController : Controller
                     if (dr.Read())
                     {
                         emp.EmpId = dr.GetInt32("Emp_Id");
-                        emp.EmpName = dr.GetString("Emp_Name");
-                        emp.EmpEmail = dr.GetString("Emp_Email");
-                        emp.EmpPhone = dr.GetString("Emp_Phone");
-                        emp.GroupID = dr.GetInt32("GroupID");
-                        emp.CallingName = dr.GetString("Calling_Name");
-                        emp.Section = dr.GetString("Section");
-                        emp.Gender = dr.GetString("Gender");
 
-                        // FIXED - NULL SAFE DOB READING
+                        emp.EmpName = dr.IsDBNull(dr.GetOrdinal("Emp_Name"))
+                            ? null
+                            : dr.GetString("Emp_Name");
+
+                        emp.EmpEmail = dr.IsDBNull(dr.GetOrdinal("Emp_Email"))
+                            ? null
+                            : dr.GetString("Emp_Email");
+
+                        emp.EmpPhone = dr.IsDBNull(dr.GetOrdinal("Emp_Phone"))
+                            ? null
+                            : dr.GetString("Emp_Phone");
+
+                        emp.GroupID = dr.IsDBNull(dr.GetOrdinal("GroupID"))
+                            ? (int?)null
+                            : dr.GetInt32("GroupID");
+
+                        emp.CallingName = dr.IsDBNull(dr.GetOrdinal("Calling_Name"))
+                            ? null
+                            : dr.GetString("Calling_Name");
+
+                        emp.Section = dr.IsDBNull(dr.GetOrdinal("Section"))
+                            ? null
+                            : dr.GetString("Section");
+
+                        emp.Gender = dr.IsDBNull(dr.GetOrdinal("Gender"))
+                            ? null
+                            : dr.GetString("Gender");
+
                         int dobIndex = dr.GetOrdinal("DOB");
-                        emp.DOB = dr.IsDBNull(dobIndex) ? (DateTime?)null : dr.GetDateTime(dobIndex);
+                        emp.DOB = dr.IsDBNull(dobIndex)
+                            ? (DateTime?)null
+                            : dr.GetDateTime(dobIndex);
                     }
+
                 }
             }
         }

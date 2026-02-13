@@ -1,13 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProHub.Models
 {
     public class Employee
     {
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Service Number must be a valid number.")]
         public int EmpId { get; set; }
+
+
+        [Required]
+        [StringLength(100)]
         public string EmpName { get; set; }
+
+        [Required]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
         public string EmpEmail { get; set; }
+
+        [Required]
+        [Phone]
         public string EmpPhone { get; set; }
         public DateTime? LastSuccessfulLogin { get; set; }
         public bool Locked { get; set; }

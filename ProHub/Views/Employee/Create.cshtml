@@ -1,6 +1,7 @@
 ﻿@model ProHub.Models.Employee
 @{
     ViewData["Title"] = "Create Employee";
+    <partial name="_ValidationScriptsPartial" />
 }
 <style>
     body {
@@ -276,7 +277,9 @@
                         </label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-id-badge"></i>
-                            <input asp-for="EmpId" class="form-control-modern" placeholder="Enter service number" required />
+                            <input asp-for="EmpId" type="number" min="1" class="form-control-modern" placeholder="Enter Service Number" required />
+                            <span asp-validation-for="EmpId" class="text-danger"></span>
+
                         </div>
                     </div>
                 </div>
@@ -308,6 +311,7 @@
                         <div class="input-icon-wrapper">
                             <i class="bi bi-envelope-at"></i>
                             <input asp-for="EmpEmail" type="email" class="form-control-modern" placeholder="example@slt.lk" required />
+                            <span asp-validation-for="EmpEmail" class="text-danger"></span>
                         </div>
                     </div>
                     <!-- Contact Number -->

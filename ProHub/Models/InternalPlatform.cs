@@ -1,4 +1,5 @@
 ﻿// Models/InternalPlatform.cs
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProHub.Models
@@ -7,7 +8,10 @@ namespace ProHub.Models
     {
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "App Name is required")]
         public string? AppName { get; set; }
+
+        [Required(ErrorMessage = "Develop by Name is required")]
         public int? DevelopedById { get; set; }
         public Employee? DevelopedBy { get; set; }
         public string? DevelopedTeam { get; set; }
@@ -18,16 +22,24 @@ namespace ProHub.Models
         public string PlatformType { get; set; }
         public string PlatformName { get; set; }
 
+        [Required(ErrorMessage = "SDLC Phase is required")]
         public int? SDLCPhaseId { get; set; }
+
         public SDLCPhase? SDLCPhase { get; set; }
 
         public decimal? PercentageDone { get; set; }
         public string? Status { get; set; }
         public DateTime? StatusDate { get; set; }
         public string? BusOwner { get; set; }
+
+        [Required(ErrorMessage = "Application Category is required")]
         public string? AppCategory { get; set; }
+
         public string? Scope { get; set; }
+        [RegularExpression(@"^(\d{1,3}\.){3}\d{1,3}$", ErrorMessage = "Invalid IP Address")]
         public string? AppIP { get; set; }
+
+        [Url(ErrorMessage = "Invalid Application URL")]
         public string? AppURL { get; set; }
         public string? AppUsers { get; set; }
         public DateTime? UATDate { get; set; }
@@ -81,6 +93,7 @@ namespace ProHub.Models
 
         // --- Properties for JOINed data (for display) ---
         public string? DevelopedByName { get; set; }
+        public string? DeveloperEmail { get; set; }
         public string? SDLCPhaseName { get; set; }
         public string? ParentProjectName { get; set; }
         public string? EndUserTypeName { get; set; }

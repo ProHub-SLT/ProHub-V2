@@ -178,7 +178,7 @@ namespace PROHUB.Data
             {
                 await connection.OpenAsync();
 
-                string query = "DELETE FROM Trainee WHERE Trainee_ID = @ID";
+                string query = "DELETE FROM trainee WHERE Trainee_ID = @ID";
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@ID", id);

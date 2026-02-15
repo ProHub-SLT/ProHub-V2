@@ -154,7 +154,8 @@ public class EmployeeController : Controller
         int pageSize = 10)
     {
         // Multiple group filter
-        string filter = "Administrator,Developer,Non Developer,Ishamp Users,DPO";
+        // Multiple group filter - Updated to match actual database values
+        string filter = "Development Team,QA Team,DevOps Team,UI/UX Design Team,Project Management,Business Analysis,Database Administration,Network Security,Technical Support,Sales Engineering,System Architecture,Data Science Team";
 
         return LoadEmployees(search, filter, sortColumn, sortOrder, page, pageSize);
     }
@@ -194,11 +195,11 @@ public class EmployeeController : Controller
                 FROM employee e
                 INNER JOIN empgroup g ON e.GroupID = g.GroupID
                 WHERE (@search IS NULL
-                       OR e.Emp_Name LIKE CONCAT('%', @search, '%')
-                       OR e.Emp_Email LIKE CONCAT('%', @search, '%')
-                       OR e.Emp_Phone LIKE CONCAT('%', @search, '%'))
+                       OR e.Emp_Name COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%')
+                       OR e.Emp_Email COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%')
+                       OR e.Emp_Phone COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%'))
                   AND (@filter IS NULL 
-                       OR (@filter IS NOT NULL AND FIND_IN_SET(g.GroupName, @filter)))";
+                       OR (@filter IS NOT NULL AND FIND_IN_SET(g.GroupName COLLATE utf8mb4_general_ci, @filter COLLATE utf8mb4_general_ci)))";
 
             using (var cmd = new MySqlCommand(sql, con))
             {
@@ -215,10 +216,10 @@ public class EmployeeController : Controller
                     {
                         employees.Add(new Employee
                         {
-                            EmpId = dr.GetInt32("Emp_Id"),
-                            EmpName = dr.GetString("Emp_Name"),
-                            EmpEmail = dr.GetString("Emp_Email"),
-                            EmpPhone = dr.GetString("Emp_Phone")
+                            EmpId = dr.IsDBNull(dr.GetOrdinal("Emp_Id")) ? 0 : dr.GetInt32("Emp_Id"),
+                            EmpName = dr.IsDBNull(dr.GetOrdinal("Emp_Name")) ? "" : dr.GetString("Emp_Name"),
+                            EmpEmail = dr.IsDBNull(dr.GetOrdinal("Emp_Email")) ? "" : dr.GetString("Emp_Email"),
+                            EmpPhone = dr.IsDBNull(dr.GetOrdinal("Emp_Phone")) ? "" : dr.GetString("Emp_Phone")
                         });
                     }
                 }

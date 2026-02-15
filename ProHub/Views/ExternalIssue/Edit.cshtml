@@ -267,6 +267,19 @@
                 background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
             }
 
+    /* Custom Scrollable Dropdown */
+    .dropdown-menu-scrollable {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+    .search-item {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1000;
+        padding: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
     @@media (max-width: 768px) {
         .form-row {
             grid-template-columns: 1fr;
@@ -307,25 +320,54 @@
                         <label asp-for="PlatformId" class="form-label-modern">
                             <i class="bi bi-app-indicator me-1"></i> External Platform/Solution
                         </label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-pc-display"></i>
-                            <select asp-for="PlatformId" class="form-control-modern" >
-                                <option value="">Select Platform</option>
-                                @if (ViewBag.Platforms != null)
-                                {
-                                    foreach (var platform in (List<ExternalPlatform>)ViewBag.Platforms)
+                        <div class="input-icon-wrapper position-relative">
+                            <!-- Hidden Input -->
+                            <input type="hidden" asp-for="PlatformId" id="PlatformId" />
+                            
+                            <!-- Custom Dropdown Trigger -->
+                             <div class="dropdown">
+                                @{
+                                    var selectedPlatformName = "Select Platform";
+                                    if (ViewBag.Platforms != null)
                                     {
-                                        if (platform.Id == Model.PlatformId)
+                                        var platforms = (List<ExternalPlatform>)ViewBag.Platforms;
+                                        var selected = platforms.FirstOrDefault(p => p.Id == Model.PlatformId);
+                                        if (selected != null)
                                         {
-                                            <option value="@platform.Id" selected="selected">@platform.PlatformName</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="@platform.Id">@platform.PlatformName</option>
+                                            selectedPlatformName = selected.PlatformName;
                                         }
                                     }
                                 }
-                            </select>
+                                <button class="form-control-modern text-start d-flex justify-content-between align-items-center" type="button"
+                                    id="platformDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="padding-left: 2.75rem;">
+                                    <span id="platformDropdownText" style="@(Model.PlatformId != 0 ? "color: #000;" : "color: #718096;")">@selectedPlatformName</span>
+                                </button>
+                                <i class="bi bi-pc-display" style="z-index: 5;"></i>
+
+                                <!-- Dropdown Menu -->
+                                <ul class="dropdown-menu w-100 shadow border-0 dropdown-menu-scrollable" aria-labelledby="platformDropdown">
+                                    <li class="search-item">
+                                        <input type="text" class="form-control-modern form-control-sm" id="platformSearch" 
+                                               placeholder="Search platforms..." onclick="event.stopPropagation()" style="padding-left: 1rem;">
+                                    </li>
+                                    @if (ViewBag.Platforms != null)
+                                    {
+                                        foreach (var platform in (List<ExternalPlatform>)ViewBag.Platforms)
+                                        {
+                                            <li>
+                                                <button class="dropdown-item platform-option" type="button" 
+                                                        data-id="@platform.Id" data-name="@platform.PlatformName">
+                                                    @platform.PlatformName
+                                                </button>
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li><span class="dropdown-item text-muted">No platforms available</span></li>
+                                    }
+                                </ul>
+                            </div>
                         </div>
                         <span asp-validation-for="PlatformId" class="helper-text"></span>
                     </div>
@@ -589,6 +631,48 @@
         document.getElementById('popupCloseBtn').addEventListener('click', function () {
             document.getElementById('successPopup').classList.add('hidden');
             window.location.href = '@Url.Action("Index")';
+        });
+
+        // --- Custom Searchable Dropdown Logic ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownText = document.getElementById('platformDropdownText');
+            const hiddenInput = document.getElementById('PlatformId');
+            const searchInput = document.getElementById('platformSearch');
+
+            // Handle Selection
+            document.querySelectorAll('.platform-option').forEach(item => {
+                item.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const name = this.getAttribute('data-name');
+                    
+                    hiddenInput.value = id;
+                    dropdownText.textContent = name;
+                    dropdownText.style.color = "#000"; // Reset text color
+                });
+            });
+
+            // Handle Search
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function () {
+                    const value = this.value.toLowerCase();
+                    const items = this.closest('.dropdown-menu').querySelectorAll('.platform-option');
+
+                    items.forEach(btn => {
+                        const text = btn.textContent.toLowerCase();
+                        const li = btn.closest('li');
+                        if (text.includes(value)) {
+                            li.style.display = '';
+                        } else {
+                            li.style.display = 'none';
+                        }
+                    });
+                });
+
+                // Prevent close on click
+                searchInput.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
         });
     </script>
 }

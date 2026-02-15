@@ -212,7 +212,7 @@
         max-height: 240px;
         overflow-y: auto;
         width: 100%;
-        padding: 0.5rem 0;
+        padding: 0;
         border-radius: 0.375rem;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -344,18 +344,21 @@
             <div class="form-body">
                 <!-- Week Selection -->
                 <div class="mb-3 row">
-                    <label asp-for="StartDate" class="col-sm-4 col-form-label">Week</label>
+                    <label class="col-sm-4 col-form-label">Week</label>
                     <div class="col-sm-8">
-                        <select asp-for="StartDate" class="form-select" id="weekSelect" style="cursor: not-allowed;" disabled>
+                        <select class="form-select" id="weekSelector">
                             <option value="">Select a Week</option>
                             @foreach (var week in upcomingWeeks)
                             {
-                                <option value="@week.Value"
-                                    selected="@(week.Value == defaultWeekValue ? "selected" : null)">@week.Text</option>
+                                var sDate = DateTime.Parse(week.Value);
+                                var eDate = sDate.AddDays(4).ToString("yyyy-MM-dd");
+                                <option value="@week.Value" data-end-date="@eDate"
+                                        selected="@(week.Value == defaultWeekValue ? "selected" : null)">@week.Text</option>
                             }
                         </select>
-                        <input type="hidden" asp-for="StartDate" value="@defaultWeekValue" />
-                        <input type="hidden" asp-for="EndDate" value="@nextWeekEnd.ToString("yyyy-MM-dd")" />
+                        <!-- Hidden inputs acting as the true model binders -->
+                        <input type="hidden" asp-for="StartDate" id="StartDateInput" value="@defaultWeekValue" />
+                        <input type="hidden" asp-for="EndDate" id="EndDateInput" value="@nextWeekEnd.ToString("yyyy-MM-dd")" />
                         <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
                 </div>
@@ -371,6 +374,9 @@
                                 <span class="dropdown-text">Select External Projects</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-work-plan w-100" aria-labelledby="externalProjectsDropdown">
+                                <li class="px-2 py-2 sticky-top bg-white border-bottom">
+                                    <input type="text" class="form-control form-control-sm" id="externalProjectSearch" placeholder="Search external projects..." onclick="event.stopPropagation()">
+                                </li>
                                 @foreach (var project in Model.ExternalPlatforms)
                                 {
                                     <li>
@@ -399,6 +405,9 @@
                                 <span class="dropdown-text">Select Internal Projects</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-work-plan w-100" aria-labelledby="internalProjectsDropdown">
+                                <li class="px-2 py-2 sticky-top bg-white border-bottom">
+                                    <input type="text" class="form-control form-control-sm" id="internalProjectSearch" placeholder="Search internal projects..." onclick="event.stopPropagation()">
+                                </li>
                                 @foreach (var project in Model.InternalPlatforms)
                                 {
                                     <li>
@@ -481,10 +490,60 @@
         let projectWorkPlans = {};
 
         document.addEventListener('DOMContentLoaded', function () {
+            // Week Selector Logic
+            const weekSelector = document.getElementById('weekSelector');
+            const startDateInput = document.getElementById('StartDateInput');
+            const endDateInput = document.getElementById('EndDateInput');
+
+            if(weekSelector) {
+                weekSelector.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const start = selectedOption.value;
+                    const end = selectedOption.getAttribute('data-end-date');
+                    
+                    if(start && end) {
+                        startDateInput.value = start;
+                        endDateInput.value = end;
+                    }
+                });
+            }
+
             const externalCheckboxes = document.querySelectorAll('input[name="ExternalProjectIds"]');
             const internalCheckboxes = document.querySelectorAll('input[name="InternalProjectIds"]');
             const externalDropdownText = document.querySelector('#externalProjectsDropdown .dropdown-text');
             const internalDropdownText = document.querySelector('#internalProjectsDropdown .dropdown-text');
+
+            // Search functionality for dropdowns
+            function setupDropdownSearch(searchInputId) {
+                const searchInput = document.getElementById(searchInputId);
+                if (!searchInput) return;
+
+                searchInput.addEventListener('keyup', function (e) {
+                    const value = this.value.toLowerCase();
+                    const dropdownMenu = this.closest('.dropdown-menu');
+                    const items = dropdownMenu.querySelectorAll('li:not(:first-child)'); // Skip the search box
+
+                    items.forEach(item => {
+                        const label = item.querySelector('label');
+                        if (label) {
+                            const text = label.textContent.toLowerCase();
+                            if (text.includes(value)) {
+                                item.classList.remove('d-none');
+                            } else {
+                                item.classList.add('d-none');
+                            }
+                        }
+                    });
+                });
+
+                // Prevent dropdown closing when clicking/typing in search
+                searchInput.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+
+            setupDropdownSearch('externalProjectSearch');
+            setupDropdownSearch('internalProjectSearch');
 
             // Update dropdown text
             function updateDropdownText(checkboxes, textElement) {

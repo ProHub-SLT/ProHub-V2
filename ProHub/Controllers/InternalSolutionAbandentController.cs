@@ -113,7 +113,7 @@ namespace ProHub.Controllers
 
             FROM Internal_Platforms p
             INNER JOIN SDLCPhas s ON p.SDLCPhase = s.ID
-            LEFT JOIN Employee e ON p.Developed_By = e.Emp_Id
+            LEFT JOIN employee e ON p.Developed_By = e.Emp_Id
             LEFT JOIN ParentProject pr ON p.ParentProjectID = pr.ParentProjectID
             LEFT JOIN Internal_Platforms m ON p.MainAppID = m.ID -- JOIN Self to get Main App Name
             
@@ -382,9 +382,9 @@ namespace ProHub.Controllers
                             p.SSLCertificateExpDate
 
                         FROM Internal_Platforms p
-                        LEFT JOIN Employee d ON p.Developed_By = d.Emp_Id
-                        LEFT JOIN Employee b1 ON p.BackupOfficer_1 = b1.Emp_Id
-                        LEFT JOIN Employee b2 ON p.BackupOfficer_2 = b2.Emp_Id
+                        LEFT JOIN employee d ON p.Developed_By = d.Emp_Id
+                        LEFT JOIN employee b1 ON p.BackupOfficer_1 = b1.Emp_Id
+                        LEFT JOIN employee b2 ON p.BackupOfficer_2 = b2.Emp_Id
                         LEFT JOIN TargetEndUser u ON p.EndUserType = u.Id
                         LEFT JOIN ParentProject pr ON p.ParentProjectID = pr.ParentProjectID
                         LEFT JOIN SDLCPhas s ON p.SDLCPhase = s.ID

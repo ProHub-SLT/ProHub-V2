@@ -59,9 +59,9 @@ namespace PROHUB.Data
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM Internal_Issues ii
                 LEFT JOIN Internal_Platforms ip ON ii.Internal_APP = ip.ID
-                LEFT JOIN Employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
+                LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
                 ORDER BY ii.Issue_Start_Time DESC;
             ";
 
@@ -90,9 +90,9 @@ namespace PROHUB.Data
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM Internal_Issues ii
                 LEFT JOIN Internal_Platforms ip ON ii.Internal_APP = ip.ID
-                LEFT JOIN Employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
+                LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
                 WHERE ii.Description LIKE @SearchTerm
                    OR ip.App_Name LIKE @SearchTerm
                    OR emp_assigned_to.Emp_Name LIKE @SearchTerm
@@ -128,9 +128,9 @@ namespace PROHUB.Data
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM Internal_Issues ii
                 LEFT JOIN Internal_Platforms ip ON ii.Internal_APP = ip.ID
-                LEFT JOIN Employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
+                LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
                 WHERE ii.ID = @Id;
             ";
 
@@ -253,8 +253,8 @@ namespace PROHUB.Data
 
             const string query = @"
                 SELECT e.Emp_ID, e.Emp_Name
-                FROM Employee e
-                LEFT JOIN EmpGroup g ON e.GroupID = g.GroupID
+                FROM employee e
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
                 WHERE g.GroupName IS NULL
                    OR g.GroupName <> 'Inactive'
                 ORDER BY e.Emp_Name;

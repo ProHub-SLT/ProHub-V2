@@ -354,7 +354,7 @@ namespace ProHub.Data
             var list = new List<MainPlatform>();
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID, Platforms FROM Main_Platforms ORDER BY Platforms", conn);
+            using var cmd = new MySqlCommand("SELECT ID, Platforms FROM main_platforms ORDER BY Platforms", conn);
             using var r = cmd.ExecuteReader();
             while (r.Read())
                 list.Add(new MainPlatform { ID = r.GetInt32(0), Platforms = r.IsDBNull(1) ? null : r.GetString(1) });
@@ -367,7 +367,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID FROM Main_Platforms WHERE LOWER(Platforms) LIKE '%internal%' LIMIT 1", conn);
+            using var cmd = new MySqlCommand("SELECT ID FROM main_platforms WHERE LOWER(Platforms) LIKE '%internal%' LIMIT 1", conn);
             using var r = cmd.ExecuteReader();
             if (r.Read())
                 return r.GetInt32(0);
@@ -392,8 +392,8 @@ namespace ProHub.Data
                     e2.Emp_ID AS Backup2EmpId,
                     e2.Emp_Name AS Backup2Name
                 FROM internal_platforms ip
-                LEFT JOIN Employee e1 ON ip.BackupOfficer_1 = e1.Emp_ID
-                LEFT JOIN Employee e2 ON ip.BackupOfficer_2 = e2.Emp_ID
+                LEFT JOIN employee e1 ON ip.BackupOfficer_1 = e1.Emp_ID
+                LEFT JOIN employee e2 ON ip.BackupOfficer_2 = e2.Emp_ID
                 ORDER BY ip.App_Name";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -433,38 +433,44 @@ namespace ProHub.Data
             conn.Open();
 
             string query = @"
-        SELECT 
-            ip.ID AS Id,
-            ip.App_Name AS AppName,
-            ip.App_URL AS AppURL,
-            ip.App_IP AS AppIP,
-            ip.StartDate AS StartDate,
-            ip.TargetDate AS TargetDate,
-            ip.VADate AS VADate,
-            ip.PercentageDone AS PercentageDone,
-            ip.Status AS Status,
-            ip.LaunchedDate AS LaunchedDate,
-            ip.Price AS Price,
-            e.Emp_Name AS DevelopedByName,
-            sp.Phase AS SDLCPhase,
-            pp.ParentProjectGroup AS ParentProjectName,
-            ma.App_Name AS MainAppName,
-            ipc.Comment AS Comment
-        FROM internal_platforms ip
-        LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
-        LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
-        LEFT JOIN ParentProject pp ON ip.ParentProjectID = pp.ParentProjectID
-        LEFT JOIN internal_platforms ma ON ip.MainAppID = ma.ID 
-        LEFT JOIN (
-            SELECT Solution_ID, Comment
-            FROM Internal_Project_Comments
-            WHERE ID IN (
-                SELECT MAX(ID)
-                FROM Internal_Project_Comments
-                GROUP BY Solution_ID
-            )
-        ) ipc ON ip.ID = ipc.Solution_ID
-        WHERE sp.Phase = 'Retired'";
+       SELECT 
+    ip.ID AS Id,
+    ip.App_Name AS AppName,
+    ip.App_URL AS AppURL,
+    ip.App_IP AS AppIP,
+    ip.StartDate AS StartDate,
+    ip.TargetDate AS TargetDate,
+    ip.VADate AS VADate,
+    ip.PercentageDone AS PercentageDone,
+    ip.Status AS Status,
+    ip.LaunchedDate AS LaunchedDate,
+    ip.Price AS Price,
+    e.Emp_Name AS DevelopedByName,
+    sp.Phase AS SDLCPhase,
+    pp.ParentProjectGroup AS ParentProjectName,
+    ma.App_Name AS MainAppName,
+    ipc.Comment AS Comment
+FROM internal_platforms ip
+LEFT JOIN employee e 
+    ON ip.Developed_By = e.Emp_ID
+LEFT JOIN SDLCPhas sp 
+    ON ip.SDLCPhase = sp.ID
+LEFT JOIN ParentProject pp 
+    ON ip.ParentProjectID = pp.ParentProjectID
+LEFT JOIN internal_platforms ma 
+    ON ip.MainAppID = ma.ID
+LEFT JOIN (
+    SELECT Solution_ID, Comment
+    FROM Internal_Project_Comments
+    WHERE ID IN (
+        SELECT MAX(ID)
+        FROM Internal_Project_Comments
+        GROUP BY Solution_ID
+    )
+) ipc 
+    ON ip.ID = ipc.Solution_ID
+WHERE sp.Phase = 'Retired';";
+
 
             if (!string.IsNullOrEmpty(search))
                 query += " AND (ip.App_Name LIKE @search OR e.Emp_Name LIKE @search)";
@@ -530,9 +536,9 @@ namespace ProHub.Data
                     e3.Emp_ID AS Backup2EmpId,
                     e3.Emp_Name AS Backup2Name
                 FROM internal_platforms ip
-                LEFT JOIN Employee e1 ON ip.Developed_By = e1.Emp_ID
-                LEFT JOIN Employee e2 ON ip.BackupOfficer_1 = e2.Emp_ID
-                LEFT JOIN Employee e3 ON ip.BackupOfficer_2 = e3.Emp_ID
+                LEFT JOIN employee e1 ON ip.Developed_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON ip.BackupOfficer_1 = e2.Emp_ID
+                LEFT JOIN employee e3 ON ip.BackupOfficer_2 = e3.Emp_ID
                 WHERE ip.BackupOfficer_1 = @employeeId OR ip.BackupOfficer_2 = @employeeId
                 ORDER BY ip.App_Name";
 
@@ -581,16 +587,49 @@ namespace ProHub.Data
 
             string query = @"
         SELECT 
-            ip.*,
+            ip.ID AS Id,
+            ip.App_Name AS AppName,
+            ip.App_URL AS AppURL,
+            ip.App_IP AS AppIP,
+            ip.StartDate AS StartDate,
+            ip.TargetDate AS TargetDate,
+            ip.VADate AS VADate,
+            ip.PercentageDone AS PercentageDone,
+            ip.Status AS Status,
+            ip.LaunchedDate AS LaunchedDate,
+            ip.Price AS Price,
             e.Emp_Name AS DevelopedByName,
-            bo.Emp_Name AS BackupOfficer1Name,
-            bo2.Emp_Name AS BackupOfficer2Name,
-            sp.Phase AS SDLCPhaseName
+            sp.Phase AS SDLCPhase,
+            pp.ParentProjectGroup AS ParentProjectName,
+            ma.App_Name AS MainAppName,
+            ipc.Comment AS Comment,
+            bo1.Emp_Name AS Backup1Name, 
+            bo1.Emp_Email AS Backup1Email,
+            bo2.Emp_Name AS Backup2Name, 
+            bo2.Emp_Email AS Backup2Email
         FROM internal_platforms ip
-        LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
-        LEFT JOIN Employee bo ON ip.BackupOfficer_1 = bo.Emp_ID
-        LEFT JOIN Employee bo2 ON ip.BackupOfficer_2 = bo2.Emp_ID
-        LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
+        LEFT JOIN employee e 
+            ON ip.Developed_By = e.Emp_ID
+        LEFT JOIN SDLCPhas sp 
+            ON ip.SDLCPhase = sp.ID
+        LEFT JOIN ParentProject pp 
+            ON ip.ParentProjectID = pp.ParentProjectID
+        LEFT JOIN internal_platforms ma 
+            ON ip.MainAppID = ma.ID
+        LEFT JOIN employee bo1 
+            ON ip.BackupOfficer_1 = bo1.Emp_ID
+        LEFT JOIN employee bo2 
+            ON ip.BackupOfficer_2 = bo2.Emp_ID
+        LEFT JOIN (
+            SELECT Solution_ID, Comment
+            FROM Internal_Project_Comments
+            WHERE ID IN (
+                SELECT MAX(ID)
+                FROM Internal_Project_Comments
+                GROUP BY Solution_ID
+            )
+        ) ipc 
+            ON ip.ID = ipc.Solution_ID
         WHERE ip.ID = @id";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -599,46 +638,59 @@ namespace ProHub.Data
             using var r = cmd.ExecuteReader();
             if (r.Read())
             {
+                // Helper function to safely get dates avoiding IsDBNull crashes if column exists
+                DateTime? GetDateSafe(string colName)
+                {
+                    int ord = r.GetOrdinal(colName);
+                    return r.IsDBNull(ord) ? (DateTime?)null : r.GetDateTime(ord);
+                }
+
                 item = new InternalPlatform
                 {
-                    Id = GetValueOrDefault(r, "ID", 0),
-                    AppName = GetValueOrDefault(r, "App_Name", ""),
+                    Id = GetValueOrDefault(r, "Id", 0),
+                    AppName = GetValueOrDefault(r, "AppName", ""),
+                    AppURL = GetValueOrDefault(r, "AppURL", ""),
+                    AppIP = GetValueOrDefault(r, "AppIP", ""),
+                    StartDate = GetDateSafe("StartDate"),
+                    TargetDate = GetDateSafe("TargetDate"),
+                    VADate = GetDateSafe("VADate"),
+                    LaunchedDate = GetDateSafe("LaunchedDate"),
+                    PercentageDone = GetValueOrDefault(r, "PercentageDone", (decimal?)null),
+                    Status = GetValueOrDefault(r, "Status", ""),
+                    Price = GetValueOrDefault(r, "Price", (decimal?)null),
+
+                    // Complex Objects & Display Names
+                    DevelopedByName = GetValueOrDefault(r, "DevelopedByName", ""),
                     DevelopedBy = new Employee
                     {
                         EmpName = GetValueOrDefault(r, "DevelopedByName", "")
                     },
-                    DevelopedTeam = GetValueOrDefault(r, "DevelopedTeam", ""),
-                    StartDate = GetValueOrDefault(r, "StartDate", (DateTime?)null),
-                    TargetDate = GetValueOrDefault(r, "TargetDate", (DateTime?)null),
-                    LaunchedDate = GetValueOrDefault(r, "LaunchedDate", (DateTime?)null),
-                    UATDate = GetValueOrDefault(r, "UATDate", (DateTime?)null),
-                    Status = GetValueOrDefault(r, "Status", ""),
-                    StatusDate = GetValueOrDefault(r, "StatusDate", (DateTime?)null),
-                    BitBucket = GetValueOrDefault(r, "BitBucket", ""),
-                    BitBucketRepo = GetValueOrDefault(r, "BitBucketRepo", ""),
-                    AppURL = GetValueOrDefault(r, "AppURL", ""),
-                    AppIP = GetValueOrDefault(r, "AppIP", ""),
-                    AppUsers = GetValueOrDefault(r, "AppUsers", ""),
-                    IntegratedApps = GetValueOrDefault(r, "Integrated_apps", ""),
-                    WAF = GetValueOrDefault(r, "WAF", ""),
-                    BusOwner = GetValueOrDefault(r, "Bus_Owner", ""),
-                    AppBusinessOwner = GetValueOrDefault(r, "App_Business_Owner", ""),
-                    AppCategory = GetValueOrDefault(r, "App_Category", ""),
-                    Scope = GetValueOrDefault(r, "Scope", ""),
-                    Price = GetValueOrDefault(r, "Price", (decimal?)null),
+
+                    SDLCPhaseName = GetValueOrDefault(r, "SDLCPhase", ""),
                     SDLCPhase = new SDLCPhase
                     {
-                        Phase = GetValueOrDefault(r, "SDLCPhaseName", "")
+                        Phase = GetValueOrDefault(r, "SDLCPhase", "")
                     },
-                    SSLCertificateExpDate = GetValueOrDefault(r, "SSLCertificateExpDate", (DateTime?)null),
-                    DPOHandoverDate = GetValueOrDefault(r, "DPO_Handover_Date", (DateTime?)null),
-                    DPOHandoverComment = GetValueOrDefault(r, "DPO_Handover_Comment", ""),
-                    BackupOfficer1 = string.IsNullOrEmpty(GetValueOrDefault(r, "BackupOfficer1Name", ""))
+
+                    ParentProjectGroupName = GetValueOrDefault(r, "ParentProjectName", ""),
+                    MainAppName = GetValueOrDefault(r, "MainAppName", ""),
+                    Comment = GetValueOrDefault(r, "Comment", ""),
+
+                    // Backup Officers
+                    BackupOfficer1 = string.IsNullOrEmpty(GetValueOrDefault(r, "Backup1Name", ""))
                         ? null
-                        : new Employee { EmpName = GetValueOrDefault(r, "BackupOfficer1Name", "") },
-                    BackupOfficer2 = string.IsNullOrEmpty(GetValueOrDefault(r, "BackupOfficer2Name", ""))
+                        : new Employee
+                        {
+                            EmpName = GetValueOrDefault(r, "Backup1Name", ""),
+                            EmpEmail = GetValueOrDefault(r, "Backup1Email", "")
+                        },
+                    BackupOfficer2 = string.IsNullOrEmpty(GetValueOrDefault(r, "Backup2Name", ""))
                         ? null
-                        : new Employee { EmpName = GetValueOrDefault(r, "BackupOfficer2Name", "") }
+                        : new Employee
+                        {
+                            EmpName = GetValueOrDefault(r, "Backup2Name", ""),
+                            EmpEmail = GetValueOrDefault(r, "Backup2Email", "")
+                        }
                 };
             }
 

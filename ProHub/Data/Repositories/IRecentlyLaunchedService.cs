@@ -45,7 +45,7 @@ namespace PROHUB.Data
                te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                pp.ParentProjectGroup AS ParentProjectGroupName
         FROM Internal_Platforms isol
-        LEFT JOIN Employee emp ON isol.Developed_By = emp.Emp_ID
+        LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
         LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
         LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
         LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
@@ -72,7 +72,7 @@ namespace PROHUB.Data
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName
                 FROM Internal_Platforms isol
-                LEFT JOIN Employee emp ON isol.Developed_By = emp.Emp_ID
+                LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
                 LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
                 LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
                 LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
@@ -96,7 +96,7 @@ namespace PROHUB.Data
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName
                 FROM Internal_Platforms isol
-                LEFT JOIN Employee emp ON isol.Developed_By = emp.Emp_ID
+                LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
                 LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
                 LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
                 LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID

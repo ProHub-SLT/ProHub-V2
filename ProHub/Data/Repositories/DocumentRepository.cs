@@ -57,7 +57,7 @@ namespace ProHub.Data
         SELECT d.*, ip.App_Name AS SolutionName, e.Emp_Name AS CreatedByName
         FROM Document d
         LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
-        LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+        LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
           AND (@solutionId IS NULL OR d.Solution_ID = @solutionId)
           AND (d.Doc_Name LIKE @search OR ip.App_Name LIKE @search OR e.Emp_Name LIKE @search)
@@ -114,7 +114,7 @@ namespace ProHub.Data
         SELECT COUNT(*) 
         FROM Document d
         LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
-        LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+        LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
           AND (@solutionId IS NULL OR d.Solution_ID = @solutionId)
           AND (d.Doc_Name LIKE @search OR ip.App_Name LIKE @search OR e.Emp_Name LIKE @search)";
@@ -146,8 +146,8 @@ namespace ProHub.Data
             string sql = @"
         SELECT d.*, ep.Platform_Name AS SolutionName, e.Emp_Name AS CreatedByName
         FROM Document d
-        LEFT JOIN External_Platforms ep ON d.Solution_ID = ep.ID
-        LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+        LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
+        LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
           AND (@solutionId IS NULL OR d.Solution_ID = @solutionId) -- New Filter
           AND (d.Doc_Name LIKE @search OR ep.Platform_Name LIKE @search OR e.Emp_Name LIKE @search)
@@ -199,8 +199,8 @@ namespace ProHub.Data
             string sql = @"
         SELECT COUNT(*) 
         FROM Document d
-        LEFT JOIN External_Platforms ep ON d.Solution_ID = ep.ID
-        LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+        LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
+        LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
           AND (@solutionId IS NULL OR d.Solution_ID = @solutionId) -- New Filter
           AND (d.Doc_Name LIKE @search OR ep.Platform_Name LIKE @search OR e.Emp_Name LIKE @search)";
@@ -223,8 +223,8 @@ namespace ProHub.Data
             string sql = @"
                 SELECT COUNT(*) 
                 FROM Document d
-                LEFT JOIN External_Platforms ep ON d.Solution_ID = ep.ID
-                LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+                LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
+                LEFT JOIN employee e ON d.Created_By = e.Emp_ID
                 WHERE d.Platform_ID = @platformId 
                   AND (d.Doc_Name LIKE @search OR ep.Platform_Name LIKE @search OR e.Emp_Name LIKE @search)";
 
@@ -243,8 +243,8 @@ namespace ProHub.Data
                 SELECT d.*, ip.App_Name AS SolutionName, e.Emp_Name AS CreatedByName
                 FROM Document d
                 LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
-                LEFT JOIN External_Platforms ep ON d.Solution_ID = ep.ID
-                LEFT JOIN Employee e ON d.Created_By = e.Emp_ID
+                LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
+                LEFT JOIN employee e ON d.Created_By = e.Emp_ID
                 WHERE d.ID = @id";
 
             using var cmd = new MySqlCommand(sql, conn);

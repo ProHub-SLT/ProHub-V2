@@ -1,7 +1,7 @@
-@model ProHub.Models.InternalPlatform
+﻿@model ProHub.Models.ExternalPlatform
 
 @{
-    ViewData["Title"] = "Internal Solution Retired Details";
+    ViewData["Title"] = "External Solution Retired Details";
 }
 
 <style>
@@ -383,10 +383,10 @@
     <div class="hero">
         <div class="d-flex justify-content-between flex-wrap">
             <div>
-                <h1 aria-label="Platform Name">@(string.IsNullOrEmpty(Model.AppName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppName)</h1>
-                <small>Internal Solution</small><br />
+                <h1 aria-label="Platform Name">@(string.IsNullOrEmpty(Model.PlatformName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.PlatformName)</h1>
+                <small>External Solution</small><br />
                 <div class="status-badge" role="status">
-                    <i class="bi bi-info-circle-fill"></i> @(string.IsNullOrEmpty(Model.Status) ? "Retired" : Model.Status)
+                    <i class="bi bi-info-circle-fill"></i> @(string.IsNullOrEmpty(Model.SDLCStage?.Phase) ? "Retired" : Model.SDLCStage.Phase)
                 </div>
             </div>
             <div class="text-end mt-3 mt-md-0">
@@ -411,21 +411,15 @@
         <div class="section-header"><i class="bi bi-card-list"></i> Basic Information</div>
         <div class="info-grid">
             <div class="info-item">
-                <div class="info-label">Application Name</div>
+                <div class="info-label">Platform Name</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.AppName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppName)
+                    @(string.IsNullOrEmpty(Model.PlatformName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.PlatformName)
                 </div>
             </div>
             <div class="info-item">
-                <div class="info-label">Main Application</div>
+                <div class="info-label">Platform Type</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.MainAppName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.MainAppName)
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Parent Project</div>
-                <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.ParentProjectGroupName) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.ParentProjectGroupName)
+                    @(string.IsNullOrEmpty(Model.PlatformType) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.PlatformType)
                 </div>
             </div>
             <div class="info-item">
@@ -435,37 +429,54 @@
                 </div>
             </div>
             <div class="info-item">
+                <div class="info-label">Developed Team</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.DevelopedTeam) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.DevelopedTeam)
+                </div>
+            </div>
+            <div class="info-item">
                 <div class="info-label">SDLC Phase</div>
                 <div class="info-value">
                     <span class="badge bg-success">
-                        @(string.IsNullOrEmpty(Model.SDLCPhase?.Phase) ? "Retired" : Model.SDLCPhase.Phase)
+                        @(string.IsNullOrEmpty(Model.SDLCStage?.Phase) ? "Retired" : Model.SDLCStage.Phase)
                     </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Technical Information -->
+    <!-- Financial Information -->
     <div class="section-card">
-        <div class="section-header"><i class="bi bi-hdd-network-fill"></i> Technical Information</div>
+        <div class="section-header"><i class="bi bi-currency-dollar"></i> Financial Information</div>
         <div class="info-grid">
             <div class="info-item">
-                <div class="info-label">Application IP</div>
+                <div class="info-label">One Time Charge (OTC)</div>
                 <div class="info-value">
-                    @(string.IsNullOrEmpty(Model.AppIP) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.AppIP)
+                    @(Model.PlatformOTC.HasValue ? string.Format("Rs. {0:N0}", Model.PlatformOTC.Value) : "Not specified")
                 </div>
             </div>
             <div class="info-item">
-                <div class="info-label">Application URL</div>
+                <div class="info-label">Monthly Recurring Charge (MRC)</div>
                 <div class="info-value">
-                    @if (!string.IsNullOrEmpty(Model.AppURL))
-                    {
-                        <a href="@Model.AppURL" target="_blank" class="text-primary">@Model.AppURL</a>
-                    }
-                    else
-                    {
-                        @Html.Raw("<span class='empty-value'>Not specified</span>")
-                    }
+                    @(Model.PlatformMRC.HasValue ? string.Format("Rs. {0:N0}", Model.PlatformMRC.Value) : "Not specified")
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Contract Period</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.ContractPeriod) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.ContractPeriod)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Revenue</div>
+                <div class="info-value">
+                    @(Model.Revenue.HasValue ? string.Format("Rs. {0:N0}", Model.Revenue.Value) : "Not specified")
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Software Value</div>
+                <div class="info-value">
+                    @(Model.SoftwareValue.HasValue ? string.Format("Rs. {0:N0}", Model.SoftwareValue.Value) : "Not specified")
                 </div>
             </div>
         </div>
@@ -484,6 +495,10 @@
                 <p>Target Date</p>
             </div>
             <div class="mini-card">
+                <h4>@(Model.UATDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>UAT Date</p>
+            </div>
+            <div class="mini-card">
                 <h4>@(Model.VADate?.ToString("MMM dd, yyyy") ?? "—")</h4>
                 <p>VA Date</p>
             </div>
@@ -491,29 +506,115 @@
                 <h4>@(Model.LaunchedDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
                 <p>Launched Date</p>
             </div>
+            <div class="mini-card">
+                <h4>@(Model.BillingDate?.ToString("MMM dd, yyyy") ?? "—")</h4>
+                <p>Billing Date</p>
+            </div>
         </div>
     </div>
 
-    <!-- Financial & Comments -->
+    <!-- Additional Information -->
     <div class="section-card">
-        <div class="section-header"><i class="bi bi-cash-stack"></i> Other Information</div>
-        <div class="info-grid" style="grid-template-columns: 1fr;">
-            <div class="info-item mb-2">
-                <div class="info-label">Price</div>
-                <div class="info-value fs-5 fw-bold text-primary">
-                    @(Model.Price.HasValue ? string.Format("Rs. {0:N0}", Model.Price.Value) : "Not specified")
+        <div class="section-header"><i class="bi bi-info-circle"></i> Additional Information</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Platform Owner</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.PlatformOwner) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.PlatformOwner)
                 </div>
             </div>
-
-            @if (!string.IsNullOrEmpty(Model.Comment))
-            {
-                <div class="info-item">
-                    <div class="info-label">Closing Comment</div>
-                    <div class="info-value comment-box">
-                        @Model.Comment
-                    </div>
+            <div class="info-item">
+                <div class="info-label">APP Owner</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.APP_Owner) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.APP_Owner)
                 </div>
-            }
+            </div>
+            <div class="info-item">
+                <div class="info-label">Sales AM</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.SalesAM) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.SalesAM)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Proposal Uploaded</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.ProposalUploaded) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.ProposalUploaded)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">SLA</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.SLA) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.SLA)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Integrated Apps</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.IntegratedApps) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.IntegratedApps)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Details -->
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-tools"></i> Technical Details</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">BitBucket</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.BitBucket) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.BitBucket)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">BIT Bucket Repo</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.BITBucketRepo) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.BITBucketRepo)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">DR</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.DR) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.DR)
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">SSL Certificate Exp Date</div>
+                <div class="info-value">
+                    @(Model.SSLCertificateExpDate?.ToString("MMM dd, yyyy") ?? "Not specified")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incentives & Handover -->
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-gift"></i> Incentives & Handover</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Incentive Earned</div>
+                <div class="info-value">
+                    @(Model.IncentiveEarned.HasValue ? string.Format("Rs. {0:N0}", Model.IncentiveEarned.Value) : "Not specified")
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Incentive Share</div>
+                <div class="info-value">
+                    @(Model.IncentiveShare.HasValue ? string.Format("Rs. {0:N0}", Model.IncentiveShare.Value) : "Not specified")
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">DPO Handover Date</div>
+                <div class="info-value">
+                    @(Model.DPOHandoverDate?.ToString("MMM dd, yyyy") ?? "Not specified")
+                </div>
+            </div>
+            <div class="info-item" style="grid-column: span 2;">
+                <div class="info-label">DPO Handover Comment</div>
+                <div class="info-value">
+                    @(string.IsNullOrEmpty(Model.DPOHandoverComment) ? Html.Raw("<span class='empty-value'>Not specified</span>") : Model.DPOHandoverComment)
+                </div>
+            </div>
         </div>
     </div>
 
@@ -561,7 +662,7 @@
 
     <!-- Back Button -->
     <div class="text-start mt-4">
-        <a asp-controller="InternalSolutionRetired" asp-action="Index" class="back-btn" aria-label="Return to Dashboard">
+        <a asp-controller="ExternalSolutionRetired" asp-action="Index" class="back-btn" aria-label="Return to Dashboard">
             <i class="bi bi-arrow-left"></i> Back to Dashboard
         </a>
     </div>

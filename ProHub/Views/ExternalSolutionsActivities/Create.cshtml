@@ -307,6 +307,21 @@
         font-weight: bold;
         margin-left: 4px;
     }
+
+    /* Custom Scrollable Dropdown */
+    .dropdown-menu-scrollable {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+    .search-item {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1000;
+        padding: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -350,12 +365,45 @@
                         <label asp-for="SolutionId" class="form-label-modern required">
                             <i class="bi bi-box-seam me-1"></i> Solution
                         </label>
-                        <div class="input-icon-wrapper">
-                            <i class="bi bi-boxes"></i>
-                            <select asp-for="SolutionId" class="form-control-modern"
-                                    asp-items="@(ViewBag.ExternalSolutions != null ? new SelectList(ViewBag.ExternalSolutions, "Id", "PlatformName") : null)">
-                                <option value="">-- Select Solution --</option>
-                            </select>
+                        <div class="input-icon-wrapper position-relative">
+                            <!-- Hidden Input -->
+                            <input type="hidden" asp-for="SolutionId" id="SolutionId" />
+                            
+                            <!-- Custom Dropdown Trigger -->
+                             <div class="dropdown">
+                                <button class="form-control-modern text-start d-flex justify-content-between align-items-center" type="button"
+                                    id="solutionDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="padding-left: 2.75rem;">
+                                    <span id="solutionDropdownText">-- Select Solution --</span>
+                                </button>
+                                <i class="bi bi-boxes" style="z-index: 5;"></i>
+
+                                <!-- Dropdown Menu -->
+                                <ul class="dropdown-menu w-100 shadow border-0 dropdown-menu-scrollable" aria-labelledby="solutionDropdown">
+                                    <li class="search-item">
+                                        <input type="text" class="form-control-modern form-control-sm" id="solutionSearch" 
+                                               placeholder="Search solutions..." onclick="event.stopPropagation()" style="padding-left: 1rem;">
+                                    </li>
+                                    @{
+                                        var solutions = ViewBag.ExternalSolutions as IEnumerable<ProHub.Models.ExternalPlatform>;
+                                        if (solutions != null)
+                                        {
+                                            foreach (var solution in solutions)
+                                            {
+                                                <li>
+                                                    <button class="dropdown-item solution-option" type="button" 
+                                                            data-id="@solution.Id" data-name="@solution.PlatformName">
+                                                        @solution.PlatformName
+                                                    </button>
+                                                </li>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <li><span class="dropdown-item text-muted">No solutions available</span></li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
                         </div>
                         <span asp-validation-for="SolutionId" class="helper-text"></span>
                     </div>
@@ -481,7 +529,7 @@
 
             // Get all required fields
             const platformId = document.querySelector('input[name="PlatformId"]');
-            const solutionId = document.querySelector('select[name="SolutionId"]');
+            const solutionId = document.getElementById('SolutionId'); // Use ID for hidden input
             const createdBy = document.querySelector('select[name="CreatedBy"]');
             const targetDate = document.querySelector('input[name="TargetDate"]');
             const status = document.querySelector('select[name="Status"]');
@@ -498,10 +546,13 @@
             // Validate Solution
             if (!solutionId.value) {
                 isValid = false;
-                solutionId.style.borderColor = '#dc3545';
+                // Highlight the custom dropdown button if validation fails
+                const dropdownBtn = document.getElementById('solutionDropdown');
+                if (dropdownBtn) dropdownBtn.style.borderColor = '#dc3545';
+
                 const errorSpan = solutionId.closest('.form-group-modern').querySelector('.helper-text');
                 if (errorSpan) errorSpan.textContent = 'Solution is required.';
-                if (!firstInvalidField) firstInvalidField = solutionId;
+                if (!firstInvalidField) firstInvalidField = solutionId.closest('.form-group-modern');
             }
 
             // Validate Created By
@@ -561,6 +612,54 @@
         document.getElementById('popupCloseBtn').addEventListener('click', function () {
             document.getElementById('successPopup').classList.add('hidden');
             window.location.href = '@Url.Action("Index")';
+        });
+
+        // --- Custom Searchable Dropdown Logic ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownText = document.getElementById('solutionDropdownText');
+            const hiddenInput = document.getElementById('SolutionId');
+            const searchInput = document.getElementById('solutionSearch');
+
+            // Handle Selection
+            document.querySelectorAll('.solution-option').forEach(item => {
+                item.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const name = this.getAttribute('data-name');
+                    
+                    hiddenInput.value = id;
+                    dropdownText.textContent = name;
+                    dropdownText.style.color = "#000"; // Reset text color
+
+                    // Clear validation error style if any
+                    const dropdownBtn = document.getElementById('solutionDropdown');
+                    if (dropdownBtn) dropdownBtn.style.borderColor = '#e2e8f0';
+                    const errorSpan = hiddenInput.closest('.form-group-modern').querySelector('.helper-text');
+                    if(errorSpan) errorSpan.textContent = '';
+                });
+            });
+
+            // Handle Search
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function () {
+                    const value = this.value.toLowerCase();
+                    const items = this.closest('.dropdown-menu').querySelectorAll('.solution-option');
+
+                    items.forEach(btn => {
+                        const text = btn.textContent.toLowerCase();
+                        const li = btn.closest('li');
+                        if (text.includes(value)) {
+                            li.style.display = '';
+                        } else {
+                            li.style.display = 'none';
+                        }
+                    });
+                });
+
+                // Prevent close on click
+                searchInput.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
         });
     </script>
 }

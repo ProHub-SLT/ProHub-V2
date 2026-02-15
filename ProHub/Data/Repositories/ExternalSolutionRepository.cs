@@ -85,9 +85,9 @@ namespace ProHub.Data
 
         FROM external_platforms ep
         INNER JOIN company c ON ep.Company_ID = c.ID
-        LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-        LEFT JOIN SDLCPhas sp ON ep.SDLCstage = sp.ID
-        LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID  /* <--- Added JOIN here */
+        LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+        LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+        LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID  /* <--- Added JOIN here */
         WHERE sp.Phase = 'Abandoned'";
 
             if (!string.IsNullOrEmpty(search))
@@ -232,11 +232,11 @@ namespace ProHub.Data
 
                 FROM external_platforms ep
                 INNER JOIN company c ON ep.Company_ID = c.ID
-                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN Employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
-                LEFT JOIN Employee e3 ON ep.BackupOfficer_2 = e3.Emp_ID
-                LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCstage = sp.ID
+                LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
+                LEFT JOIN employee e3 ON ep.BackupOfficer_2 = e3.Emp_ID
+                LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
                 WHERE ep.ID = @id AND sp.Phase = 'Abandoned'";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -333,7 +333,7 @@ namespace ProHub.Data
             var list = new List<ExternalPlatform>();
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID, Platform_Name FROM External_Platforms ORDER BY Platform_Name", conn);
+            using var cmd = new MySqlCommand("SELECT ID, Platform_Name FROM external_platforms ORDER BY Platform_Name", conn);
             using var r = cmd.ExecuteReader();
             while (r.Read())
                 list.Add(new ExternalPlatform { Id = r.GetInt32(0), PlatformName = r.GetString(1) });
@@ -346,7 +346,7 @@ namespace ProHub.Data
             using var conn = GetConnection();
             conn.Open();
             var placeholders = string.Join(",", ids.Select((_, i) => $"@p{i}"));
-            var sql = $"SELECT ID, Platform_Name FROM External_Platforms WHERE ID IN ({placeholders})";
+            var sql = $"SELECT ID, Platform_Name FROM external_platforms WHERE ID IN ({placeholders})";
             using var cmd = new MySqlCommand(sql, conn);
             for (int i = 0; i < ids.Count; i++)
                 cmd.Parameters.AddWithValue($"@p{i}", ids[i]);
@@ -376,8 +376,8 @@ namespace ProHub.Data
                     e2.Emp_ID AS Backup2EmpId,
                     e2.Emp_Name AS Backup2Name
                 FROM external_platforms ep
-                LEFT JOIN Employee e1 ON ep.BackupOfficer_1 = e1.Emp_ID
-                LEFT JOIN Employee e2 ON ep.BackupOfficer_2 = e2.Emp_ID
+                LEFT JOIN employee e1 ON ep.BackupOfficer_1 = e1.Emp_ID
+                LEFT JOIN employee e2 ON ep.BackupOfficer_2 = e2.Emp_ID
                 ORDER BY ep.Platform_Name";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -415,7 +415,7 @@ namespace ProHub.Data
             var list = new List<MainPlatform>();
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID, Platforms FROM Main_Platforms ORDER BY Platforms", conn);
+            using var cmd = new MySqlCommand("SELECT ID, Platforms FROM main_platforms ORDER BY Platforms", conn);
             using var r = cmd.ExecuteReader();
             while (r.Read())
                 list.Add(new MainPlatform { ID = r.GetInt32(0), Platforms = r.IsDBNull(1) ? null : r.GetString(1) });
@@ -427,7 +427,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID FROM Main_Platforms WHERE LOWER(Platforms) LIKE '%external%' LIMIT 1", conn);
+            using var cmd = new MySqlCommand("SELECT ID FROM main_platforms WHERE LOWER(Platforms) LIKE '%external%' LIMIT 1", conn);
             using var r = cmd.ExecuteReader();
             if (r.Read())
                 return r.GetInt32(0);
@@ -466,9 +466,9 @@ namespace ProHub.Data
                        ) AS Revenue
 
                 FROM external_platforms ep
-                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
-                LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID
+                LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+                LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID
                 WHERE (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')";
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -515,8 +515,8 @@ namespace ProHub.Data
                        ep.Proposal_Upload AS ProposalUploaded, e1.Emp_ID AS DevelopedById, e1.Emp_Name AS DevelopedByName,
                        sp.Phase AS SDLCPhaseName
                 FROM external_platforms ep
-                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
+                LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
                 WHERE ep.ID = @id AND (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')";
             using var cmd = new MySqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@id", id);
@@ -535,6 +535,98 @@ namespace ProHub.Data
                 ProposalUploaded = GetValueOrDefault(reader, "ProposalUploaded", ""),
                 DevelopedBy = new Employee { EmpId = GetValueOrDefault(reader, "DevelopedById", 0), EmpName = GetValueOrDefault(reader, "DevelopedByName", "") },
                 SDLCStage = new SDLCPhase { Phase = GetValueOrDefault(reader, "SDLCPhaseName", "Retired") }
+            };
+        }
+
+        // Get full details of a single retired solution by ID
+        public ExternalPlatform? GetRetiredSolutionByIdFull(int id)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+            string query = @"
+                SELECT 
+                    ep.ID AS Id,
+                    ep.Platform_Name AS PlatformName,
+                    ep.Platform_Type AS PlatformType,
+                    ep.StartDate,
+                    ep.TargetDate,
+                    ep.UATDate,
+                    ep.VADate,
+                    ep.LaunchedDate,
+                    ep.Status,
+                    ep.StatusDate,
+                    ep.BitBucket,
+                    ep.BIT_bucket_repo AS BITBucketRepo,
+                    ep.Integrated_apps AS IntegratedApps,
+                    ep.DR,
+                    ep.Platform_Owner AS PlatformOwner,
+                    ep.APP_OP_Owner AS APP_Owner,
+                    ep.Platform_OTC AS PlatformOTC,
+                    ep.Platform_MRC AS PlatformMRC,
+                    ep.Contract_Period AS ContractPeriod,
+                    ep.Incentive_Earned AS IncentiveEarned,
+                    ep.Incentive_Share AS IncentiveShare,
+                    ep.BillingDate,
+                    ep.Proposal_Upload AS ProposalUploaded,
+                    ep.SLA,
+                    ep.Software_Value AS SoftwareValue,
+                    ep.SSLCertificateExpDate,
+                    ep.DPO_Handover_Date AS DPOHandoverDate,
+                    ep.DPO_Handover_Comment AS DPOHandoverComment,
+                    ep.PercentageDone,
+                    ep.Developed_Team AS DevelopedTeam,
+                    ep.Sales_AM AS SalesAM,
+                    e1.Emp_ID AS DevelopedById,
+                    e1.Emp_Name AS DevelopedByName,
+                    sp.ID AS SDLCStageId,
+                    sp.Phase AS SDLCPhaseName,
+                    c.ID AS CompanyId,
+                    c.Company_Name AS CompanyName
+                FROM external_platforms ep
+                LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN company c ON ep.Company_ID = c.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+                WHERE ep.ID = @id AND (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')";
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@id", id);
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read()) return null;
+            return new ExternalPlatform
+            {
+                Id = GetValueOrDefault(reader, "Id", 0),
+                PlatformName = GetValueOrDefault(reader, "PlatformName", ""),
+                PlatformType = GetValueOrDefault(reader, "PlatformType", ""),
+                StartDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? (DateTime?)null : reader.GetDateTime("StartDate"),
+                TargetDate = reader.IsDBNull(reader.GetOrdinal("TargetDate")) ? (DateTime?)null : reader.GetDateTime("TargetDate"),
+                UATDate = reader.IsDBNull(reader.GetOrdinal("UATDate")) ? (DateTime?)null : reader.GetDateTime("UATDate"),
+                VADate = reader.IsDBNull(reader.GetOrdinal("VADate")) ? (DateTime?)null : reader.GetDateTime("VADate"),
+                LaunchedDate = reader.IsDBNull(reader.GetOrdinal("LaunchedDate")) ? (DateTime?)null : reader.GetDateTime("LaunchedDate"),
+                Status = GetValueOrDefault(reader, "Status", ""),
+                StatusDate = reader.IsDBNull(reader.GetOrdinal("StatusDate")) ? (DateTime?)null : reader.GetDateTime("StatusDate"),
+                BitBucket = GetValueOrDefault(reader, "BitBucket", ""),
+                BITBucketRepo = GetValueOrDefault(reader, "BITBucketRepo", ""),
+                IntegratedApps = GetValueOrDefault(reader, "IntegratedApps", ""),
+                DR = GetValueOrDefault(reader, "DR", ""),
+                PlatformOwner = GetValueOrDefault(reader, "PlatformOwner", ""),
+                APP_Owner = GetValueOrDefault(reader, "APP_Owner", ""),
+                PlatformOTC = reader.IsDBNull(reader.GetOrdinal("PlatformOTC")) ? (decimal?)null : reader.GetDecimal("PlatformOTC"),
+                PlatformMRC = reader.IsDBNull(reader.GetOrdinal("PlatformMRC")) ? (decimal?)null : reader.GetDecimal("PlatformMRC"),
+                ContractPeriod = GetValueOrDefault(reader, "ContractPeriod", ""),
+                IncentiveEarned = reader.IsDBNull(reader.GetOrdinal("IncentiveEarned")) ? (decimal?)null : reader.GetDecimal("IncentiveEarned"),
+                IncentiveShare = reader.IsDBNull(reader.GetOrdinal("IncentiveShare")) ? (decimal?)null : reader.GetDecimal("IncentiveShare"),
+                BillingDate = reader.IsDBNull(reader.GetOrdinal("BillingDate")) ? (DateTime?)null : reader.GetDateTime("BillingDate"),
+                ProposalUploaded = GetValueOrDefault(reader, "ProposalUploaded", ""),
+                SLA = GetValueOrDefault(reader, "SLA", ""),
+                SoftwareValue = reader.IsDBNull(reader.GetOrdinal("SoftwareValue")) ? (decimal?)null : reader.GetDecimal("SoftwareValue"),
+                SSLCertificateExpDate = reader.IsDBNull(reader.GetOrdinal("SSLCertificateExpDate")) ? (DateTime?)null : reader.GetDateTime("SSLCertificateExpDate"),
+                DPOHandoverDate = reader.IsDBNull(reader.GetOrdinal("DPOHandoverDate")) ? (DateTime?)null : reader.GetDateTime("DPOHandoverDate"),
+                DPOHandoverComment = GetValueOrDefault(reader, "DPOHandoverComment", ""),
+                PercentageDone = GetValueOrDefault(reader, "PercentageDone", (decimal?)null),
+                DevelopedTeam = GetValueOrDefault(reader, "DevelopedTeam", ""),
+                SalesAM = GetValueOrDefault(reader, "SalesAM", ""),
+                DevelopedBy = new Employee { EmpId = GetValueOrDefault(reader, "DevelopedById", 0), EmpName = GetValueOrDefault(reader, "DevelopedByName", "") },
+                Company = new Company { Id = GetValueOrDefault(reader, "CompanyId", 0), CompanyName = GetValueOrDefault(reader, "CompanyName", "") },
+                SDLCStage = new SDLCPhase { Id = GetValueOrDefault(reader, "SDLCStageId", 0), Phase = GetValueOrDefault(reader, "SDLCPhaseName", "Retired") }
             };
         }
 
@@ -584,9 +676,9 @@ namespace ProHub.Data
                     c.ID AS CompanyId,
                     c.Company_Name AS CompanyName
                 FROM external_platforms ep
-                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN Company c ON ep.Company_ID = c.ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
+                LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN company c ON ep.Company_ID = c.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
                 WHERE (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')
                 ORDER BY ep.Platform_Name";
             using var cmd = new MySqlCommand(query, conn);
@@ -682,10 +774,10 @@ namespace ProHub.Data
                     st.ID AS SalesTeamId,
                     st.Sales_Team_Name AS SalesTeamName
                 FROM external_platforms ep
-                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN Company c ON ep.Company_ID = c.ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
-                LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID
+                LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN company c ON ep.Company_ID = c.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+                LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID
                 WHERE ep.ID = @id";
             using var cmd = new MySqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@id", id);

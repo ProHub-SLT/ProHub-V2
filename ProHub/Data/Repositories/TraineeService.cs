@@ -39,16 +39,16 @@ namespace PROHUB.Data
                 string query = @"
                     SELECT 
                         t.*, 
-                        e.Emp_Name AS SupervisorName, 
+                        e.emp_name AS SupervisorName, 
                         f.field_of_spec_name AS FieldOfSpecName 
                     FROM 
-                        Trainee t
+                        trainee t
                     LEFT JOIN 
-                        Employee e ON t.Supervisor = e.Emp_ID
+                        employee e ON t.supervisor = e.emp_id
                     LEFT JOIN 
-                        Fields_of_Specialization f ON t.field_of_spec_id = f.field_of_spec_id
+                        fields_of_specialization f ON t.field_of_spec_id = f.field_of_spec_id
                     ORDER BY 
-                        t.Trainee_ID DESC";
+                        t.trainee_id DESC";
 
                 using (var cmd = new MySqlCommand(query, connection))
                 using (MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync())
@@ -72,16 +72,16 @@ namespace PROHUB.Data
                 string query = @"
                     SELECT 
                         t.*, 
-                        e.Emp_Name AS SupervisorName, 
+                        e.emp_name AS SupervisorName, 
                         f.field_of_spec_name AS FieldOfSpecName 
                     FROM 
-                        Trainee t
+                        trainee t
                     LEFT JOIN 
-                        Employee e ON t.Supervisor = e.Emp_ID
+                        employee e ON t.supervisor = e.emp_id
                     LEFT JOIN 
-                        Fields_of_Specialization f ON t.field_of_spec_id = f.field_of_spec_id
+                        fields_of_specialization f ON t.field_of_spec_id = f.field_of_spec_id
                     WHERE 
-                        t.Trainee_ID = @ID";
+                        t.trainee_id = @ID";
 
                 using (var cmd = new MySqlCommand(query, connection))
                 {
@@ -108,12 +108,12 @@ namespace PROHUB.Data
 
                 // FIX: Changed requested_payment_amount to requested_payment_date
                 string query = @"
-                    INSERT INTO Trainee
-                    (Trainee_Name, Trainee_Phone, Trainee_NIC, Trainee_Email,
-                     Training_StartDate, Training_EndDate, Institute, Languages_Known,
-                     Supervisor, Target_Date, Trainee_HomeAddress, AssignedWork_Desc,
+                    INSERT INTO trainee
+                    (trainee_name, trainee_phone, trainee_nic, trainee_email,
+                     training_startdate, training_enddate, institute, languages_known,
+                     supervisor, target_date, trainee_homeaddress, assignedwork_desc,
                      field_of_spec_id, payment_start_date, payment_end_date,
-                     requested_payment_date, absent_Count, terminated_date, terminated_reason)
+                     requested_payment_date, absent_count, terminated_date, terminated_reason)
                     VALUES
                     (@Trainee_Name, @Trainee_Phone, @Trainee_NIC, @Trainee_Email,
                      @Training_StartDate, @Training_EndDate, @Institute, @Languages_Known,
@@ -139,27 +139,27 @@ namespace PROHUB.Data
 
                 // FIX: Changed requested_payment_amount to requested_payment_date in the SET clause
                 string query = @"
-                    UPDATE Trainee SET
-                        Trainee_Name = @Trainee_Name,
-                        Trainee_Phone = @Trainee_Phone,
-                        Trainee_NIC = @Trainee_NIC,
-                        Trainee_Email = @Trainee_Email,
-                        Trainee_HomeAddress = @Trainee_HomeAddress,
-                        Training_StartDate = @Training_StartDate,
-                        Training_EndDate = @Training_EndDate,
-                        Institute = @Institute,
-                        Languages_Known = @Languages_Known,
-                        Supervisor = @Supervisor,
-                        Target_Date = @Target_Date,
-                        AssignedWork_Desc = @AssignedWork_Desc,
+                    UPDATE trainee SET
+                        trainee_name = @Trainee_Name,
+                        trainee_phone = @Trainee_Phone,
+                        trainee_nic = @Trainee_NIC,
+                        trainee_email = @Trainee_Email,
+                        trainee_homeaddress = @Trainee_HomeAddress,
+                        training_startdate = @Training_StartDate,
+                        training_enddate = @Training_EndDate,
+                        institute = @Institute,
+                        languages_known = @Languages_Known,
+                        supervisor = @Supervisor,
+                        target_date = @Target_Date,
+                        assignedwork_desc = @AssignedWork_Desc,
                         field_of_spec_id = @field_of_spec_id,
                         payment_start_date = @payment_start_date,
                         payment_end_date = @payment_end_date,
                         requested_payment_date = @requested_payment_date,
-                        absent_Count = @absent_Count,
+                        absent_count = @absent_Count,
                         terminated_date = @terminated_date,
                         terminated_reason = @terminated_reason
-                    WHERE Trainee_ID = @Trainee_ID";
+                    WHERE trainee_id = @Trainee_ID";
 
                 using (var cmd = new MySqlCommand(query, connection))
                 {
@@ -178,7 +178,7 @@ namespace PROHUB.Data
             {
                 await connection.OpenAsync();
 
-                string query = "DELETE FROM trainee WHERE Trainee_ID = @ID";
+                string query = "DELETE FROM trainee WHERE trainee_id = @ID";
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@ID", id);
@@ -222,26 +222,26 @@ namespace PROHUB.Data
         {
             return new Trainees
             {
-                Trainee_ID = reader.GetInt32("Trainee_ID"),
-                Trainee_Name = reader.GetString("Trainee_Name"),
+                Trainee_ID = reader.GetInt32("trainee_id"),
+                Trainee_Name = reader.GetString("trainee_name"),
 
-                Trainee_Phone = reader.IsDBNull("Trainee_Phone") ? null : reader.GetString("Trainee_Phone"),
-                Trainee_NIC = reader.IsDBNull("Trainee_NIC") ? null : reader.GetString("Trainee_NIC"),
-                Trainee_Email = reader.IsDBNull("Trainee_Email") ? null : reader.GetString("Trainee_Email"),
-                Trainee_HomeAddress = reader.IsDBNull("Trainee_HomeAddress") ? null : reader.GetString("Trainee_HomeAddress"),
+                Trainee_Phone = reader.IsDBNull("trainee_phone") ? null : reader.GetString("trainee_phone"),
+                Trainee_NIC = reader.IsDBNull("trainee_nic") ? null : reader.GetString("trainee_nic"),
+                Trainee_Email = reader.IsDBNull("trainee_email") ? null : reader.GetString("trainee_email"),
+                Trainee_HomeAddress = reader.IsDBNull("trainee_homeaddress") ? null : reader.GetString("trainee_homeaddress"),
 
-                Training_StartDate = reader.IsDBNull("Training_StartDate") ? null : reader.GetDateTime("Training_StartDate"),
-                Training_EndDate = reader.IsDBNull("Training_EndDate") ? null : reader.GetDateTime("Training_EndDate"),
+                Training_StartDate = reader.IsDBNull("training_startdate") ? null : reader.GetDateTime("training_startdate"),
+                Training_EndDate = reader.IsDBNull("training_enddate") ? null : reader.GetDateTime("training_enddate"),
 
-                Institute = reader.IsDBNull("Institute") ? null : reader.GetString("Institute"),
-                Languages_Known = reader.IsDBNull("Languages_Known") ? null : reader.GetString("Languages_Known"),
+                Institute = reader.IsDBNull("institute") ? null : reader.GetString("institute"),
+                Languages_Known = reader.IsDBNull("languages_known") ? null : reader.GetString("languages_known"),
 
-                Supervisor = reader.IsDBNull("Supervisor") ? null : reader.GetInt32("Supervisor"),
+                Supervisor = reader.IsDBNull("supervisor") ? null : reader.GetInt32("supervisor"),
                 field_of_spec_id = reader.IsDBNull("field_of_spec_id") ? null : reader.GetInt32("field_of_spec_id"),
 
-                Target_Date = reader.IsDBNull("Target_Date") ? null : reader.GetDateTime("Target_Date"),
+                Target_Date = reader.IsDBNull("target_date") ? null : reader.GetDateTime("target_date"),
 
-                AssignedWork_Desc = reader.IsDBNull("AssignedWork_Desc") ? null : reader.GetString("AssignedWork_Desc"),
+                AssignedWork_Desc = reader.IsDBNull("assignedwork_desc") ? null : reader.GetString("assignedwork_desc"),
 
                 payment_start_date = reader.IsDBNull("payment_start_date") ? null : reader.GetDateTime("payment_start_date"),
                 payment_end_date = reader.IsDBNull("payment_end_date") ? null : reader.GetDateTime("payment_end_date"),
@@ -249,7 +249,7 @@ namespace PROHUB.Data
                 // This matches the new column name in your database
                 requested_payment_date = reader.IsDBNull("requested_payment_date") ? null : reader.GetDateTime("requested_payment_date"),
 
-                absent_Count = reader.IsDBNull("absent_Count") ? 0 : reader.GetInt32("absent_Count"),
+                absent_Count = reader.IsDBNull("absent_count") ? 0 : reader.GetInt32("absent_count"),
 
                 terminated_date = reader.IsDBNull("terminated_date") ? null : reader.GetDateTime("terminated_date"),
                 terminated_reason = reader.IsDBNull("terminated_reason") ? null : reader.GetString("terminated_reason"),

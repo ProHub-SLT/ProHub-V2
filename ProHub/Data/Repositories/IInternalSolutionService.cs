@@ -52,11 +52,11 @@ namespace PROHUB.Data
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName
-                FROM Internal_Platforms isol
+                FROM internal_platforms isol
                 LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
                 LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
                 LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
-                LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
+                LEFT JOIN internal_platforms parent ON isol.MainAppID = parent.ID
                 LEFT JOIN ParentProject pp ON isol.ParentProjectID = pp.ParentProjectID;";
 
             using var command = new MySqlCommand(query, connection);
@@ -74,11 +74,11 @@ namespace PROHUB.Data
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName
-                FROM Internal_Platforms isol
+                FROM internal_platforms isol
                 LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
                 LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
                 LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
-                LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
+                LEFT JOIN internal_platforms parent ON isol.MainAppID = parent.ID
                 LEFT JOIN ParentProject pp ON isol.ParentProjectID = pp.ParentProjectID
                 WHERE isol.ID = @ID;";
 
@@ -94,7 +94,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                INSERT INTO Internal_Platforms (
+                INSERT INTO internal_platforms (
                     App_Name, Developed_By, Developed_Team, StartDate, TargetDate,
                     Bit_bucket_repo, SDLCPhase, PercentageDone, Status, StatusDate,
                     Bus_Owner, App_Category, Scope, App_IP, App_URL, App_Users,
@@ -136,7 +136,7 @@ namespace PROHUB.Data
             {
                 // 1. Update the Main Solution Table
                 const string updateQuery = @"
-                    UPDATE Internal_Platforms SET
+                    UPDATE internal_platforms SET
                         App_Name = @App_Name, Developed_By = @Developed_By, Developed_Team = @Developed_Team,
                         StartDate = @StartDate, TargetDate = @TargetDate, Bit_bucket_repo = @Bit_bucket_repo,
                         SDLCPhase = @SDLCPhase, PercentageDone = @PercentageDone, Status = @Status,
@@ -211,7 +211,7 @@ namespace PROHUB.Data
         {
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
-            const string query = "DELETE FROM Internal_Platforms WHERE ID = @ID;";
+            const string query = "DELETE FROM internal_platforms WHERE ID = @ID;";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@ID", id);
             return await command.ExecuteNonQueryAsync() > 0;
@@ -221,7 +221,7 @@ namespace PROHUB.Data
         {
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
-            const string query = "SELECT COUNT(1) FROM Internal_Platforms WHERE ID = @ID;";
+            const string query = "SELECT COUNT(1) FROM internal_platforms WHERE ID = @ID;";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@ID", id);
             return Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
@@ -291,7 +291,7 @@ namespace PROHUB.Data
             var list = new List<InternalPlatform>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, App_Name FROM Internal_Platforms ORDER BY App_Name", conn);
+            using var cmd = new MySqlCommand("SELECT ID, App_Name FROM internal_platforms ORDER BY App_Name", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {

@@ -453,7 +453,7 @@ namespace ProHub.Controllers
 
                 string query = @"
             SELECT ip.App_Name, ip.Price, ip.LaunchedDate, sp.Phase AS SDLCPhaseName
-            FROM Internal_Platforms ip
+            FROM internal_platforms ip
             LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
             WHERE ip.LaunchedDate IS NOT NULL AND ip.Price > 0
             ORDER BY ip.LaunchedDate;
@@ -557,7 +557,7 @@ namespace ProHub.Controllers
                                     ip.LaunchedDate,
                                     sp.Phase AS SDLCPhase,
                                     emp.Emp_Name AS DevelopedBy
-                                FROM Internal_Platforms ip
+                                FROM internal_platforms ip
                                 LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
                                 LEFT JOIN employee emp ON ip.Developed_By = emp.Emp_ID
                                 WHERE ip.LaunchedDate IS NOT NULL

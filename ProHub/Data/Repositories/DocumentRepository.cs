@@ -56,7 +56,7 @@ namespace ProHub.Data
             string sql = @"
         SELECT d.*, ip.App_Name AS SolutionName, e.Emp_Name AS CreatedByName
         FROM Document d
-        LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
+        LEFT JOIN internal_platforms ip ON d.Solution_ID = ip.ID
         LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
           AND (@solutionId IS NULL OR d.Solution_ID = @solutionId)
@@ -113,7 +113,7 @@ namespace ProHub.Data
             string sql = @"
         SELECT COUNT(*) 
         FROM Document d
-        LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
+        LEFT JOIN internal_platforms ip ON d.Solution_ID = ip.ID
         LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
           AND (@solutionId IS NULL OR d.Solution_ID = @solutionId)
@@ -242,7 +242,7 @@ namespace ProHub.Data
             string sql = @"
                 SELECT d.*, ip.App_Name AS SolutionName, e.Emp_Name AS CreatedByName
                 FROM Document d
-                LEFT JOIN Internal_Platforms ip ON d.Solution_ID = ip.ID
+                LEFT JOIN internal_platforms ip ON d.Solution_ID = ip.ID
                 LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
                 LEFT JOIN employee e ON d.Created_By = e.Emp_ID
                 WHERE d.ID = @id";

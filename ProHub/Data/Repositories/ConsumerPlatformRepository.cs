@@ -341,7 +341,7 @@ namespace ProHub.Data
             var list = new List<InternalPlatform>();
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT ID, App_Name FROM Internal_Platforms ORDER BY App_Name", conn);
+            using var cmd = new MySqlCommand("SELECT ID, App_Name FROM internal_platforms ORDER BY App_Name", conn);
             using var r = cmd.ExecuteReader();
             while (r.Read())
                 list.Add(new InternalPlatform { Id = r.GetInt32(0), AppName = r.GetString(1) });

@@ -111,11 +111,11 @@ namespace ProHub.Controllers
                     LIMIT 1
                 ) AS LastComment
 
-            FROM Internal_Platforms p
+            FROM internal_platforms p
             INNER JOIN SDLCPhas s ON p.SDLCPhase = s.ID
             LEFT JOIN employee e ON p.Developed_By = e.Emp_Id
             LEFT JOIN ParentProject pr ON p.ParentProjectID = pr.ParentProjectID
-            LEFT JOIN Internal_Platforms m ON p.MainAppID = m.ID -- JOIN Self to get Main App Name
+            LEFT JOIN internal_platforms m ON p.MainAppID = m.ID -- JOIN Self to get Main App Name
             
             WHERE s.Phase = 'Abandoned'
               AND (p.App_Name LIKE @search OR e.Emp_Name LIKE @search);
@@ -381,14 +381,14 @@ namespace ProHub.Controllers
 
                             p.SSLCertificateExpDate
 
-                        FROM Internal_Platforms p
+                        FROM internal_platforms p
                         LEFT JOIN employee d ON p.Developed_By = d.Emp_Id
                         LEFT JOIN employee b1 ON p.BackupOfficer_1 = b1.Emp_Id
                         LEFT JOIN employee b2 ON p.BackupOfficer_2 = b2.Emp_Id
                         LEFT JOIN TargetEndUser u ON p.EndUserType = u.Id
                         LEFT JOIN ParentProject pr ON p.ParentProjectID = pr.ParentProjectID
                         LEFT JOIN SDLCPhas s ON p.SDLCPhase = s.ID
-                        LEFT JOIN Internal_Platforms m ON p.MainAppID = m.ID
+                        LEFT JOIN internal_platforms m ON p.MainAppID = m.ID
 
                         WHERE p.ID = @Id;
                     ";

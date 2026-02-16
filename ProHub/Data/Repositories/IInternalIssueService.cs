@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using Microsoft.Extensions.Configuration;
+﻿﻿using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using ProHub.Models;
 using PROHUB.Models;
@@ -58,7 +58,7 @@ namespace PROHUB.Data
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM Internal_Issues ii
-                LEFT JOIN Internal_Platforms ip ON ii.Internal_APP = ip.ID
+                LEFT JOIN internal_platforms ip ON ii.Internal_APP = ip.ID
                 LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
                 LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
                 LEFT JOIN employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
@@ -89,7 +89,7 @@ namespace PROHUB.Data
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM Internal_Issues ii
-                LEFT JOIN Internal_Platforms ip ON ii.Internal_APP = ip.ID
+                LEFT JOIN internal_platforms ip ON ii.Internal_APP = ip.ID
                 LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
                 LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
                 LEFT JOIN employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
@@ -127,7 +127,7 @@ namespace PROHUB.Data
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
                 FROM Internal_Issues ii
-                LEFT JOIN Internal_Platforms ip ON ii.Internal_APP = ip.ID
+                LEFT JOIN internal_platforms ip ON ii.Internal_APP = ip.ID
                 LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
                 LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
                 LEFT JOIN employee emp_assigned_by ON ii.Assigned_By = emp_assigned_by.Emp_ID
@@ -282,7 +282,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            const string query = "SELECT ID, App_Name FROM Internal_Platforms ORDER BY App_Name;";
+            const string query = "SELECT ID, App_Name FROM internal_platforms ORDER BY App_Name;";
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())

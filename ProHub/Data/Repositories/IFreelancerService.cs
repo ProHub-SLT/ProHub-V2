@@ -38,11 +38,11 @@ namespace PROHUB.Services
             await connection.OpenAsync();
 
             const string query = @"
-                SELECT f.*, t.TaskId, t.ID, t.TaskName, t.Specification, t.Payment, 
-                       t.DeliveryDueDate, t.Status, t.Paid, t.FreelancerId
+                SELECT f.*, t.taskid, t.id, t.taskname, t.specification, t.payment, 
+                       t.deliveryduedate, t.status, t.paid, t.freelancerid
                 FROM freelancers f
-                LEFT JOIN tasks t ON f.FreelancerId = t.FreelancerId
-                ORDER BY f.FreelancerId, t.TaskId";
+                LEFT JOIN tasks t ON f.freelancerid = t.freelancerid
+                ORDER BY f.freelancerid, t.taskid";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = (MySqlDataReader)await command.ExecuteReaderAsync();
@@ -52,22 +52,22 @@ namespace PROHUB.Services
 
             while (await reader.ReadAsync())
             {
-                int freelancerId = reader.GetInt32(reader.GetOrdinal("FreelancerId"));
+                int freelancerId = reader.GetInt32(reader.GetOrdinal("freelancerid"));
 
                 if (freelancerId != currentFreelancerId)
                 {
                     currentFreelancer = new Freelancer
                     {
                         FreelancerId = freelancerId,
-                        Name = reader.GetString(reader.GetOrdinal("Name")),
-                        NIC = reader.GetString(reader.GetOrdinal("NIC")),
-                        ProjectName = reader.GetString(reader.GetOrdinal("ProjectName")),
-                        ProjectScope = reader.IsDBNull(reader.GetOrdinal("ProjectScope")) ? "" : reader.GetString("ProjectScope"),
-                        Amount = reader.IsDBNull(reader.GetOrdinal("Amount")) ? "" : reader.GetString("Amount"),
-                        BudgetAvailable = reader.IsDBNull(reader.GetOrdinal("BudgetAvailable")) ? "" : reader.GetString("BudgetAvailable"),
-                        StartDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("StartDate")),
-                        EndDate = reader.IsDBNull(reader.GetOrdinal("EndDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("EndDate")),
-                        Duration = reader.IsDBNull(reader.GetOrdinal("Duration")) ? "" : reader.GetString("Duration"),
+                        Name = reader.GetString(reader.GetOrdinal("name")),
+                        NIC = reader.GetString(reader.GetOrdinal("nic")),
+                        ProjectName = reader.GetString(reader.GetOrdinal("projectname")),
+                        ProjectScope = reader.IsDBNull(reader.GetOrdinal("projectscope")) ? "" : reader.GetString("projectscope"),
+                        Amount = reader.IsDBNull(reader.GetOrdinal("amount")) ? "" : reader.GetString("amount"),
+                        BudgetAvailable = reader.IsDBNull(reader.GetOrdinal("budgetavailable")) ? "" : reader.GetString("budgetavailable"),
+                        StartDate = reader.IsDBNull(reader.GetOrdinal("startdate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("startdate")),
+                        EndDate = reader.IsDBNull(reader.GetOrdinal("enddate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("enddate")),
+                        Duration = reader.IsDBNull(reader.GetOrdinal("duration")) ? "" : reader.GetString("duration"),
                         Tasks = new List<FreelancerTaskViewModel>()
                     };
 
@@ -75,18 +75,18 @@ namespace PROHUB.Services
                     currentFreelancerId = freelancerId;
                 }
 
-                if (!reader.IsDBNull(reader.GetOrdinal("TaskId")) && currentFreelancer != null)
+                if (!reader.IsDBNull(reader.GetOrdinal("taskid")) && currentFreelancer != null)
                 {
                     var task = new FreelancerTaskViewModel
                     {
-                        TaskId = reader.GetInt32("TaskId"),
-                        ID = reader.GetInt32("ID"),
-                        TaskName = reader.IsDBNull(reader.GetOrdinal("TaskName")) ? "" : reader.GetString("TaskName"),
-                        Specification = reader.IsDBNull(reader.GetOrdinal("Specification")) ? "" : reader.GetString("Specification"),
-                        Payment = reader.IsDBNull(reader.GetOrdinal("Payment")) ? "" : reader.GetString("Payment"),
-                        DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("DeliveryDueDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("DeliveryDueDate")),
-                        Status = reader.IsDBNull(reader.GetOrdinal("Status")) ? "Pending" : reader.GetString("Status"),
-                        Paid = reader.IsDBNull(reader.GetOrdinal("Paid")) ? "No" : reader.GetString("Paid")
+                        TaskId = reader.GetInt32("taskid"),
+                        ID = reader.GetInt32("id"),
+                        TaskName = reader.IsDBNull(reader.GetOrdinal("taskname")) ? "" : reader.GetString("taskname"),
+                        Specification = reader.IsDBNull(reader.GetOrdinal("specification")) ? "" : reader.GetString("specification"),
+                        Payment = reader.IsDBNull(reader.GetOrdinal("payment")) ? "" : reader.GetString("payment"),
+                        DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("deliveryduedate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("deliveryduedate")),
+                        Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "Pending" : reader.GetString("status"),
+                        Paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? "No" : reader.GetString("paid")
                     };
 
                     currentFreelancer.Tasks.Add(task);
@@ -105,12 +105,12 @@ namespace PROHUB.Services
             await connection.OpenAsync();
 
             const string query = @"
-                SELECT f.*, t.TaskId, t.ID, t.TaskName, t.Specification, t.Payment, 
-                       t.DeliveryDueDate, t.Status, t.Paid, t.FreelancerId
+                SELECT f.*, t.taskid, t.id, t.taskname, t.specification, t.payment, 
+                       t.deliveryduedate, t.status, t.paid, t.freelancerid
                 FROM freelancers f
-                LEFT JOIN tasks t ON f.FreelancerId = t.FreelancerId
-                WHERE f.FreelancerId = @FreelancerId
-                ORDER BY t.TaskId";
+                LEFT JOIN tasks t ON f.freelancerid = t.freelancerid
+                WHERE f.freelancerid = @FreelancerId
+                ORDER BY t.taskid";
 
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@FreelancerId", freelancerId);
@@ -125,32 +125,32 @@ namespace PROHUB.Services
                 {
                     freelancer = new Freelancer
                     {
-                        FreelancerId = reader.GetInt32(reader.GetOrdinal("FreelancerId")),
-                        Name = reader.GetString(reader.GetOrdinal("Name")),
-                        NIC = reader.GetString(reader.GetOrdinal("NIC")),
-                        ProjectName = reader.GetString(reader.GetOrdinal("ProjectName")),
-                        ProjectScope = reader.IsDBNull(reader.GetOrdinal("ProjectScope")) ? "" : reader.GetString("ProjectScope"),
-                        Amount = reader.IsDBNull(reader.GetOrdinal("Amount")) ? "" : reader.GetString("Amount"),
-                        BudgetAvailable = reader.IsDBNull(reader.GetOrdinal("BudgetAvailable")) ? "" : reader.GetString("BudgetAvailable"),
-                        StartDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("StartDate")),
-                        EndDate = reader.IsDBNull(reader.GetOrdinal("EndDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("EndDate")),
-                        Duration = reader.IsDBNull(reader.GetOrdinal("Duration")) ? "" : reader.GetString("Duration"),
+                        FreelancerId = reader.GetInt32(reader.GetOrdinal("freelancerid")),
+                        Name = reader.GetString(reader.GetOrdinal("name")),
+                        NIC = reader.GetString(reader.GetOrdinal("nic")),
+                        ProjectName = reader.GetString(reader.GetOrdinal("projectname")),
+                        ProjectScope = reader.IsDBNull(reader.GetOrdinal("projectscope")) ? "" : reader.GetString("projectscope"),
+                        Amount = reader.IsDBNull(reader.GetOrdinal("amount")) ? "" : reader.GetString("amount"),
+                        BudgetAvailable = reader.IsDBNull(reader.GetOrdinal("budgetavailable")) ? "" : reader.GetString("budgetavailable"),
+                        StartDate = reader.IsDBNull(reader.GetOrdinal("startdate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("startdate")),
+                        EndDate = reader.IsDBNull(reader.GetOrdinal("enddate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("enddate")),
+                        Duration = reader.IsDBNull(reader.GetOrdinal("duration")) ? "" : reader.GetString("duration"),
                         Tasks = new List<FreelancerTaskViewModel>()
                     };
                 }
 
-                if (!reader.IsDBNull(reader.GetOrdinal("TaskId")))
+                if (!reader.IsDBNull(reader.GetOrdinal("taskid")))
                 {
                     var task = new FreelancerTaskViewModel
                     {
-                        TaskId = reader.GetInt32("TaskId"),
-                        ID = reader.GetInt32("ID"),
-                        TaskName = reader.IsDBNull(reader.GetOrdinal("TaskName")) ? "" : reader.GetString("TaskName"),
-                        Specification = reader.IsDBNull(reader.GetOrdinal("Specification")) ? "" : reader.GetString("Specification"),
-                        Payment = reader.IsDBNull(reader.GetOrdinal("Payment")) ? "" : reader.GetString("Payment"),
-                        DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("DeliveryDueDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("DeliveryDueDate")),
-                        Status = reader.IsDBNull(reader.GetOrdinal("Status")) ? "Pending" : reader.GetString("Status"),
-                        Paid = reader.IsDBNull(reader.GetOrdinal("Paid")) ? "No" : reader.GetString("Paid")
+                        TaskId = reader.GetInt32("taskid"),
+                        ID = reader.GetInt32("id"),
+                        TaskName = reader.IsDBNull(reader.GetOrdinal("taskname")) ? "" : reader.GetString("taskname"),
+                        Specification = reader.IsDBNull(reader.GetOrdinal("specification")) ? "" : reader.GetString("specification"),
+                        Payment = reader.IsDBNull(reader.GetOrdinal("payment")) ? "" : reader.GetString("payment"),
+                        DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("deliveryduedate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("deliveryduedate")),
+                        Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "Pending" : reader.GetString("status"),
+                        Paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? "No" : reader.GetString("paid")
                     };
 
                     freelancer.Tasks.Add(task);
@@ -172,7 +172,7 @@ namespace PROHUB.Services
             try
             {
                 const string freelancerQuery = @"
-                    INSERT INTO freelancers (Name, NIC, ProjectName, ProjectScope, Amount, BudgetAvailable, StartDate, EndDate, Duration)
+                    INSERT INTO freelancers (name, nic, projectname, projectscope, amount, budgetavailable, startdate, enddate, duration)
                     VALUES (@Name, @NIC, @ProjectName, @ProjectScope, @Amount, @BudgetAvailable, @StartDate, @EndDate, @Duration);
                     SELECT LAST_INSERT_ID();";
 
@@ -184,7 +184,7 @@ namespace PROHUB.Services
                 foreach (var task in freelancer.Tasks)
                 {
                     const string taskQuery = @"
-                        INSERT INTO tasks (ID, TaskName, Specification, Payment, DeliveryDueDate, Status, Paid, FreelancerId)
+                        INSERT INTO tasks (id, taskname, specification, payment, deliveryduedate, status, paid, freelancerid)
                         VALUES (@ID, @TaskName, @Specification, @Payment, @DeliveryDueDate, @Status, @Paid, @FreelancerId)";
 
                     using var taskCommand = new MySqlCommand(taskQuery, connection, transaction);
@@ -216,10 +216,10 @@ namespace PROHUB.Services
             {
                 const string freelancerQuery = @"
                     UPDATE freelancers 
-                    SET Name=@Name, NIC=@NIC, ProjectName=@ProjectName, ProjectScope=@ProjectScope,
-                        Amount=@Amount, BudgetAvailable=@BudgetAvailable, StartDate=@StartDate, 
-                        EndDate=@EndDate, Duration=@Duration
-                    WHERE FreelancerId=@FreelancerId";
+                    SET name=@Name, nic=@NIC, projectname=@ProjectName, projectscope=@ProjectScope,
+                        amount=@Amount, budgetavailable=@BudgetAvailable, startdate=@StartDate, 
+                        enddate=@EndDate, duration=@Duration
+                    WHERE freelancerid=@FreelancerId";
 
                 using var freelancerCommand = new MySqlCommand(freelancerQuery, connection, transaction);
                 freelancerCommand.Parameters.AddWithValue("@FreelancerId", freelancer.FreelancerId);
@@ -228,7 +228,7 @@ namespace PROHUB.Services
                 await freelancerCommand.ExecuteNonQueryAsync();
 
                 // Refresh tasks
-                const string deleteTasks = "DELETE FROM Tasks WHERE FreelancerId = @FreelancerId";
+                const string deleteTasks = "DELETE FROM tasks WHERE freelancerid = @FreelancerId";
                 using var deleteCommand = new MySqlCommand(deleteTasks, connection, transaction);
                 deleteCommand.Parameters.AddWithValue("@FreelancerId", freelancer.FreelancerId);
                 await deleteCommand.ExecuteNonQueryAsync();
@@ -236,7 +236,7 @@ namespace PROHUB.Services
                 foreach (var task in freelancer.Tasks)
                 {
                     const string insertTask = @"
-                        INSERT INTO tasks (ID, TaskName, Specification, Payment, DeliveryDueDate, Status, Paid, FreelancerId)
+                        INSERT INTO tasks (id, taskname, specification, payment, deliveryduedate, status, paid, freelancerid)
                         VALUES (@ID, @TaskName, @Specification, @Payment, @DeliveryDueDate, @Status, @Paid, @FreelancerId)";
 
                     using var taskCommand = new MySqlCommand(insertTask, connection, transaction);
@@ -263,7 +263,7 @@ namespace PROHUB.Services
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "DELETE FROM freelancers WHERE FreelancerId = @FreelancerId";
+            const string query = "DELETE FROM freelancers WHERE freelancerid = @FreelancerId";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@FreelancerId", freelancerId);
 
@@ -280,7 +280,7 @@ namespace PROHUB.Services
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "SELECT * FROM tasks WHERE FreelancerId = @FreelancerId";
+            const string query = "SELECT taskid, id, taskname, specification, payment, deliveryduedate, status, paid, freelancerid FROM tasks WHERE freelancerid = @FreelancerId";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@FreelancerId", freelancerId);
 
@@ -290,14 +290,14 @@ namespace PROHUB.Services
             {
                 tasks.Add(new FreelancerTaskViewModel
                 {
-                    TaskId = reader.GetInt32("TaskId"),
-                    ID = reader.GetInt32("ID"),
-                    TaskName = reader.IsDBNull(reader.GetOrdinal("TaskName")) ? "" : reader.GetString("TaskName"),
-                    Specification = reader.IsDBNull(reader.GetOrdinal("Specification")) ? "" : reader.GetString("Specification"),
-                    Payment = reader.IsDBNull(reader.GetOrdinal("Payment")) ? "" : reader.GetString("Payment"),
-                    DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("DeliveryDueDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("DeliveryDueDate")),
-                    Status = reader.IsDBNull(reader.GetOrdinal("Status")) ? "Pending" : reader.GetString("Status"),
-                    Paid = reader.IsDBNull(reader.GetOrdinal("Paid")) ? "No" : reader.GetString("Paid")
+                    TaskId = reader.GetInt32("taskid"),
+                    ID = reader.GetInt32("id"),
+                    TaskName = reader.IsDBNull(reader.GetOrdinal("taskname")) ? "" : reader.GetString("taskname"),
+                    Specification = reader.IsDBNull(reader.GetOrdinal("specification")) ? "" : reader.GetString("specification"),
+                    Payment = reader.IsDBNull(reader.GetOrdinal("payment")) ? "" : reader.GetString("payment"),
+                    DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("deliveryduedate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("deliveryduedate")),
+                    Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "Pending" : reader.GetString("status"),
+                    Paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? "No" : reader.GetString("paid")
                 });
             }
 

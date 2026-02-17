@@ -453,15 +453,15 @@ namespace ProHub.Data
 FROM internal_platforms ip
 LEFT JOIN employee e 
     ON ip.Developed_By = e.Emp_ID
-LEFT JOIN SDLCPhas sp 
+LEFT JOIN sdlcphas sp 
     ON ip.SDLCPhase = sp.ID
-LEFT JOIN ParentProject pp 
+LEFT JOIN parentproject pp 
     ON ip.ParentProjectID = pp.ParentProjectID
 LEFT JOIN internal_platforms ma 
     ON ip.MainAppID = ma.ID
 LEFT JOIN (
     SELECT Solution_ID, Comment
-    FROM Internal_Project_Comments
+    FROM internal_project_comments
     WHERE ID IN (
         SELECT MAX(ID)
         FROM Internal_Project_Comments
@@ -610,9 +610,9 @@ WHERE sp.Phase = 'Retired';";
         FROM internal_platforms ip
         LEFT JOIN employee e 
             ON ip.Developed_By = e.Emp_ID
-        LEFT JOIN SDLCPhas sp 
+        LEFT JOIN sdlcphas sp 
             ON ip.SDLCPhase = sp.ID
-        LEFT JOIN ParentProject pp 
+        LEFT JOIN parentproject pp 
             ON ip.ParentProjectID = pp.ParentProjectID
         LEFT JOIN internal_platforms ma 
             ON ip.MainAppID = ma.ID
@@ -622,10 +622,10 @@ WHERE sp.Phase = 'Retired';";
             ON ip.BackupOfficer_2 = bo2.Emp_ID
         LEFT JOIN (
             SELECT Solution_ID, Comment
-            FROM Internal_Project_Comments
+            FROM internal_project_comments
             WHERE ID IN (
                 SELECT MAX(ID)
-                FROM Internal_Project_Comments
+                FROM internal_project_comments
                 GROUP BY Solution_ID
             )
         ) ipc 

@@ -464,7 +464,7 @@ LEFT JOIN (
     FROM internal_project_comments
     WHERE ID IN (
         SELECT MAX(ID)
-        FROM Internal_Project_Comments
+        FROM internal_project_comments
         GROUP BY Solution_ID
     )
 ) ipc 

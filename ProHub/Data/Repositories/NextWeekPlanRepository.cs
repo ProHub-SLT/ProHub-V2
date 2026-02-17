@@ -35,7 +35,7 @@ namespace ProHub.Data
             string sql = @"
                 SELECT ID, StartDate, EndDate, ExternalPlatform, InternalApp,
                        WorkPlanDesc, UpdatedBy, UpdatedOn
-                FROM WorkPlan
+                FROM workplan
                 WHERE StartDate = @start
                 ORDER BY UpdatedOn DESC";
 
@@ -78,7 +78,7 @@ namespace ProHub.Data
             conn.Open();
             // Updated query to match existing database schema
             string sql = @"
-                INSERT INTO WorkPlan 
+                INSERT INTO workplan 
                 (StartDate, EndDate, ExternalPlatform, InternalApp,
                  WorkPlanDesc, UpdatedBy, UpdatedOn)
                 VALUES (@s, @e, @ep, @ia, @wp, @ub, NOW())";
@@ -97,7 +97,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("DELETE FROM WorkPlan WHERE ID = @id", conn);
+            using var cmd = new MySqlCommand("DELETE FROM workplan WHERE ID = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();
         }
@@ -106,7 +106,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("DELETE FROM WorkPlan WHERE ID = @id", conn);
+            using var cmd = new MySqlCommand("DELETE FROM workplan WHERE ID = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();
         }
@@ -121,7 +121,7 @@ namespace ProHub.Data
             string sql = @"
                 SELECT ID, StartDate, EndDate, ExternalPlatform, InternalApp,
                        WorkPlanDesc, UpdatedBy, UpdatedOn
-                FROM WorkPlan
+                FROM workplan
                 WHERE ID = @id";
 
             using var cmd = new MySqlCommand(sql, conn);
@@ -164,7 +164,7 @@ namespace ProHub.Data
 
             // Updated query to match existing database schema
             string sql = @"
-                UPDATE WorkPlan 
+                UPDATE workplan 
                 SET StartDate = @s, 
                     EndDate = @e, 
                     ExternalPlatform = @ep, 

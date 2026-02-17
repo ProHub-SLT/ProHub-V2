@@ -205,7 +205,7 @@ namespace PROHUB.Data
                     c.ID AS CompanyId, c.Company_Name AS CompanyName,
                     e2.Emp_ID AS BackupOfficer1Id, e2.Emp_Name AS BackupOfficer1Name,
                     e3.Emp_ID AS BackupOfficer2Id, e3.Emp_Name AS BackupOfficer2Name,
-                    (SELECT COUNT(*) FROM External_Project_Comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
+                    (SELECT COUNT(*) FROM external_project_comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
                 FROM external_platforms ep
                 LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
                 LEFT JOIN employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
@@ -342,7 +342,7 @@ namespace PROHUB.Data
             e.Emp_Name as Developed_By_Name,   
             st.Sales_Team_Name                 
         FROM external_platforms ep
-        LEFT JOIN sdlcphase sp ON ep.SDLCStage = sp.ID
+        LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
         LEFT JOIN company c ON ep.Company_ID = c.ID
         LEFT JOIN employee e ON ep.Developed_By = e.Emp_ID        
         LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID       

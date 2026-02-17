@@ -55,7 +55,7 @@ namespace ProHub.Data
                     c.Company_Name,
                     cc.Platform_ID,
                     ep.Platform_Name
-                FROM CustomerContacts cc
+                FROM customercontacts cc
                 LEFT JOIN company c ON cc.Contact_Company = c.Id
                 LEFT JOIN external_platforms ep ON cc.Platform_ID = ep.Id
                 WHERE 1=1";
@@ -115,7 +115,7 @@ namespace ProHub.Data
                     cc.Contact_Designation,
                     cc.Contact_Company,
                     c.Company_Name
-                FROM CustomerContacts cc
+                FROM customercontacts cc
                 LEFT JOIN company c ON cc.Contact_Company = c.Id
                 LEFT JOIN external_platforms ep ON cc.Platform_ID = ep.Id
                 WHERE cc.Id = @id";

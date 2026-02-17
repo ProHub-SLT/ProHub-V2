@@ -7,7 +7,7 @@ using ProHub.Models;
 using PROHUB.Data;
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Data; 
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -95,7 +95,7 @@ namespace ProHub.Controllers
             {
                 _logger.LogError(ex, "Error creating solution.");
                 ModelState.AddModelError(string.Empty, $"An error occurred: {GetInnermostMessage(ex)}");
-                TempData["ErrorMessage"] = "An internal error occurred.";
+                TempData["ErrorMessage"] = $"Error: {GetInnermostMessage(ex)}";
                 return View(model);
             }
         }

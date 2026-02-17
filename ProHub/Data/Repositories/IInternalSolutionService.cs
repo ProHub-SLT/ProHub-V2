@@ -263,7 +263,7 @@ namespace PROHUB.Data
             var list = new List<SDLCPhase>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, Phase FROM SDLCPhas ORDER BY OrderSeq, Phase", conn);
+            using var cmd = new MySqlCommand("SELECT ID, Phase FROM sdlcphas ORDER BY OrderSeq, Phase", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {
@@ -277,7 +277,7 @@ namespace PROHUB.Data
             var list = new List<TargetEndUser>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, EndUserType FROM Targetenduser ORDER BY EndUserType", conn);
+            using var cmd = new MySqlCommand("SELECT ID, EndUserType FROM targetenduser ORDER BY EndUserType", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {
@@ -305,7 +305,7 @@ namespace PROHUB.Data
             var list = new List<ParentProject>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ParentProjectID, ParentProjectGroup FROM ParentProject ORDER BY ParentProjectGroup", conn);
+            using var cmd = new MySqlCommand("SELECT ParentProjectID, ParentProjectGroup FROM parentproject ORDER BY ParentProjectGroup", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {

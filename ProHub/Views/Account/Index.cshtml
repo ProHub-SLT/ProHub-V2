@@ -25,7 +25,7 @@
             justify-content: center;
             padding: 20px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
             color: white;
         }
 
@@ -130,7 +130,6 @@
             height: 100%;
         }
 
-        /* === ALL YOUR ORIGINAL STYLES (unchanged except minor z-index) === */
         .container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -174,12 +173,17 @@
             position: relative;
             animation: pulse 3s infinite ease-in-out;
             margin-right: 25px;
+            flex-shrink: 0;
         }
         @@keyframes pulse {
             0%, 100% { box-shadow: 0 15px 50px rgba(0,0,0,0.3), 0 0 0 0 rgba(52,152,219,0.4); }
             50% { box-shadow: 0 15px 60px rgba(0,0,0,0.4), 0 0 0 20px rgba(52,152,219,0); }
         }
-        .logo img { width: 75px; height: 75px; }
+        .logo img { 
+            width: 75px; 
+            height: 75px;
+            object-fit: contain;
+        }
         .prohub-brand {
             font-size: 3.5rem;
             font-weight: 700;
@@ -237,7 +241,6 @@
             to { width: 120px; }
         }
 
-        /* Login Card - unchanged */
         .login-card {
             background: rgba(255, 255, 255, 0.98);
             border-radius: 30px;
@@ -247,8 +250,9 @@
             overflow: hidden;
             animation: slideInRight 0.8s ease-out;
             position: relative;
-            max-width: 550px; /* 🔥 add this */
-            margin: auto;
+            max-width: 550px;
+            margin: 0 auto;
+            width: 100%;
         }
         @@keyframes slideInRight {
             from { opacity: 0; transform: translateX(50px); }
@@ -345,8 +349,17 @@
             100% { transform: scale(1.5); opacity: 0; }
         }
         .auth-icon i { font-size: 2.8rem; color: white; z-index: 1; }
-        .auth-title { font-size: 1.8rem; font-weight: 600; color: #2c3e50; margin-bottom: 15px; }
-        .auth-subtitle { color: #5a6c7d; margin-bottom: 40px; font-size: 1.05rem; }
+        .auth-title { 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            color: #2c3e50; 
+            margin-bottom: 15px;
+        }
+        .auth-subtitle { 
+            color: #5a6c7d; 
+            margin-bottom: 40px; 
+            font-size: 1.05rem;
+        }
         .azure-btn {
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
@@ -419,20 +432,355 @@
         .support-link a:hover::after { width: 100%; }
         .support-link a:hover { color: #39B54A; }
 
-        /* Responsive */
-        @@media (max-width: 1024px) {
-            .container { grid-template-columns: 1fr; gap: 50px; }
-            .left-section { text-align: center; }
-            .logo-container { justify-content: center; }
-            .decorative-line { margin: 40px auto; }
+        /* === RESPONSIVE DESIGN === */
+        
+        /* Tablets and smaller desktops */
+        @@media (max-width: 1200px) {
+            .container {
+                gap: 60px;
+                max-width: 1000px;
+            }
+            .logo {
+                width: 120px;
+                height: 120px;
+                margin-right: 20px;
+            }
+            .logo img {
+                width: 65px;
+                height: 65px;
+            }
+            .prohub-brand {
+                font-size: 3rem;
+            }
+            .main-title {
+                font-size: 3.2rem;
+            }
+            .subtitle {
+                font-size: 1.2rem;
+            }
         }
+
+        /* Tablets */
+        @@media (max-width: 1024px) {
+            .container { 
+                grid-template-columns: 1fr; 
+                gap: 50px;
+                padding: 20px;
+            }
+            .left-section { 
+                text-align: center; 
+                padding: 20px;
+            }
+            .logo-container { 
+                justify-content: center;
+                margin-bottom: 40px;
+            }
+            .decorative-line { 
+                margin: 30px auto;
+            }
+            .login-card {
+                max-width: 600px;
+            }
+        }
+
+        /* Small tablets and large phones */
         @@media (max-width: 768px) {
-            .main-title { font-size: 2.8rem; }
-            .prohub-brand { font-size: 2.5rem; }
-            .login-header { padding: 40px 30px; }
-            .login-header h2 { font-size: 2rem; }
-            .auth-section { padding: 40px 30px; }
-            .azure-btn { padding: 18px 40px; font-size: 1rem; }
+            body {
+                padding: 15px;
+            }
+            .container {
+                gap: 40px;
+            }
+            .left-section {
+                padding: 15px;
+            }
+            .logo-container {
+                margin-bottom: 30px;
+                flex-direction: column;
+                gap: 20px;
+            }
+            .logo {
+                width: 100px;
+                height: 100px;
+                margin-right: 0;
+            }
+            .logo img {
+                width: 55px;
+                height: 55px;
+            }
+            .prohub-brand { 
+                font-size: 2.5rem;
+            }
+            .prohub-tagline {
+                font-size: 0.85rem;
+                letter-spacing: 2px;
+            }
+            .main-title { 
+                font-size: 2.8rem;
+                margin-bottom: 15px;
+            }
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            .decorative-line {
+                width: 100px;
+                height: 3px;
+                margin: 25px auto;
+            }
+            .login-header { 
+                padding: 40px 30px;
+            }
+            .login-header h2 { 
+                font-size: 2rem;
+            }
+            .login-header p {
+                font-size: 1rem;
+            }
+            .auth-section { 
+                padding: 40px 30px;
+            }
+            .auth-icon {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 30px;
+            }
+            .auth-icon i {
+                font-size: 2.4rem;
+            }
+            .auth-title {
+                font-size: 1.5rem;
+            }
+            .auth-subtitle {
+                font-size: 1rem;
+                margin-bottom: 35px;
+            }
+            .azure-btn { 
+                padding: 18px 40px; 
+                font-size: 1rem;
+                gap: 12px;
+            }
+            .azure-btn i {
+                font-size: 1.4rem;
+            }
+            .support-link {
+                margin-top: 35px;
+                font-size: 0.95rem;
+            }
+            /* Adjust floating shapes for tablets */
+            .floating-shape:nth-child(1) {
+                width: 200px;
+                height: 200px;
+            }
+            .floating-shape:nth-child(3) {
+                width: 250px;
+                height: 250px;
+            }
+        }
+
+        /* Mobile phones */
+        @@media (max-width: 576px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                gap: 30px;
+            }
+            .left-section {
+                padding: 10px;
+            }
+            .logo-container {
+                margin-bottom: 25px;
+                gap: 15px;
+            }
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+            .logo img {
+                width: 45px;
+                height: 45px;
+            }
+            .prohub-brand {
+                font-size: 2rem;
+            }
+            .prohub-tagline {
+                font-size: 0.75rem;
+                letter-spacing: 1.5px;
+            }
+            .main-title {
+                font-size: 2.2rem;
+                margin-bottom: 12px;
+            }
+            .subtitle {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            .decorative-line {
+                width: 80px;
+                height: 3px;
+                margin: 20px auto;
+            }
+            .login-card {
+                border-radius: 20px;
+            }
+            .login-header {
+                padding: 30px 20px;
+            }
+            .login-header h2 {
+                font-size: 1.6rem;
+                margin-bottom: 10px;
+            }
+            .login-header p {
+                font-size: 0.95rem;
+            }
+            .auth-section {
+                padding: 30px 20px;
+            }
+            .auth-icon {
+                width: 70px;
+                height: 70px;
+                margin-bottom: 25px;
+            }
+            .auth-icon i {
+                font-size: 2rem;
+            }
+            .auth-title {
+                font-size: 1.3rem;
+                margin-bottom: 12px;
+            }
+            .auth-subtitle {
+                font-size: 0.95rem;
+                margin-bottom: 30px;
+            }
+            .azure-btn {
+                padding: 16px 30px;
+                font-size: 0.95rem;
+                gap: 10px;
+                border-radius: 12px;
+                width: 100%;
+                justify-content: center;
+            }
+            .azure-btn i {
+                font-size: 1.3rem;
+            }
+            .support-link {
+                margin-top: 30px;
+                font-size: 0.9rem;
+            }
+            /* Reduce floating shapes on mobile */
+            .floating-shape:nth-child(1),
+            .floating-shape:nth-child(3) {
+                width: 150px;
+                height: 150px;
+            }
+            .floating-shape:nth-child(2),
+            .floating-shape:nth-child(4) {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        /* Extra small phones */
+        @@media (max-width: 400px) {
+            .prohub-brand {
+                font-size: 1.8rem;
+            }
+            .main-title {
+                font-size: 2rem;
+            }
+            .subtitle {
+                font-size: 0.95rem;
+            }
+            .login-header h2 {
+                font-size: 1.4rem;
+            }
+            .auth-title {
+                font-size: 1.2rem;
+            }
+            .azure-btn {
+                padding: 14px 25px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Landscape mode adjustments for mobile */
+        @@media (max-width: 896px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+                align-items: flex-start;
+            }
+            .left-section {
+                padding: 15px;
+            }
+            .logo-container {
+                margin-bottom: 20px;
+                flex-direction: row;
+                gap: 15px;
+            }
+            .logo {
+                width: 70px;
+                height: 70px;
+                margin-right: 15px;
+            }
+            .logo img {
+                width: 40px;
+                height: 40px;
+            }
+            .prohub-brand {
+                font-size: 1.8rem;
+            }
+            .prohub-tagline {
+                font-size: 0.7rem;
+            }
+            .main-title {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            .decorative-line {
+                margin: 15px 0;
+            }
+            .login-header {
+                padding: 25px 20px;
+            }
+            .login-header h2 {
+                font-size: 1.4rem;
+            }
+            .login-header p {
+                font-size: 0.9rem;
+            }
+            .auth-section {
+                padding: 25px 20px;
+            }
+            .auth-icon {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 20px;
+            }
+            .auth-icon i {
+                font-size: 1.8rem;
+            }
+            .auth-title {
+                font-size: 1.1rem;
+            }
+            .auth-subtitle {
+                font-size: 0.85rem;
+                margin-bottom: 25px;
+            }
+            .azure-btn {
+                padding: 12px 25px;
+                font-size: 0.85rem;
+            }
+            .support-link {
+                margin-top: 20px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -498,6 +846,7 @@
         </div>
     </div>
 
+   
     <!-- Enhanced Particle System -->
     <script>
         // Enhanced particle system with floating geometric shapes

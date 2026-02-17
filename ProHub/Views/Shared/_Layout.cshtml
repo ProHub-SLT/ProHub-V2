@@ -2,6 +2,43 @@
 @using Microsoft.AspNetCore.Authentication.OpenIdConnect
 @using Microsoft.Identity.Web
 @using System.Security.Claims
+
+
+@using ProHub.Constants
+
+@{
+    // Get current user's roles
+    var rolesList = User.Claims
+                      .Where(c => c.Type == "app_role")
+                      .Select(c => c.Value)
+                      .Distinct(StringComparer.OrdinalIgnoreCase)
+                      .ToList();
+
+    // Role flags
+    bool isAdmin = rolesList.Contains(AppRoles.Admin, StringComparer.OrdinalIgnoreCase);
+    bool isDeveloper = rolesList.Contains(AppRoles.Developer, StringComparer.OrdinalIgnoreCase);
+    bool isViewOnly = rolesList.Contains(AppRoles.ViewOnly, StringComparer.OrdinalIgnoreCase);
+
+    bool isDPO = rolesList.Contains(AppRoles.DPO, StringComparer.OrdinalIgnoreCase);
+    bool isIshamp = rolesList.Contains(AppRoles.Ishamp, StringComparer.OrdinalIgnoreCase);
+    bool isNonDeveloper = rolesList.Contains(AppRoles.NonDeveloper, StringComparer.OrdinalIgnoreCase);
+    bool isInactive = rolesList.Contains(AppRoles.Inactive, StringComparer.OrdinalIgnoreCase);
+
+    // Privileged users
+    bool isPrivileged = isAdmin || isDeveloper;
+}
+
+
+
+@if (Context.Items["SessionExpired"] != null && (bool)Context.Items["SessionExpired"])
+{
+    <div class="alert alert-warning text-center">
+        Session expired. Please log in again.
+        <a href="@Url.Action("SignOut", "Account")">Log out</a>
+    </div>
+}
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -939,107 +976,152 @@
             <!-- Navigation Items -->
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Platforms/Solutions
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-prohub dropdown-menu-platforms">
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolution")">Internal Solutions - Operational</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionInprogress")">Internal Solutions - In Progress</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "RecentlyLaunched")">Internal Solutions - Recently Launched</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionRetired")">Internal Solutions - Retired</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionsAbandoned")">Internal Solutions - Abandoned</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ConsumerPlatform")">Customer Service Platform</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("index", "ExternalSolutions")">External Solutions - Operational</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("index", "ExternalSolutionsProspective")">External Solutions - Prospective</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ExternalSolutionRetired")">External Solutions - Retired</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Abandoned")">External Solutions - Abandoned</a></li>
-
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "ConsumerPlatform")">Internal Solutions - Backup Matrix</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "ExternalPlatform")">External Solutions - Backup Matrix</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ProjectedRevenue", "RevenueCal")">External Solutions - Projected Revenue</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ActualRevenue", "RevenueCal")">External Solutions - Financial Revenue</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("InternalProjectValue", "RevenueCal")">Internal Solutions - Annual Contribution</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            My Work
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-prohub">
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Create", "NextWeekPlans")">Update Weekly Plan</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "NextWeekPlans")">Weekly Plan - Report</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "NextWeekPlans")">My Applications - Backup Matrix</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Report Incidents
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-prohub">
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("List", "ExternalIssue")">External Solutions</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("List", "InternalIssue")">Internal Solutions</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "OtherSystemIssues")">Other Solutions</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Reference Data
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-prohub">
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Companies")">Companies/Customers</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "CustomerContacts")">Customer Contacts</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Employee")">Divisional Members</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ParentProjects")">Application Groups</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "FieldsOfSpecialization")">Fields of Specialization</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            DMS
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-prohub">
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalDocuments")">Internal Solutions Documents</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ExternalDocuments")">External Solutions Documents</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Project Activities
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-prohub">
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionsActivities")">Internal Solutions Activities</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ExternalSolutionsActivities")">External Solutions Activities</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Overtime")">Overtime Data</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Trainees
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-prohub">
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Trainee")">All Trainees</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ActiveTrainee", "Trainee")">Active Trainees</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("InactiveTrainee", "Trainee")">Inactive Trainees</a></li>
-                            <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("PaidTrainee", "Trainee")">Paid Trainees</a></li>
-                        </ul>
-                    </li>
 
 
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-prohub" href="@Url.Action("Index", "Partner")">
-                            Partners
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-prohub" href="@Url.Action("List", "Freelancer")">
-                            Freelancer
-                        </a>
-                    </li>
+                    @if (isDPO || isPrivileged || isNonDeveloper)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Platforms/Solutions
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-prohub dropdown-menu-platforms">
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolution")">Internal Solutions - Operational</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionInprogress")">Internal Solutions - In Progress</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "RecentlyLaunched")">Internal Solutions - Recently Launched</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionRetired")">Internal Solutions - Retired</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionsAbandoned")">Internal Solutions - Abandoned</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ConsumerPlatform")">Customer Service Platform</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("index", "ExternalSolutions")">External Solutions - Operational</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("index", "ExternalSolutionsProspective")">External Solutions - Prospective</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ExternalSolutionRetired")">External Solutions - Retired</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Abandoned")">External Solutions - Abandoned</a></li>
+
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "ConsumerPlatform")">Internal Solutions - Backup Matrix</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "ExternalPlatform")">External Solutions - Backup Matrix</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ProjectedRevenue", "RevenueCal")">External Solutions - Projected Revenue</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ActualRevenue", "RevenueCal")">External Solutions - Financial Revenue</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("InternalProjectValue", "RevenueCal")">Internal Solutions - Annual Contribution</a></li>
+                            </ul>
+                        </li>
+                    }
+
+
+                    @if (isPrivileged || isNonDeveloper)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                My Work
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-prohub">
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Create", "NextWeekPlans")">Update Weekly Plan</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "NextWeekPlans")">Weekly Plan - Report</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("DownloadBackupMatrix", "NextWeekPlans")">My Applications - Backup Matrix</a></li>
+                            </ul>
+                        </li>
+                    }
+                  
+
+
+                    @if (isIshamp || isDPO || isPrivileged || isNonDeveloper || isViewOnly)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Report Incidents
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-prohub">
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("List", "ExternalIssue")">External Solutions</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("List", "InternalIssue")">Internal Solutions</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "OtherSystemIssues")">Other Solutions</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (isPrivileged || isNonDeveloper)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Reference Data
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-prohub">
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Companies")">Companies/Customers</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "CustomerContacts")">Customer Contacts</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Employee")">Divisional Members</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ParentProjects")">Application Groups</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "FieldsOfSpecialization")">Fields of Specialization</a></li>
+                            </ul>
+                        </li>
+                    }
+
+
+                    @if ( isPrivileged || isNonDeveloper || isViewOnly)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                DMS
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-prohub">
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalDocuments")">Internal Solutions Documents</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ExternalDocuments")">External Solutions Documents</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if ( isPrivileged || isNonDeveloper || isViewOnly)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Project Activities
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-prohub">
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "InternalSolutionsActivities")">Internal Solutions Activities</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "ExternalSolutionsActivities")">External Solutions Activities</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Overtime")">Overtime Data</a></li>
+                            </ul>
+                        </li>
+                    }
+                   
+
+                    @if (isPrivileged || isNonDeveloper)
+                    {
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-prohub dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Trainees
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-prohub">
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("Index", "Trainee")">All Trainees</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("ActiveTrainee", "Trainee")">Active Trainees</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("InactiveTrainee", "Trainee")">Inactive Trainees</a></li>
+                                <li><a class="dropdown-item dropdown-item-prohub" href="@Url.Action("PaidTrainee", "Trainee")">Paid Trainees</a></li>
+                            </ul>
+                        </li>
+                    }
+                  
+
+                    @if (isPrivileged || isNonDeveloper || isViewOnly)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-prohub" href="@Url.Action("Index", "Partner")">
+                                Partners
+                            </a>
+                        </li>
+                        
+                    }
+                 
+
+                    @if ( isPrivileged || isNonDeveloper)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-prohub" href="@Url.Action("List", "Freelancer")">
+                                Freelancer
+                            </a>
+                        </li>
+                    }
+                  
                 </ul>
 
                 <!-- Profile / Login Section -->
@@ -1058,12 +1140,7 @@
                             else
                                 initials = (parts[0][0].ToString() + parts[1][0].ToString()).ToUpper();
                         }
-                        var rolesList = User.Claims
-                        .Where(c => c.Type == "app_role")
-                        .Select(c => c.Value)
-                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .ToList();
-
+                      
 
 
                     }
@@ -1203,20 +1280,20 @@
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5 class="footer-heading">Quick Access</h5>
                     <ul class="footer-links">
-                        <li><a href="#" class="footer-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                        <li><a href="#" class="footer-link"><i class="bi bi-calendar-week"></i> Weekly Plan</a></li>
-                        <li><a href="#" class="footer-link"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
-                        <li><a href="#" class="footer-link"><i class="bi bi-person-badge"></i> Profile</a></li>
+                        <li><a href="@Url.Action("Index", "Home")" class="footer-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li><a href="@Url.Action("Index", "NextWeekPlans")" class="footer-link"><i class="bi bi-calendar-week"></i> Weekly Plan</a></li>
+                        <li><a href="@Url.Action("List", "Freelancer")" class="footer-link"><i class="bi bi-journal-text"></i> Freelancer</a></li>
+                        <li><a href="@Url.Action("Index", "Trainee")" class="footer-link"><i class="bi bi-person-badge"></i>  Trainees</a></li>
                     </ul>
                 </div>
                 <!-- Resources -->
                 <div class="col-lg-3 col-md-6 mb-4">
                     <h5 class="footer-heading">Resources</h5>
                     <ul class="footer-links">
-                        <li><a href="#" class="footer-link"><i class="bi bi-journal-text"></i> Documentation</a></li>
-                        <li><a href="#" class="footer-link"><i class="bi bi-question-circle"></i> Help Center</a></li>
-                        <li><a href="#" class="footer-link"><i class="bi bi-download"></i> Downloads</a></li>
-                        <li><a href="#" class="footer-link"><i class="bi bi-info-circle"></i> System Status</a></li>
+                        <li><a href="href=" @Url.Action("DownloadBackupMatrix", "ConsumerPlatform")" class="footer-link"><i class="bi bi-file-earmark-text"></i> Internal Solutions - Backup Matrix</a></li>
+                        <li><a href="@Url.Action("DownloadBackupMatrix", "ExternalPlatform")" class="footer-link"><i class="bi bi-file-earmark-text"></i> External Solutions - Backup Matrix</a></li>
+                        <li><a href="#" class="footer-link"><i class="bi bi-file-earmark-text"></i> Downloads</a></li>
+                        <li><a href="#" class="footer-link"><i class="bi bi-file-earmark-text"></i> System Status</a></li>
                     </ul>
                 </div>
                 <!-- Contact Info -->
@@ -1224,7 +1301,7 @@
                     <h5 class="footer-heading">Support</h5>
                     <div class="footer-contact">
                         <i class="bi bi-telephone-fill"></i>
-                        <span>IT Help Desk: Ext. 4357</span>
+                        <span>IT Help Desk: 076-9166548 </span>
                     </div>
                     <div class="footer-contact">
                         <i class="bi bi-envelope-fill"></i>
@@ -1237,13 +1314,39 @@
                 </div>
             </div>
         </div>
-        <div class="footer-bottom">
-            <div class="container text-center">
-                <span class="footer-copyright">
-                    <i class="bi bi-c-circle"></i> @DateTime.Now.Year PROHUB Digital Platform
-                </span>
+        <div class="footer-bottom bg-light py-3 border-top">
+            @{
+                // Determine if we are on Home/Index
+                bool isHomeIndex =
+                (string)ViewContext.RouteData.Values["Controller"] == "Home" &&
+                (string)ViewContext.RouteData.Values["Action"] == "Index";
+            }
+
+            <div class="container d-flex flex-column flex-md-row justify-content-@((isHomeIndex) ? "between" : "center") align-items-center">
+                <!-- Left side / centered copyright -->
+                <div class="text-muted d-flex align-items-center gap-1">
+                    <i class="bi bi-c-circle"></i>
+                    <span>@DateTime.Now.Year PROHUB Digital Platform</span>
+                </div>
+
+                <!-- Right side: last login (only show on Home/Index) -->
+                @if (isHomeIndex)
+                {
+                    <div class="text-muted d-flex align-items-center gap-1">
+                        <i class="bi bi-clock"></i>
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <span>Last login: @ViewBag.LastLoginTime</span>
+                        }
+                        else
+                        {
+                            <span>Not logged in</span>
+                        }
+                    </div>
+                }
             </div>
         </div>
+
     </footer>
 
     <!-- Bootstrap JS -->

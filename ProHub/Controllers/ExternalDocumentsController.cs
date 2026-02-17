@@ -181,11 +181,12 @@ namespace ProHub.Controllers
         public IActionResult Delete(int id)
         {
             var doc = _docRepo.GetById(id);
-            if (doc == null) return Json(new { success = false, message = "Not found" });
+            if (doc == null) return NotFound();
             if (!IsOwnerOrAdmin(doc.Created_By)) return Forbid();
 
             _docRepo.Delete(id);
-            return Json(new { success = true });
+            TempData["SuccessMessage"] = "External document deleted successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         private string GetCurrentUserName() =>

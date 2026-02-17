@@ -52,22 +52,22 @@ namespace PROHUB.Services
 
             while (await reader.ReadAsync())
             {
-                int freelancerId = reader.GetInt32(reader.GetOrdinal("FreelancerId"));
+                int freelancerId = reader.GetInt32(reader.GetOrdinal("freelancerid"));
 
                 if (freelancerId != currentFreelancerId)
                 {
                     currentFreelancer = new Freelancer
                     {
                         FreelancerId = freelancerId,
-                        Name = reader.GetString(reader.GetOrdinal("Name")),
-                        NIC = reader.GetString(reader.GetOrdinal("NIC")),
-                        ProjectName = reader.GetString(reader.GetOrdinal("ProjectName")),
-                        ProjectScope = reader.IsDBNull(reader.GetOrdinal("ProjectScope")) ? "" : reader.GetString("ProjectScope"),
-                        Amount = reader.IsDBNull(reader.GetOrdinal("Amount")) ? "" : reader.GetString("Amount"),
-                        BudgetAvailable = reader.IsDBNull(reader.GetOrdinal("BudgetAvailable")) ? "" : reader.GetString("BudgetAvailable"),
-                        StartDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("StartDate")),
-                        EndDate = reader.IsDBNull(reader.GetOrdinal("EndDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("EndDate")),
-                        Duration = reader.IsDBNull(reader.GetOrdinal("Duration")) ? "" : reader.GetString("Duration"),
+                        Name = reader.GetString(reader.GetOrdinal("name")),
+                        NIC = reader.GetString(reader.GetOrdinal("nic")),
+                        ProjectName = reader.GetString(reader.GetOrdinal("projectname")),
+                        ProjectScope = reader.IsDBNull(reader.GetOrdinal("projectscope")) ? "" : reader.GetString("projectscope"),
+                        Amount = reader.IsDBNull(reader.GetOrdinal("amount")) ? "" : reader.GetString("amount"),
+                        BudgetAvailable = reader.IsDBNull(reader.GetOrdinal("budgetavailable")) ? "" : reader.GetString("budgetavailable"),
+                        StartDate = reader.IsDBNull(reader.GetOrdinal("startdate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("startdate")),
+                        EndDate = reader.IsDBNull(reader.GetOrdinal("enddate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("enddate")),
+                        Duration = reader.IsDBNull(reader.GetOrdinal("duration")) ? "" : reader.GetString("duration"),
                         Tasks = new List<FreelancerTaskViewModel>()
                     };
 
@@ -75,18 +75,18 @@ namespace PROHUB.Services
                     currentFreelancerId = freelancerId;
                 }
 
-                if (!reader.IsDBNull(reader.GetOrdinal("TaskId")) && currentFreelancer != null)
+                if (!reader.IsDBNull(reader.GetOrdinal("taskid")) && currentFreelancer != null)
                 {
                     var task = new FreelancerTaskViewModel
                     {
-                        TaskId = reader.GetInt32("TaskId"),
-                        ID = reader.GetInt32("ID"),
-                        TaskName = reader.IsDBNull(reader.GetOrdinal("TaskName")) ? "" : reader.GetString("TaskName"),
-                        Specification = reader.IsDBNull(reader.GetOrdinal("Specification")) ? "" : reader.GetString("Specification"),
-                        Payment = reader.IsDBNull(reader.GetOrdinal("Payment")) ? "" : reader.GetString("Payment"),
-                        DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("DeliveryDueDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("DeliveryDueDate")),
-                        Status = reader.IsDBNull(reader.GetOrdinal("Status")) ? "Pending" : reader.GetString("Status"),
-                        Paid = reader.IsDBNull(reader.GetOrdinal("Paid")) ? "No" : reader.GetString("Paid")
+                        TaskId = reader.GetInt32("taskid"),
+                        ID = reader.GetInt32("id"),
+                        TaskName = reader.IsDBNull(reader.GetOrdinal("taskname")) ? "" : reader.GetString("taskname"),
+                        Specification = reader.IsDBNull(reader.GetOrdinal("specification")) ? "" : reader.GetString("specification"),
+                        Payment = reader.IsDBNull(reader.GetOrdinal("payment")) ? "" : reader.GetString("payment"),
+                        DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("deliveryduedate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("deliveryduedate")),
+                        Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "Pending" : reader.GetString("status"),
+                        Paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? "No" : reader.GetString("paid")
                     };
 
                     currentFreelancer.Tasks.Add(task);
@@ -125,32 +125,32 @@ namespace PROHUB.Services
                 {
                     freelancer = new Freelancer
                     {
-                        FreelancerId = reader.GetInt32(reader.GetOrdinal("FreelancerId")),
-                        Name = reader.GetString(reader.GetOrdinal("Name")),
-                        NIC = reader.GetString(reader.GetOrdinal("NIC")),
-                        ProjectName = reader.GetString(reader.GetOrdinal("ProjectName")),
-                        ProjectScope = reader.IsDBNull(reader.GetOrdinal("ProjectScope")) ? "" : reader.GetString("ProjectScope"),
-                        Amount = reader.IsDBNull(reader.GetOrdinal("Amount")) ? "" : reader.GetString("Amount"),
-                        BudgetAvailable = reader.IsDBNull(reader.GetOrdinal("BudgetAvailable")) ? "" : reader.GetString("BudgetAvailable"),
-                        StartDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("StartDate")),
-                        EndDate = reader.IsDBNull(reader.GetOrdinal("EndDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("EndDate")),
-                        Duration = reader.IsDBNull(reader.GetOrdinal("Duration")) ? "" : reader.GetString("Duration"),
+                        FreelancerId = reader.GetInt32(reader.GetOrdinal("freelancerid")),
+                        Name = reader.GetString(reader.GetOrdinal("name")),
+                        NIC = reader.GetString(reader.GetOrdinal("nic")),
+                        ProjectName = reader.GetString(reader.GetOrdinal("projectname")),
+                        ProjectScope = reader.IsDBNull(reader.GetOrdinal("projectscope")) ? "" : reader.GetString("projectscope"),
+                        Amount = reader.IsDBNull(reader.GetOrdinal("amount")) ? "" : reader.GetString("amount"),
+                        BudgetAvailable = reader.IsDBNull(reader.GetOrdinal("budgetavailable")) ? "" : reader.GetString("budgetavailable"),
+                        StartDate = reader.IsDBNull(reader.GetOrdinal("startdate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("startdate")),
+                        EndDate = reader.IsDBNull(reader.GetOrdinal("enddate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("enddate")),
+                        Duration = reader.IsDBNull(reader.GetOrdinal("duration")) ? "" : reader.GetString("duration"),
                         Tasks = new List<FreelancerTaskViewModel>()
                     };
                 }
 
-                if (!reader.IsDBNull(reader.GetOrdinal("TaskId")))
+                if (!reader.IsDBNull(reader.GetOrdinal("taskid")))
                 {
                     var task = new FreelancerTaskViewModel
                     {
-                        TaskId = reader.GetInt32("TaskId"),
-                        ID = reader.GetInt32("ID"),
-                        TaskName = reader.IsDBNull(reader.GetOrdinal("TaskName")) ? "" : reader.GetString("TaskName"),
-                        Specification = reader.IsDBNull(reader.GetOrdinal("Specification")) ? "" : reader.GetString("Specification"),
-                        Payment = reader.IsDBNull(reader.GetOrdinal("Payment")) ? "" : reader.GetString("Payment"),
-                        DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("DeliveryDueDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("DeliveryDueDate")),
-                        Status = reader.IsDBNull(reader.GetOrdinal("Status")) ? "Pending" : reader.GetString("Status"),
-                        Paid = reader.IsDBNull(reader.GetOrdinal("Paid")) ? "No" : reader.GetString("Paid")
+                        TaskId = reader.GetInt32("taskid"),
+                        ID = reader.GetInt32("id"),
+                        TaskName = reader.IsDBNull(reader.GetOrdinal("taskname")) ? "" : reader.GetString("taskname"),
+                        Specification = reader.IsDBNull(reader.GetOrdinal("specification")) ? "" : reader.GetString("specification"),
+                        Payment = reader.IsDBNull(reader.GetOrdinal("payment")) ? "" : reader.GetString("payment"),
+                        DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("deliveryduedate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("deliveryduedate")),
+                        Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "Pending" : reader.GetString("status"),
+                        Paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? "No" : reader.GetString("paid")
                     };
 
                     freelancer.Tasks.Add(task);
@@ -290,14 +290,14 @@ namespace PROHUB.Services
             {
                 tasks.Add(new FreelancerTaskViewModel
                 {
-                    TaskId = reader.GetInt32("TaskId"),
-                    ID = reader.GetInt32("ID"),
-                    TaskName = reader.IsDBNull(reader.GetOrdinal("TaskName")) ? "" : reader.GetString("TaskName"),
-                    Specification = reader.IsDBNull(reader.GetOrdinal("Specification")) ? "" : reader.GetString("Specification"),
-                    Payment = reader.IsDBNull(reader.GetOrdinal("Payment")) ? "" : reader.GetString("Payment"),
-                    DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("DeliveryDueDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("DeliveryDueDate")),
-                    Status = reader.IsDBNull(reader.GetOrdinal("Status")) ? "Pending" : reader.GetString("Status"),
-                    Paid = reader.IsDBNull(reader.GetOrdinal("Paid")) ? "No" : reader.GetString("Paid")
+                    TaskId = reader.GetInt32("taskid"),
+                    ID = reader.GetInt32("id"),
+                    TaskName = reader.IsDBNull(reader.GetOrdinal("taskname")) ? "" : reader.GetString("taskname"),
+                    Specification = reader.IsDBNull(reader.GetOrdinal("specification")) ? "" : reader.GetString("specification"),
+                    Payment = reader.IsDBNull(reader.GetOrdinal("payment")) ? "" : reader.GetString("payment"),
+                    DeliveryDueDate = reader.IsDBNull(reader.GetOrdinal("deliveryduedate")) ? null : DateOnly.FromDateTime(reader.GetDateTime("deliveryduedate")),
+                    Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "Pending" : reader.GetString("status"),
+                    Paid = reader.IsDBNull(reader.GetOrdinal("paid")) ? "No" : reader.GetString("paid")
                 });
             }
 

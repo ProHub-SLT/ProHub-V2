@@ -59,21 +59,58 @@ public class EmployeeController : Controller
     // -------------------------------------------------------
     // CREATE: POST
     // -------------------------------------------------------
-    [Authorize(Roles = $"{AppRoles.Admin}")]
     [HttpPost]
+    [Authorize(Roles = $"{AppRoles.Admin}")]
     public IActionResult Create(Employee emp)
     {
         using (var con = new MySqlConnection(_connectionString))
         {
             con.Open();
 
-            string sql = @"
-                INSERT INTO employee
-                (Emp_Id, Emp_Name, Emp_Email, Emp_Phone, GroupID, DOB, Calling_Name, Gender, Section)
-                VALUES
-                (@EmpId, @EmpName, @EmpEmail, @EmpPhone, @GroupID, @DOB, @CallingName, @Gender, @Section)";
+            // 🔎 CHECK IF EMPID EXISTS
+            string checkSql = "SELECT COUNT(*) FROM employee WHERE Emp_Id = @EmpId";
 
-            using (var cmd = new MySqlCommand(sql, con))
+            using (var checkCmd = new MySqlCommand(checkSql, con))
+            {
+                checkCmd.Parameters.AddWithValue("@EmpId", emp.EmpId);
+
+                int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                if (count > 0)
+                {
+                    ModelState.AddModelError("EmpId", "This Service Number is Already Taken.");
+                    ViewBag.Groups = GetGroups();
+                    return View(emp);
+                }
+            }
+
+
+            // Check duplicate email
+            string emailCheckSql = "SELECT COUNT(*) FROM employee WHERE Emp_Email = @Email";
+
+            using (var emailCmd = new MySqlCommand(emailCheckSql, con))
+            {
+                emailCmd.Parameters.AddWithValue("@Email", emp.EmpEmail);
+
+                int emailCount = Convert.ToInt32(emailCmd.ExecuteScalar());
+
+                if (emailCount > 0)
+                {
+                    ModelState.AddModelError("EmpEmail", "This email is already registered.");
+                    ViewBag.Groups = GetGroups();
+                    return View(emp);
+                }
+            }
+
+
+            // ✅ INSERT IF NOT EXISTS
+            string insertSql = @"
+            INSERT INTO employee
+            (Emp_Id, Emp_Name, Emp_Email, Emp_Phone, GroupID, DOB, Calling_Name, Gender, Section)
+            VALUES
+            (@EmpId, @EmpName, @EmpEmail, @EmpPhone, @GroupID, @DOB, @CallingName, @Gender, @Section)";
+
+            using (var cmd = new MySqlCommand(insertSql, con))
             {
                 cmd.Parameters.AddWithValue("@EmpId", emp.EmpId);
                 cmd.Parameters.AddWithValue("@EmpName", emp.EmpName);
@@ -89,7 +126,7 @@ public class EmployeeController : Controller
             }
         }
 
-        TempData["SuccessMessage"] = "Contact Added Successfully!";
+        TempData["SuccessMessage"] = "Employee created successfully!";
         return RedirectToAction("Create");
     }
 
@@ -117,7 +154,8 @@ public class EmployeeController : Controller
         int pageSize = 10)
     {
         // Multiple group filter
-        string filter = "Administrator,Developer,Non Developer,Ishamp Users,DPO";
+        // Multiple group filter - Updated to match actual database values
+        string filter = "Development Team,QA Team,DevOps Team,UI/UX Design Team,Project Management,Business Analysis,Database Administration,Network Security,Technical Support,Sales Engineering,System Architecture,Data Science Team";
 
         return LoadEmployees(search, filter, sortColumn, sortOrder, page, pageSize);
     }
@@ -157,11 +195,11 @@ public class EmployeeController : Controller
                 FROM employee e
                 INNER JOIN empgroup g ON e.GroupID = g.GroupID
                 WHERE (@search IS NULL
-                       OR e.Emp_Name LIKE CONCAT('%', @search, '%')
-                       OR e.Emp_Email LIKE CONCAT('%', @search, '%')
-                       OR e.Emp_Phone LIKE CONCAT('%', @search, '%'))
+                       OR e.Emp_Name COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%')
+                       OR e.Emp_Email COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%')
+                       OR e.Emp_Phone COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%'))
                   AND (@filter IS NULL 
-                       OR (@filter IS NOT NULL AND FIND_IN_SET(g.GroupName, @filter)))";
+                       OR (@filter IS NOT NULL AND FIND_IN_SET(g.GroupName COLLATE utf8mb4_general_ci, @filter COLLATE utf8mb4_general_ci)))";
 
             using (var cmd = new MySqlCommand(sql, con))
             {
@@ -178,10 +216,10 @@ public class EmployeeController : Controller
                     {
                         employees.Add(new Employee
                         {
-                            EmpId = dr.GetInt32("Emp_Id"),
-                            EmpName = dr.GetString("Emp_Name"),
-                            EmpEmail = dr.GetString("Emp_Email"),
-                            EmpPhone = dr.GetString("Emp_Phone")
+                            EmpId = dr.IsDBNull(dr.GetOrdinal("Emp_Id")) ? 0 : dr.GetInt32("Emp_Id"),
+                            EmpName = dr.IsDBNull(dr.GetOrdinal("Emp_Name")) ? "" : dr.GetString("Emp_Name"),
+                            EmpEmail = dr.IsDBNull(dr.GetOrdinal("Emp_Email")) ? "" : dr.GetString("Emp_Email"),
+                            EmpPhone = dr.IsDBNull(dr.GetOrdinal("Emp_Phone")) ? "" : dr.GetString("Emp_Phone")
                         });
                     }
                 }
@@ -247,18 +285,41 @@ public class EmployeeController : Controller
                     if (dr.Read())
                     {
                         emp.EmpId = dr.GetInt32("Emp_Id");
-                        emp.EmpName = dr.GetString("Emp_Name");
-                        emp.EmpEmail = dr.GetString("Emp_Email");
-                        emp.EmpPhone = dr.GetString("Emp_Phone");
-                        emp.GroupID = dr.GetInt32("GroupID");
-                        emp.CallingName = dr.GetString("Calling_Name");
-                        emp.Section = dr.GetString("Section");
-                        emp.Gender = dr.GetString("Gender");
 
-                        // FIXED - NULL SAFE DOB READING
+                        emp.EmpName = dr.IsDBNull(dr.GetOrdinal("Emp_Name"))
+                            ? null
+                            : dr.GetString("Emp_Name");
+
+                        emp.EmpEmail = dr.IsDBNull(dr.GetOrdinal("Emp_Email"))
+                            ? null
+                            : dr.GetString("Emp_Email");
+
+                        emp.EmpPhone = dr.IsDBNull(dr.GetOrdinal("Emp_Phone"))
+                            ? null
+                            : dr.GetString("Emp_Phone");
+
+                        emp.GroupID = dr.IsDBNull(dr.GetOrdinal("GroupID"))
+                            ? (int?)null
+                            : dr.GetInt32("GroupID");
+
+                        emp.CallingName = dr.IsDBNull(dr.GetOrdinal("Calling_Name"))
+                            ? null
+                            : dr.GetString("Calling_Name");
+
+                        emp.Section = dr.IsDBNull(dr.GetOrdinal("Section"))
+                            ? null
+                            : dr.GetString("Section");
+
+                        emp.Gender = dr.IsDBNull(dr.GetOrdinal("Gender"))
+                            ? null
+                            : dr.GetString("Gender");
+
                         int dobIndex = dr.GetOrdinal("DOB");
-                        emp.DOB = dr.IsDBNull(dobIndex) ? (DateTime?)null : dr.GetDateTime(dobIndex);
+                        emp.DOB = dr.IsDBNull(dobIndex)
+                            ? (DateTime?)null
+                            : dr.GetDateTime(dobIndex);
                     }
+
                 }
             }
         }

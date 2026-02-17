@@ -33,10 +33,8 @@ namespace PROHUB.Controllers
             _connectionString = configuration.GetConnectionString("DefaultConnection") ?? "";
         }
 
-        // ... (Rest of your controller code) ...
-
         // 🔹 1. ALL TRAINEES
-        public async Task<IActionResult> Index(string search = "", int page = 1, int pageSize = 10, string sortColumn = "Trainee_ID", string sortOrder = "desc")
+        public async Task<IActionResult> Index(string search = "", int page = 1, int pageSize = 10, string sortColumn = "trainee_id", string sortOrder = "desc")
         {
             // Get Data
             var allTrainees = (await _traineeService.GetAllAsync()).AsQueryable();
@@ -103,7 +101,7 @@ namespace PROHUB.Controllers
         }
 
         // 🔹 2. ACTIVE TRAINEES
-        public async Task<IActionResult> ActiveTrainee(string search = "", int page = 1, int pageSize = 10, string sortColumn = "Trainee_ID", string sortOrder = "desc")
+        public async Task<IActionResult> ActiveTrainee(string search = "", int page = 1, int pageSize = 10, string sortColumn = "trainee_id", string sortOrder = "desc")
         {
             // 1. Fetch Data
             var allTrainees = (await _traineeService.GetAllAsync()).AsQueryable();
@@ -172,7 +170,7 @@ namespace PROHUB.Controllers
         }
 
         // 🔹 3. INACTIVE TRAINEES
-        public async Task<IActionResult> InactiveTrainee(string search = "", int page = 1, int pageSize = 10, string sortColumn = "Trainee_ID", string sortOrder = "desc")
+        public async Task<IActionResult> InactiveTrainee(string search = "", int page = 1, int pageSize = 10, string sortColumn = "trainee_id", string sortOrder = "desc")
         {
             // 1. Get Data
             var allTrainees = (await _traineeService.GetAllAsync()).AsQueryable();
@@ -236,7 +234,7 @@ namespace PROHUB.Controllers
         }
 
         // 🔹 4. PAID TRAINEES
-        public async Task<IActionResult> PaidTrainee(string search = "", int page = 1, int pageSize = 10, string sortColumn = "Trainee_ID", string sortOrder = "desc")
+        public async Task<IActionResult> PaidTrainee(string search = "", int page = 1, int pageSize = 10, string sortColumn = "trainee_id", string sortOrder = "desc")
         {
             // 1. Get Data
             var allTrainees = (await _traineeService.GetAllAsync()).AsQueryable();
@@ -266,7 +264,7 @@ namespace PROHUB.Controllers
                 "requested_payment_date" => sortOrder == "asc" ? paidList.OrderBy(t => t.requested_payment_date) : paidList.OrderByDescending(t => t.requested_payment_date),
                 "payment_start_date" => sortOrder == "asc" ? paidList.OrderBy(t => t.payment_start_date) : paidList.OrderByDescending(t => t.payment_start_date),
                 "payment_end_date" => sortOrder == "asc" ? paidList.OrderBy(t => t.payment_end_date) : paidList.OrderByDescending(t => t.payment_end_date),
-                // Default Case (Trainee_ID)
+                // Default Case (trainee_id)
                 _ => sortOrder == "asc" ? paidList.OrderBy(t => t.Trainee_ID) : paidList.OrderByDescending(t => t.Trainee_ID),
             };
 
@@ -397,8 +395,8 @@ namespace PROHUB.Controllers
             using (var connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                // FIX: The SQL query must use the actual database column names (Emp_ID, Emp_Name)
-                string query = "SELECT Emp_ID, Emp_Name FROM Employee ORDER BY Emp_Name";
+                // FIX: The SQL query must use the actual database column names (emp_id, emp_name)
+                string query = "SELECT emp_id, emp_name FROM employee ORDER BY emp_name";
                 using (var cmd = new MySqlCommand(query, connection))
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
@@ -406,9 +404,9 @@ namespace PROHUB.Controllers
                     {
                         employees.Add(new Employee
                         {
-                            // FIX: We read the column by its exact DB name (Emp_ID)
-                            EmpId = reader.GetInt32("Emp_ID"),
-                            EmpName = reader.GetString("Emp_Name")
+                            // FIX: We read the column by its exact DB name (emp_id)
+                            EmpId = reader.GetInt32("emp_id"),
+                            EmpName = reader.GetString("emp_name")
                         });
                     }
                 }
@@ -422,8 +420,8 @@ namespace PROHUB.Controllers
             using (var connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                // Ensure your DB table is actually 'Fields_of_Specialization' and columns are 'field_of_spec_id', 'field_of_spec_name'
-                string query = "SELECT field_of_spec_id, field_of_spec_name FROM Fields_of_Specialization ORDER BY field_of_spec_name";
+                // Ensure your DB table is actually 'fields_of_specialization' and columns are 'field_of_spec_id', 'field_of_spec_name'
+                string query = "SELECT field_of_spec_id, field_of_spec_name FROM fields_of_specialization ORDER BY field_of_spec_name";
                 using (var cmd = new MySqlCommand(query, connection))
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {

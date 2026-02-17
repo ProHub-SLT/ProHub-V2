@@ -70,6 +70,10 @@ namespace ProHub.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult SignOut()
         {
+            
+            HttpContext.Session.Clear();
+
+
             var callbackUrl = Url.Action(nameof(Index), "Account", values: null, protocol: Request.Scheme);
             return SignOut(
                 new AuthenticationProperties { RedirectUri = callbackUrl },

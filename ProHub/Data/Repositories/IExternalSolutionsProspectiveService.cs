@@ -67,7 +67,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-            INSERT INTO External_Project_Comments 
+            INSERT INTO external_project_comments 
             (Solution_ID, Comment, Updated_By, Updated_Time) 
             VALUES 
             (@SolutionId, @Comment, @UpdatedBy, NOW());";
@@ -112,12 +112,12 @@ namespace PROHUB.Data
         c.ID AS CompanyId, c.Company_Name AS CompanyName,
         
         
-        (SELECT COUNT(*) FROM External_Project_Comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
+        (SELECT COUNT(*) FROM external_project_comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
 
     FROM external_platforms ep
-    LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-    LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
-    LEFT JOIN Company c ON ep.Company_ID = c.ID
+    LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+    LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
+    LEFT JOIN company c ON ep.Company_ID = c.ID
     WHERE {filterClause}";
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -162,8 +162,8 @@ namespace PROHUB.Data
             c.Comment, 
             c.Updated_Time, 
             e.Emp_Name 
-        FROM External_Project_Comments c
-        LEFT JOIN Employee e ON c.Updated_By = e.Emp_ID
+        FROM external_project_comments c
+        LEFT JOIN employee e ON c.Updated_By = e.Emp_ID
         WHERE c.Solution_ID = @SolutionId 
         ORDER BY c.Updated_Time DESC";
 
@@ -205,13 +205,13 @@ namespace PROHUB.Data
                     c.ID AS CompanyId, c.Company_Name AS CompanyName,
                     e2.Emp_ID AS BackupOfficer1Id, e2.Emp_Name AS BackupOfficer1Name,
                     e3.Emp_ID AS BackupOfficer2Id, e3.Emp_Name AS BackupOfficer2Name,
-                    (SELECT COUNT(*) FROM External_Project_Comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
+                    (SELECT COUNT(*) FROM external_project_comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
                 FROM external_platforms ep
-                LEFT JOIN Employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN Employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
-                LEFT JOIN Employee e3 ON ep.BackupOfficer_2 = e3.Emp_ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
-                LEFT JOIN Company c ON ep.Company_ID = c.ID
+                LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
+                LEFT JOIN employee e3 ON ep.BackupOfficer_2 = e3.Emp_ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
+                LEFT JOIN company c ON ep.Company_ID = c.ID
                 WHERE ep.ID = @Id";
 
             using var command = new MySqlCommand(query, connection);
@@ -337,15 +337,15 @@ namespace PROHUB.Data
             string query = @"
         SELECT 
             ep.*, 
-            sp.Phase as SDLC_Phase, 
+            sp.Phase as sdlc_phase, 
             c.Company_Name, 
             e.Emp_Name as Developed_By_Name,   
             st.Sales_Team_Name                 
         FROM external_platforms ep
-        LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
-        LEFT JOIN Company c ON ep.Company_ID = c.ID
-        LEFT JOIN Employee e ON ep.Developed_By = e.Emp_ID        
-        LEFT JOIN Sales_Team st ON ep.Sales_Team_ID = st.ID       
+        LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
+        LEFT JOIN company c ON ep.Company_ID = c.ID
+        LEFT JOIN employee e ON ep.Developed_By = e.Emp_ID        
+        LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID       
         WHERE (
             LOWER(TRIM(sp.Phase)) NOT LIKE '%maintenance%' 
             AND LOWER(TRIM(sp.Phase)) NOT LIKE '%retired%' 
@@ -365,23 +365,39 @@ namespace PROHUB.Data
         public async Task<List<Employee>> GetEmployeesAsync()
         {
             var list = new List<Employee>();
+
             using var connection = GetConnection();
             await connection.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT Emp_ID, Emp_Name FROM Employee ORDER BY Emp_Name", connection);
+
+            using var cmd = new MySqlCommand(@"
+                SELECT e.Emp_ID, e.Emp_Name
+                FROM employee e
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
+                WHERE g.GroupName IS NULL
+                   OR g.GroupName <> 'Inactive'
+                ORDER BY e.Emp_Name
+            ", connection);
+
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                list.Add(new Employee { EmpId = GetInt32Safe(reader, "Emp_ID"), EmpName = GetNullableString(reader, "Emp_Name") ?? "" });
+                list.Add(new Employee
+                {
+                    EmpId = GetInt32Safe(reader, "Emp_ID"),
+                    EmpName = GetNullableString(reader, "Emp_Name") ?? string.Empty
+                });
             }
+
             return list;
         }
+
 
         public async Task<List<Company>> GetCompanyAsync()
         {
             var list = new List<Company>();
             using var connection = GetConnection();
             await connection.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, Company_Name FROM Company WHERE Company_Name IS NOT NULL AND Company_Name != '' ORDER BY Company_Name", connection);
+            using var cmd = new MySqlCommand("SELECT ID, Company_Name FROM company WHERE Company_Name IS NOT NULL AND Company_Name != '' ORDER BY Company_Name", connection);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -395,7 +411,7 @@ namespace PROHUB.Data
             var list = new List<SalesTeam>();
             using var connection = GetConnection();
             await connection.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, Sales_Team_Name FROM Sales_Team ORDER BY Sales_Team_Name", connection);
+            using var cmd = new MySqlCommand("SELECT ID, Sales_Team_Name FROM sales_team ORDER BY Sales_Team_Name", connection);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -409,7 +425,7 @@ namespace PROHUB.Data
             var list = new List<SDLCPhase>();
             using var connection = GetConnection();
             await connection.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, Phase FROM SDLCPhas ORDER BY OrderSeq, Phase", connection);
+            using var cmd = new MySqlCommand("SELECT ID, Phase FROM sdlcphas ORDER BY OrderSeq, Phase", connection);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {

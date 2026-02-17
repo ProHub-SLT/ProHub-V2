@@ -35,7 +35,11 @@ namespace ProHub.Data.Repositories
                     EmpName = reader.GetString("Emp_Name"),
                     EmpEmail = reader.GetString("Emp_Email"),
                     EmpPhone = reader["Emp_Phone"]?.ToString(),
-                    Section = reader["Section"]?.ToString()
+                    Section = reader["Section"]?.ToString(),
+                    GroupID = reader["GroupID"] != DBNull.Value ? reader.GetInt32("GroupID") : (int?)null,
+                    Group = reader["GroupName"] != DBNull.Value
+                        ? new EmpGroup { GroupID = reader.GetInt32("GroupID"), GroupName = reader.GetString("GroupName") }
+                        : null
                 };
             }
 

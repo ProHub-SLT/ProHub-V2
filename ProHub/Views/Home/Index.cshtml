@@ -13,8 +13,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - PROHUB Home</title>
 
-
-
     <style>
         * {
             margin: 0;
@@ -28,28 +26,29 @@
             background-size: cover;
             background-color: #ffffff;
             position: relative;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
 
-            /* Blur overlay */
             body::before {
                 content: "";
-                position: absolute; /* changed from fixed */
+                position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
-                min-height: 100%; /* ensures it stretches with content */
+                min-height: 100%;
                 background: inherit;
                 filter: blur(1px);
                 z-index: -1;
             }
+
         /* Hero Section */
         .hero-section {
-            min-height: 80vh;
+            min-height: 85vh;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            padding-top: 80px;
+            padding: 50px 20px 60px;
             overflow: hidden;
         }
 
@@ -58,7 +57,7 @@
                 position: absolute;
                 width: 800px;
                 height: 800px;
-                background: radial-gradient(circle, rgba(102, 126, 234, 0.08) 0%, transparent 70%);
+                background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
                 top: -200px;
                 right: -200px;
                 animation: float 20s ease-in-out infinite;
@@ -69,95 +68,327 @@
                 position: absolute;
                 width: 600px;
                 height: 600px;
-                background: radial-gradient(circle, rgba(118, 75, 162, 0.08) 0%, transparent 70%);
+                background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, transparent 70%);
                 bottom: -100px;
                 left: -100px;
                 animation: float 15s ease-in-out infinite reverse;
             }
 
         @@keyframes float {
-            0%, 100% {
-                transform: translate(0, 0) scale(1);
-            }
+            0%, 100%
 
-            50% {
-                transform: translate(50px, 50px) scale(1.1);
-            }
+        {
+            transform: translate(0, 0) scale(1);
+        }
+
+        50% {
+            transform: translate(50px, 50px) scale(1.1);
+        }
+
         }
 
         .hero-content {
             position: relative;
             z-index: 1;
             text-align: center;
-            max-width: 900px;
+            max-width: 1100px;
             padding: 0 20px;
-            animation: fadeInUp 1s ease;
+            animation: fadeInUp 0.8s ease;
         }
 
         .hero-title {
-            font-size: clamp(38px, 7vw, 80px);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 16px;
+            font-size: 60px;
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 25px;
             background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.02em;
         }
 
         .hero-subtitle {
-            font-size: clamp(18px, 3vw, 24px);
-            color: #475569;
-            margin-bottom: 30px;
+            font-size: clamp(16px, 2.5vw, 20px);
+            color: #64748b;
+            margin-bottom: 50px;
             font-weight: 400;
+            line-height: 1.6;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hello-user {
-            font-size: 26px;
+            font-size: clamp(22px, 4vw, 28px);
             font-weight: 600;
             color: #0f172a;
-            margin-bottom: 10px;
-            animation: fadeInUp 1.2s ease;
+            margin-bottom: 16px;
+            animation: fadeInUp 1s ease;
         }
 
         @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
+            from
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         }
 
         .wave-emoji {
             display: inline-block;
             animation: wave 2.5s infinite;
             transform-origin: 70% 70%;
+            font-size: 1.1em;
         }
 
         @@keyframes wave {
-            0% { transform: rotate(0.0deg) }
-            10% { transform: rotate(14.0deg) }
-            20% { transform: rotate(-8.0deg) }
-            30% { transform: rotate(14.0deg) }
-            40% { transform: rotate(-4.0deg) }
-            50% { transform: rotate(10.0deg) }
-            60% { transform: rotate(0.0deg) }
-            100% { transform: rotate(0.0deg) }
+            0%
+
+        {
+            transform: rotate(0deg)
+        }
+
+        10% {
+            transform: rotate(14deg)
+        }
+
+        20% {
+            transform: rotate(-8deg)
+        }
+
+        30% {
+            transform: rotate(14deg)
+        }
+
+        40% {
+            transform: rotate(-4deg)
+        }
+
+        50% {
+            transform: rotate(10deg)
+        }
+
+        60% {
+            transform: rotate(0deg)
+        }
+
+        100% {
+            transform: rotate(0deg)
+        }
+
         }
 
         .hello-name {
             font-weight: 800;
-            color: #0f172a;
+            background: black;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        @@media (max-width: 768px) {
-            .hero-section {
-                padding-top: 100px;
+        /* Shortcut Container - Grid Layout */
+        .shortcut-container {
+            margin-top: 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 32px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 1.2s ease;
+            
+        }
+
+        .shortcut-icon-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            padding: 24px 20px;
+            border-radius: 20px; 
+            backdrop-filter: blur(10px);
+            border: none;
+          
+           
+        }
+
+            .shortcut-icon-btn:hover {
+                transform: translateY(-10px) scale(1.02);
             }
+
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3), 0 4px 12px rgba(59, 130, 246, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            margin-bottom: 16px;
+            position: relative;
+            overflow: visible;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+            .icon-circle::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, #059669 0%, #0891b2 50%, #2563eb 100%);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: 1;
+                border-radius: 20px;
+            }
+
+            .icon-circle i {
+                font-size: 32px;
+                color: #ffffff;
+                position: relative;
+                z-index: 2;
+                transition: all 0.3s ease;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            }
+
+        /* Green Badge Styling */
+        .badge-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 50%;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4), 0 0 0 3px white;
+            z-index: 10;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.4s backwards;
+        }
+
+        @@keyframes popIn {
+            0%
+
+        {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+        }
+
+        50% {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+
+        }
+
+        .shortcut-icon-btn:hover .icon-circle {
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4), 0 6px 20px rgba(59, 130, 246, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            transform: scale(1.08);
+        }
+
+            .shortcut-icon-btn:hover .icon-circle::before {
+                opacity: 1;
+            }
+
+            .shortcut-icon-btn:hover .icon-circle i {
+                transform: scale(1.15) rotate(-8deg);
+                color: #ffffff;
+                filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            }
+
+        .shortcut-icon-btn:hover .badge-count {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5), 0 0 0 3px white;
+        }
+
+        .shortcut-label {
+            font-weight: 600;
+            color: black;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            line-height: 1.4;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .shortcut-icon-btn:hover .shortcut-label {
+            color: black;
+            transform: scale(1.05);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .hero-section
+
+        {
+            padding-top: 80px;
+        }
+
+        .shortcut-container {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .shortcut-icon-btn {
+            padding: 16px;
+        }
+
+        .icon-circle {
+            width: 70px;
+            height: 70px;
+        }
+
+            .icon-circle i {
+                font-size: 28px;
+            }
+
+        .badge-count {
+            min-width: 24px;
+            height: 24px;
+            font-size: 0.7rem;
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .shortcut-container
+
+        {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        }
+
+        /* Alternative Badge Styles for Different States */
+        .badge-count.high {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4), 0 0 0 3px white;
+        }
+
+        .shortcut-icon-btn:hover .badge-count.high {
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.5), 0 0 0 3px white;
         }
     </style>
 </head>
@@ -168,19 +399,101 @@
             @if (User.Identity.IsAuthenticated)
             {
                 <div class="hello-user text-capitalize">
-                    <span class="wave-emoji">👋</span> <span id="typing-prefix"></span><span id="typing-name" class="hello-name"></span>
+                    <span class="wave-emoji">👋</span>
+                    <span id="typing-prefix"></span>
+                    <span id="typing-name" class="hello-name"></span>
                 </div>
             }
 
             <h1 class="hero-title">Your Digital Workspace, Elevated</h1>
             <p class="hero-subtitle">Streamline collaboration, boost productivity, and transform how your team works with PROHUB's integrated platform.</p>
+
+
+
+
+            @{
+     
+                // Get current user's roles
+                var roles = User.Claims
+                .Where(c => c.Type == "app_role")
+                .Select(c => c.Value)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+                bool canSeeShortcuts = roles.Contains("Admin") || roles.Contains("Developer");
+            }
+
+
+            @if (canSeeShortcuts)
+            {
+                <div class="shortcut-container">
+                    <a href="@Url.Action("Index", "NextWeekPlans")" class="shortcut-icon-btn" title="View Current Week Plan">
+                        <div class="icon-circle">
+                            <i class="bi bi-calendar-week"></i>
+                            @if (ViewBag.MyWeekPlanCount != null && ViewBag.MyWeekPlanCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyWeekPlanCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">My Week <br /> Plan</span>
+                    </a>
+
+                    <a href="@Url.Action("Index", "RecentlyLaunched", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My Recently Launched Projects">
+                        <div class="icon-circle">
+                            <i class="bi bi-rocket-takeoff"></i>
+                            @if (ViewBag.MyLaunchedCount != null && ViewBag.MyLaunchedCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyLaunchedCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">Launched <br /> Project</span>
+                    </a>
+
+                    <a href="@Url.Action("Index", "InternalSolutionInprogress", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My In-Progress Projects">
+                        <div class="icon-circle">
+                            <i class="bi bi-hourglass-split"></i>
+                            @if (ViewBag.MyInProgressCount != null && ViewBag.MyInProgressCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyInProgressCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">In Progress Project</span>
+                    </a>
+
+                    <a href="@Url.Action("Index", "InternalSolutionsActivities", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My Assigned Activities">
+                        <div class="icon-circle">
+                            <i class="bi bi-list-check"></i>
+                            @if (ViewBag.MyActivityCount != null && ViewBag.MyActivityCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyActivityCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">Internal <br />Activities</span>
+                    </a>
+
+                    <a href="@Url.Action("Index", "ExternalSolutionsActivities", new { search = ViewBag.FullUserName })" class="shortcut-icon-btn" title="View My External Assigned Activities">
+                        <div class="icon-circle">
+                            <i class="bi bi-globe"></i>
+                            @if (ViewBag.MyExtActivityCount != null && ViewBag.MyExtActivityCount > 0)
+                            {
+                                <span class="badge-count">@ViewBag.MyExtActivityCount</span>
+                            }
+                        </div>
+                        <span class="shortcut-label">External Activities</span>
+                    </a>
+                </div>
+                
+            }
+
+           
         </div>
     </section>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const prefix = "Hello, ";
             const name = "@Html.Raw(ViewBag.DisplayName ?? "User")";
-            const typingSpeed = 200;
+            const typingSpeed = 150;
             const prefixElement = document.getElementById("typing-prefix");
             const nameElement = document.getElementById("typing-name");
             let charIndex = 0;
@@ -203,9 +516,9 @@
                     setTimeout(typeName, typingSpeed);
                 }
             }
-            
+
             if(prefixElement && nameElement) {
-                setTimeout(typePrefix, 500);
+                setTimeout(typePrefix, 300);
             }
         });
     </script>

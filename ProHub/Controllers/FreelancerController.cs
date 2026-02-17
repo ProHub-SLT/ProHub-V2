@@ -121,7 +121,7 @@ namespace PROHUB.Controllers
             var success = await _freelancerService.UpdateFreelancerAsync(model);
             if (success)
             {
-                TempData["SuccessMessage"] = $"Freelancer {model.FormattedFreelancerId} updated successfully.";
+                TempData["SuccessMessage"] = $"freelancer {model.FormattedFreelancerId} updated successfully.";
                 return RedirectToAction(nameof(List));
             }
 

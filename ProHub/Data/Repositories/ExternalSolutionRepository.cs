@@ -578,20 +578,10 @@ namespace ProHub.Data
                     ep.Sales_AM AS SalesAM,
                     e1.Emp_ID AS DevelopedById,
                     e1.Emp_Name AS DevelopedByName,
-                    e1.Emp_Email AS DevelopedByEmail,
-                    e1.Emp_Phone AS DevelopedByPhone,
-                    e2.Emp_ID AS BackupOfficer1Id,
-                    e2.Emp_Name AS BackupOfficer1Name,
-                    e2.Emp_Email AS BackupOfficer1Email,
-                    e3.Emp_ID AS BackupOfficer2Id,
-                    e3.Emp_Name AS BackupOfficer2Name,
-                    e3.Emp_Email AS BackupOfficer2Email,
                     sp.ID AS SDLCStageId,
                     sp.Phase AS SDLCPhaseName,
                     c.ID AS CompanyId,
-                    c.Company_Name AS CompanyName,
-                    st.ID AS SalesTeamId,
-                    st.Sales_Team_Name AS SalesTeamName
+                    c.Company_Name AS CompanyName
                 FROM external_platforms ep
                 LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
                 LEFT JOIN employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
@@ -604,8 +594,7 @@ namespace ProHub.Data
             cmd.Parameters.AddWithValue("@id", id);
             using var reader = cmd.ExecuteReader();
             if (!reader.Read()) return null;
-            
-            var platform = new ExternalPlatform
+            return new ExternalPlatform
             {
                 Id = GetValueOrDefault(reader, "Id", 0),
                 PlatformName = GetValueOrDefault(reader, "PlatformName", ""),
@@ -638,46 +627,10 @@ namespace ProHub.Data
                 PercentageDone = GetValueOrDefault(reader, "PercentageDone", (decimal?)null),
                 DevelopedTeam = GetValueOrDefault(reader, "DevelopedTeam", ""),
                 SalesAM = GetValueOrDefault(reader, "SalesAM", ""),
+                DevelopedBy = new Employee { EmpId = GetValueOrDefault(reader, "DevelopedById", 0), EmpName = GetValueOrDefault(reader, "DevelopedByName", "") },
                 Company = new Company { Id = GetValueOrDefault(reader, "CompanyId", 0), CompanyName = GetValueOrDefault(reader, "CompanyName", "") },
-                SalesTeam = new SalesTeam { Id = GetValueOrDefault(reader, "SalesTeamId", 0), SalesTeamName = GetValueOrDefault(reader, "SalesTeamName", "") },
                 SDLCStage = new SDLCPhase { Id = GetValueOrDefault(reader, "SDLCStageId", 0), Phase = GetValueOrDefault(reader, "SDLCPhaseName", "Retired") }
             };
-
-            // Set DevelopedBy employee
-            if (!reader.IsDBNull(reader.GetOrdinal("DevelopedById")))
-            {
-                platform.DevelopedBy = new Employee
-                {
-                    EmpId = GetValueOrDefault(reader, "DevelopedById", 0),
-                    EmpName = GetValueOrDefault(reader, "DevelopedByName", ""),
-                    EmpEmail = GetValueOrDefault(reader, "DevelopedByEmail", ""),
-                    EmpPhone = GetValueOrDefault(reader, "DevelopedByPhone", "")
-                };
-            }
-
-            // Set Backup Officer 1
-            if (!reader.IsDBNull(reader.GetOrdinal("BackupOfficer1Id")))
-            {
-                platform.BackupOfficer1 = new Employee
-                {
-                    EmpId = GetValueOrDefault(reader, "BackupOfficer1Id", 0),
-                    EmpName = GetValueOrDefault(reader, "BackupOfficer1Name", ""),
-                    EmpEmail = GetValueOrDefault(reader, "BackupOfficer1Email", "")
-                };
-            }
-
-            // Set Backup Officer 2
-            if (!reader.IsDBNull(reader.GetOrdinal("BackupOfficer2Id")))
-            {
-                platform.BackupOfficer2 = new Employee
-                {
-                    EmpId = GetValueOrDefault(reader, "BackupOfficer2Id", 0),
-                    EmpName = GetValueOrDefault(reader, "BackupOfficer2Name", ""),
-                    EmpEmail = GetValueOrDefault(reader, "BackupOfficer2Email", "")
-                };
-            }
-
-            return platform;
         }
 
         // Get full details of all retired solutions (export/report)

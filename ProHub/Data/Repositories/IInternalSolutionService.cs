@@ -228,20 +228,26 @@ namespace PROHUB.Data
         }
 
         // ... [Existing Helper Get Methods (Employees, SDLC, etc.) remain unchanged] ...
-
         public async Task<List<Employee>> GetEmployeesAsync()
         {
             var list = new List<Employee>();
+
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
             using var cmd = new MySqlCommand("SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {
-                list.Add(new Employee { EmpId = rdr.GetInt32(0), EmpName = rdr.IsDBNull(1) ? "" : rdr.GetString(1) });
+                list.Add(new Employee
+                {
+                    EmpId = rdr.GetInt32(0),
+                    EmpName = rdr.IsDBNull(1) ? string.Empty : rdr.GetString(1)
+                });
             }
+
             return list;
         }
+
 
         public async Task<List<SDLCPhase>> GetSdlcPhasesAsync()
         {

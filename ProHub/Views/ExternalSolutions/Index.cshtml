@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<ProHub.Models.ExternalPlatform>
+@using ProHub.Constants
+
+
 @{
     ViewData["Title"] = "External Solutions - Operational";
 
@@ -488,6 +491,77 @@
             transform: translateY(0px);
             box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
         }
+
+
+
+    /* <CHANGE> Enhanced permission styling to match app theme */
+    .permission-restricted {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: 1px solid #f5c2c7;
+        border-radius: 8px;
+        color: #842029;
+        font-weight: 500;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 6px rgba(132, 32, 41, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .permission-restricted:hover {
+            box-shadow: 0 3px 10px rgba(132, 32, 41, 0.15);
+        }
+
+        .permission-restricted i {
+            font-size: 1rem;
+            color: #842029;
+        }
+
+    .permission-badge2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #dc3545;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge2:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
+
+    .permission-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #dceaf8 100%);
+        border: 1px solid #b6d9f0;
+        border-radius: 6px;
+        color: #0056b3;
+        font-size: 0.9rem;
+        cursor: help;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 86, 179, 0.08);
+    }
+
+        .permission-badge:hover {
+            background: linear-gradient(135deg, #d4ebff 0%, #c5e0f5 100%);
+            box-shadow: 0 3px 8px rgba(0, 86, 179, 0.15);
+            transform: translateY(-1px);
+        }
 </style>
 
 <div class="container-fluid mt-4">
@@ -496,10 +570,21 @@
     <div class="toolbar-wrapper mb-4">
         <div class="row g-3 align-items-center">
             <div class="col-lg-3 col-md-5 col-sm-12 d-flex gap-2">
-                <a asp-action="Create" class="btn-create-new">
-                    <i class="bi bi-plus-circle"></i>
-                    <span>Create New</span>
-                </a>
+                
+                @if (User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Developer) || User.IsInRole(AppRoles.DPO))
+                {
+                    <a asp-action="Create" class="btn-create-new">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Create New</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="permission-restricted">
+                        <i class="bi bi-lock-fill"></i>
+                        View-only access
+                    </span>
+                }
 
             </div>
 
@@ -557,8 +642,8 @@
                                 Developed By <i class="bi @(sortColumn == "DevelopedByName" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
                         </th>
-                        <th style="width:12%">Launched on <br /><span>Billed on</span></th>
-                        <th style="width:12%">OTC <br /><span>MRC</span></th>
+                        <th style="width:10%">Launched on <br /><span>Billed on</span></th>
+                        <th style="width:10%">OTC <br /><span>MRC</span></th>
 
                         <th class="sortable" style="width:10%">
                             <a href="@BuildIndexUrl(1, pageSize, "ContractPeriod", ToggleSortOrder("ContractPeriod"), searchTerm)">
@@ -568,7 +653,7 @@
 
                         <th style="width:10%">Revenue <br /><span>SW. Value</span></th>
 
-                        <th class="sortable" style="width:8%">
+                        <th class="sortable" style="width:10%">
                             <a href="@BuildIndexUrl(1, pageSize, "Billed", ToggleSortOrder("Billed"), searchTerm)">
                                 Billed <i class="bi @(sortColumn == "Billed" ? (sortOrder == "asc" ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up") ms-1 sort-icon"></i>
                             </a>
@@ -580,17 +665,27 @@
                             </a>
                         </th>
 
-                        <th class="text-center" style="width:11%">Action</th>
+                        <th style="width:11%">Action</th>
                     </tr>
                 </thead>
-                <tbody>
+               <tbody>
                     @if (Model != null && Model.Any())
                     {
                         foreach (var item in Model)
                         {
+                            
+                                var canManage =
+                                    User.IsInRole(AppRoles.Admin) ||
+                                    User.IsInRole(AppRoles.Developer) ||
+                                    User.IsInRole(AppRoles.DPO);
+                           
+
                             <tr>
                                 <td title="@item.PlatformName" class="fw-bold">@item.PlatformName</td>
-                                <td title="@(item.DevelopedByName ?? "N/A")">@(item.DevelopedByName ?? "N/A")</td>
+
+                                <td title="@(item.DevelopedByName ?? "N/A")">
+                                    @(item.DevelopedByName ?? "N/A")
+                                </td>
 
                                 <td>
                                     <div>@(item.LaunchedDate?.ToString("yyyy-MM-dd") ?? "-")</div>
@@ -612,11 +707,11 @@
                                 <td>
                                     @if (item.BillingDate.HasValue)
                                     {
-                                        <span class="billed-yes"> Yes</span>
+                                        <span class="billed-yes">Yes</span>
                                     }
                                     else
                                     {
-                                        <span class="billed-no"> No</span>
+                                        <span class="billed-no">No</span>
                                     }
                                 </td>
 
@@ -624,20 +719,55 @@
 
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Details">
+
+                                        <!-- DETAILS – Everyone -->
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-info"
+                                           title="Details">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                                onclick="openDeleteModal(@item.Id, '@(item.PlatformName ?? "this Item")')"
-                                                title="Delete">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                        <a asp-controller="ExternalDocuments" asp-action="Folder" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1" title="Filter Documents">
+
+                                        @if (canManage)
+                                        {
+                                            <!-- EDIT -->
+                                            <a asp-action="Edit"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <!-- DELETE -->
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    onclick="openDeleteModal(@item.Id, '@(item.PlatformName ?? "this Item")')"
+                                                    title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <!-- VIEW ONLY INDICATOR -->
+                                            <span class="permission-badge" title="No Permisson to Edit">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+
+                                            <!-- VIEW ONLY INDICATOR -->
+                                            <span class="permission-badge2" title="No Permisson to Delete">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                        }
+
+                                        <!-- FOLDER – Everyone -->
+                                        <a asp-controller="ExternalDocuments"
+                                           asp-action="Folder"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-secondary"
+                                           title="Filter Documents">
                                             <i class="bi bi-folder"></i>
                                         </a>
+
                                     </div>
                                 </td>
                             </tr>
@@ -654,6 +784,7 @@
                         </tr>
                     }
                 </tbody>
+
             </table>
         </div>
     </div>

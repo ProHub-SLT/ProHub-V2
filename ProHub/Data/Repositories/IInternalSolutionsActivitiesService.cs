@@ -90,11 +90,11 @@ namespace PROHUB.Data
             {
 
                 query += @" AND (
-                                COALESCE(isol.App_Name, ip.App_Name) LIKE @Search 
-                                OR pa.Description LIKE @Search
-                                OR e1.Emp_Name LIKE @Search
-                                OR e2.Emp_Name LIKE @Search
-                                OR e3.Emp_Name LIKE @Search
+                                COALESCE(isol.App_Name, ip.App_Name) COLLATE utf8mb4_general_ci LIKE @Search 
+                                OR pa.Description COLLATE utf8mb4_general_ci LIKE @Search
+                                OR e1.Emp_Name COLLATE utf8mb4_general_ci LIKE @Search
+                                OR e2.Emp_Name COLLATE utf8mb4_general_ci LIKE @Search
+                                OR e3.Emp_Name COLLATE utf8mb4_general_ci LIKE @Search
                             )";
             }
 
@@ -245,11 +245,13 @@ namespace PROHUB.Data
         public async Task<List<Employee>> GetEmployeesAsync()
         {
             var list = new List<Employee>();
+
             using var connection = GetConnection();
             await connection.OpenAsync();
             const string query = "SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name";
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
+
             while (await reader.ReadAsync())
             {
                 list.Add(new Employee
@@ -258,6 +260,7 @@ namespace PROHUB.Data
                     EmpName = reader.GetString(reader.GetOrdinal("Emp_Name"))
                 });
             }
+
             return list;
         }
 

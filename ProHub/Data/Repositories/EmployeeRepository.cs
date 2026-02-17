@@ -18,7 +18,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_Name FROM Employee WHERE Emp_ID = @id", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_Name FROM employee WHERE Emp_ID = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
             return cmd.ExecuteScalar()?.ToString() ?? "Unknown";
         }
@@ -27,44 +27,72 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_ID FROM Employee WHERE Emp_Name = @name", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_ID FROM employee WHERE Emp_Name = @name", conn);
             cmd.Parameters.AddWithValue("@name", name);
             var result = cmd.ExecuteScalar();
             return result != null ? Convert.ToInt32(result) : 0;
         }
-        
+
         public Dictionary<int, string> GetNamesByIds(IEnumerable<int> ids)
         {
             if (!ids.Any()) return new();
+
             using var conn = GetConnection();
             conn.Open();
-            var placeholders = string.Join(",", ids.Select((_, i) => $"@p{i}"));
-            var sql = $"SELECT Emp_ID, Emp_Name FROM Employee WHERE Emp_ID IN ({placeholders})";
+
+            var idList = ids.ToList();
+            var placeholders = string.Join(",", idList.Select((_, i) => $"@p{i}"));
+
+            var sql = $@"
+                SELECT e.Emp_ID, e.Emp_Name
+                FROM employee e
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
+                WHERE e.Emp_ID IN ({placeholders})
+                  AND (g.GroupName IS NULL OR g.GroupName <> 'Inactive')
+            ";
+
             using var cmd = new MySqlCommand(sql, conn);
-            for (int i = 0; i < ids.Count(); i++)
-                cmd.Parameters.AddWithValue($"@p{i}", ids.ElementAt(i));
+            for (int i = 0; i < idList.Count; i++)
+                cmd.Parameters.AddWithValue($"@p{i}", idList[i]);
+
             var dict = new Dictionary<int, string>();
             using var r = cmd.ExecuteReader();
-            while (r.Read()) dict[r.GetInt32(0)] = r.GetString(1);
+            while (r.Read())
+                dict[r.GetInt32(0)] = r.GetString(1);
+
             return dict;
         }
+
 
         public List<int> GetAllEmployeeIds()
         {
             var ids = new List<int>();
+
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_ID FROM Employee ORDER BY Emp_Name", conn);
+
+            using var cmd = new MySqlCommand(@"
+                SELECT e.Emp_ID
+                FROM employee e
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
+                WHERE g.GroupName IS NULL
+                   OR g.GroupName <> 'Inactive'
+                ORDER BY e.Emp_Name
+            ", conn);
+
             using var r = cmd.ExecuteReader();
-            while (r.Read()) ids.Add(r.GetInt32(0));
+            while (r.Read())
+                ids.Add(r.GetInt32(0));
+
             return ids;
         }
+
 
         public string GetEmployeeNameByEmail(string email)
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_Name FROM Employee WHERE Emp_Email = @email", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_Name FROM employee WHERE Emp_Email = @email", conn);
             cmd.Parameters.AddWithValue("@email", email);
             return cmd.ExecuteScalar()?.ToString() ?? "Unknown User";
         }
@@ -73,7 +101,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            using var cmd = new MySqlCommand("SELECT Emp_ID FROM Employee WHERE Emp_Email = @email", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_ID FROM employee WHERE Emp_Email = @email", conn);
             cmd.Parameters.AddWithValue("@email", email);
             var result = cmd.ExecuteScalar();
             return result != null ? Convert.ToInt32(result) : 0;

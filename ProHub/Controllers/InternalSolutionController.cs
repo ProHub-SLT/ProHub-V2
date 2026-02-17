@@ -1,7 +1,9 @@
 ﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using ProHub.Constants;
 using ProHub.Models;
 using PROHUB.Data;
 using System;
@@ -128,7 +130,7 @@ namespace PROHUB.Controllers
         }
 
         // ------------------ Create ------------------
-
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -136,6 +138,7 @@ namespace PROHUB.Controllers
             return View(new InternalPlatform());
         }
 
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(InternalPlatform solution)
         {
@@ -175,7 +178,7 @@ namespace PROHUB.Controllers
         }
 
         // ------------------ Edit ------------------
-
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -195,7 +198,7 @@ namespace PROHUB.Controllers
             await PopulateDropdowns();
             return View(solution);
         }
-
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, InternalPlatform solution)
         {
@@ -261,7 +264,7 @@ namespace PROHUB.Controllers
         }
 
         // ------------------ Delete ------------------
-
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -281,6 +284,7 @@ namespace PROHUB.Controllers
             return View(solution);
         }
 
+        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Developer},{AppRoles.DPO}")]
         [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

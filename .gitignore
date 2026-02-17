@@ -1,0 +1,16 @@
+## [Required] Ignore .NET build artifacts
+bin/
+obj/
+publish/
+
+## [Optional] Standard .NET ignores
+*.user
+*.userenv
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+
+## [Project Specific]
+appsettings.Development.json

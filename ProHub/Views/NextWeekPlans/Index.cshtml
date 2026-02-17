@@ -298,7 +298,51 @@
                         @foreach (var item in Model)
                         {
                             var isOwner = User.FindFirst("EmployeeId")?.Value == item.UpdatedBy?.ToString();
-                            var canEditDelete = User.IsInRole(AppRoles.Admin) || isOwner;
+                            var isAdmin = User.IsInRole(AppRoles.Admin);
+                            
+                            // FILTER: Show only if Admin OR Owner
+                            if (!isAdmin && !isOwner)
+                            {
+                                continue;
+                            }
+
+                            var canEditDelete = isAdmin || isOwner;
+
+                            // Parse WorkPlanDesc to get all project names
+                            List<string> extProjectNames = new List<string>();
+                            List<string> intProjectNames = new List<string>();
+                            Dictionary<string, dynamic> workPlanDict = null;
+
+                            if (!string.IsNullOrEmpty(item.WorkPlanDesc))
+                            {
+                                try
+                                {
+                                    workPlanDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.WorkPlanDesc);
+                                    if (workPlanDict != null)
+                                    {
+                                        foreach (var kvp in workPlanDict)
+                                        {
+                                            if (kvp.Value != null)
+                                            {
+                                                string type = (string)kvp.Value.type;
+                                                string name = (string)kvp.Value.name;
+                                                if ("External".Equals(type, StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    extProjectNames.Add(name);
+                                                }
+                                                else if ("Internal".Equals(type, StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    intProjectNames.Add(name);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    // Ignore parsing errors
+                                }
+                            }
 
                             <tr data-plan-id="@item.ID" data-status="active">
                                 <td>
@@ -307,41 +351,57 @@
                                 </td>
                                 <td>@item.UpdatedByName</td>
                                 <td>
-                                    @{
+                                    @if(extProjectNames.Any())
+                                    {
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach(var name in extProjectNames)
+                                            {
+                                                <li>• @name</li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
                                         var extPlatform = item.ExternalPlatforms?.FirstOrDefault(x => x.Id == item.ExternalPlatform);
                                         @(extPlatform?.PlatformName ?? "None")
                                     }
                                 </td>
                                 <td>
-                                    @{
+                                    @if(intProjectNames.Any())
+                                    {
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach(var name in intProjectNames)
+                                            {
+                                                <li>• @name</li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
                                         var intPlatform = item.InternalPlatforms?.FirstOrDefault(x => x.Id == item.InternalApp);
                                         @(intPlatform?.AppName ?? "None")
                                     }
                                 </td>
                                 <td>
-                                    @if (!string.IsNullOrEmpty(item.WorkPlanDesc))
+                                    @if (workPlanDict != null)
                                     {
-                                        try
-                                        {
-                                            var workPlanDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(item.WorkPlanDesc);
-                                            <div class="work-plan-container">
-                                                @foreach (var projectPlan in workPlanDict)
+                                        <div class="work-plan-container">
+                                            @foreach (var projectPlan in workPlanDict)
+                                            {
+                                                if (projectPlan.Value != null)
                                                 {
-                                                    if (projectPlan.Value != null)
-                                                    {
-                                                        var projectInfo = projectPlan.Value;
-                                                        <div class="project-entry">
-                                                            <div class="project-name">@projectInfo.name (@projectInfo.type)</div>
-                                                            <div class="project-details">@projectInfo.details</div>
-                                                        </div>
-                                                    }
+                                                    var projectInfo = projectPlan.Value;
+                                                    <div class="project-entry">
+                                                        <div class="project-name">@projectInfo.name (@projectInfo.type)</div>
+                                                        <div class="project-details">@projectInfo.details</div>
+                                                    </div>
                                                 }
-                                            </div>
-                                        }
-                                        catch
-                                        {
-                                            @item.WorkPlanDesc
-                                        }
+                                            }
+                                        </div>
+                                    }
+                                    else if (!string.IsNullOrEmpty(item.WorkPlanDesc))
+                                    {
+                                        @item.WorkPlanDesc
                                     }
                                 </td>
                                 <td class="text-center">
@@ -363,8 +423,6 @@
                                             </a>
                                         }
 
-                                       
-
                                         <!-- DELETE: Only Admin or Owner -->
                                         @if (canEditDelete)
                                         {
@@ -377,18 +435,6 @@
                                                     title="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
-                                        }
-                                        else
-                                        {
-                                            <!-- <CHANGE> Styled lock icon badge for permission restriction -->
-                                            <span class="permission-badge" title="Only owner or admin can edit">
-                                                <i class="bi bi-lock-fill"></i>
-                                            </span>
-
-                                            <!-- <CHANGE> Styled lock icon badge for permission restriction -->
-                                            <span class="permission-badge2" title="Only owner or admin can delete">
-                                                <i class="bi bi-lock-fill"></i>
-                                            </span>
                                         }
                                     </div>
                                 </td>

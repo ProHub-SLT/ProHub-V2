@@ -26,7 +26,7 @@ namespace ProHub.Data
             using var conn = GetConnection();
             conn.Open();
 
-            string query = "SELECT * FROM Partner WHERE 1=1";
+            string query = "SELECT * FROM partner WHERE 1=1";
             if (!string.IsNullOrEmpty(search))
             {
                 query += " AND (Partner_Name LIKE @search OR Partner_Organization LIKE @search OR Partner_Title LIKE @search)";
@@ -57,13 +57,13 @@ namespace ProHub.Data
             return list;
         }
 
-        // ✅ Add new partner
+        // ✅ Add new partners
         public void AddPartner(Partner partner)
         {
             using var conn = GetConnection();
             conn.Open();
 
-            string query = @"INSERT INTO Partner 
+            string query = @"INSERT INTO partner 
                              (Partner_Organization, Partner_Title, Partner_Name, Partner_Phone1, Partner_Phone2, Partner_Email, Partner_Designation)
                              VALUES (@org, @title, @name, @ph1, @ph2, @email, @desig)";
 

@@ -108,7 +108,7 @@ namespace PROHUB.Data
 
                 // FIX: Changed requested_payment_amount to requested_payment_date
                 string query = @"
-                    INSERT INTO Trainee
+                    INSERT INTO trainee
                     (Trainee_Name, Trainee_Phone, Trainee_NIC, Trainee_Email,
                      Training_StartDate, Training_EndDate, Institute, Languages_Known,
                      Supervisor, Target_Date, Trainee_HomeAddress, AssignedWork_Desc,
@@ -139,7 +139,7 @@ namespace PROHUB.Data
 
                 // FIX: Changed requested_payment_amount to requested_payment_date in the SET clause
                 string query = @"
-                    UPDATE Trainee SET
+                    UPDATE trainee SET
                         Trainee_Name = @Trainee_Name,
                         Trainee_Phone = @Trainee_Phone,
                         Trainee_NIC = @Trainee_NIC,
@@ -178,7 +178,7 @@ namespace PROHUB.Data
             {
                 await connection.OpenAsync();
 
-                string query = "DELETE FROM Trainee WHERE Trainee_ID = @ID";
+                string query = "DELETE FROM trainee WHERE Trainee_ID = @ID";
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@ID", id);

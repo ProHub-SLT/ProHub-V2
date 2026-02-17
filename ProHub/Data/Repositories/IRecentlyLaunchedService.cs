@@ -44,12 +44,12 @@ namespace PROHUB.Data
         SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                pp.ParentProjectGroup AS ParentProjectGroupName
-        FROM Internal_Platforms isol
-        LEFT JOIN Employee emp ON isol.Developed_By = emp.Emp_ID
-        LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
-        LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
-        LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
-        LEFT JOIN ParentProject pp ON isol.ParentProjectID = pp.ParentProjectID
+        FROM internal_platforms isol
+        LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
+        LEFT JOIN sdlcphas sp ON isol.SDLCPhase = sp.ID
+        LEFT JOIN targetenduser te ON isol.EndUserType = te.ID
+        LEFT JOIN internal_platforms parent ON isol.MainAppID = parent.ID
+        LEFT JOIN parentproject pp ON isol.ParentProjectID = pp.ParentProjectID
         WHERE isol.LaunchedDate IS NOT NULL 
           AND YEAR(isol.LaunchedDate) = YEAR(NOW())
         ORDER BY isol.LaunchedDate DESC;";
@@ -71,12 +71,12 @@ namespace PROHUB.Data
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName
-                FROM Internal_Platforms isol
-                LEFT JOIN Employee emp ON isol.Developed_By = emp.Emp_ID
-                LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
-                LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
-                LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
-                LEFT JOIN ParentProject pp ON isol.ParentProjectID = pp.ParentProjectID
+                FROM internal_platforms isol
+                LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
+                LEFT JOIN sdlcphas sp ON isol.SDLCPhase = sp.ID
+                LEFT JOIN targetenduser te ON isol.EndUserType = te.ID
+                LEFT JOIN internal_platforms parent ON isol.MainAppID = parent.ID
+                LEFT JOIN parentproject pp ON isol.ParentProjectID = pp.ParentProjectID
                 WHERE isol.LaunchedDate IS NOT NULL
                 ORDER BY isol.LaunchedDate DESC;";
 
@@ -95,12 +95,12 @@ namespace PROHUB.Data
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName
-                FROM Internal_Platforms isol
-                LEFT JOIN Employee emp ON isol.Developed_By = emp.Emp_ID
-                LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
-                LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
-                LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
-                LEFT JOIN ParentProject pp ON isol.ParentProjectID = pp.ParentProjectID
+                FROM internal_platforms isol
+                LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
+                LEFT JOIN sdlcphas sp ON isol.SDLCPhase = sp.ID
+                LEFT JOIN targetenduser te ON isol.EndUserType = te.ID
+                LEFT JOIN internal_platforms parent ON isol.MainAppID = parent.ID
+                LEFT JOIN parentproject pp ON isol.ParentProjectID = pp.ParentProjectID
                 WHERE isol.ID = @ID;";
 
             using var command = new MySqlCommand(query, connection);

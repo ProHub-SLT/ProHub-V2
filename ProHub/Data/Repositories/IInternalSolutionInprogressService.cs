@@ -53,10 +53,10 @@ namespace PROHUB.Data
                sp.Phase AS SDLCPhaseName, 
                pr.ParentProjectGroup AS ParentProjectName,
                parent.App_Name AS MainAppName,  
-               (SELECT COUNT(*) FROM Internal_Project_Comments WHERE Solution_ID = ip.ID) AS CommentCount
+               (SELECT COUNT(*) FROM internal_project_comments WHERE Solution_ID = ip.ID) AS CommentCount
         FROM internal_platforms ip
-        LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
-        LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
+        LEFT JOIN employee e ON ip.Developed_By = e.Emp_ID
+        LEFT JOIN sdlcphas sp ON ip.SDLCPhase = sp.ID
         LEFT JOIN parentproject pr ON ip.ParentProjectID = pr.ParentProjectID
         LEFT JOIN internal_platforms parent ON ip.MainAppID = parent.ID 
         WHERE sp.Phase NOT IN ('Maintenance', 'Retired', 'Abandoned')";
@@ -112,8 +112,8 @@ namespace PROHUB.Data
                        pr.ParentProjectGroup AS ParentProjectName,
                        parent.App_Name AS MainAppName -- <--- අලුතෙන් එකතු කළ කොටස
                 FROM internal_platforms ip
-                LEFT JOIN Employee e ON ip.Developed_By = e.Emp_ID
-                LEFT JOIN SDLCPhas sp ON ip.SDLCPhase = sp.ID
+                LEFT JOIN employee e ON ip.Developed_By = e.Emp_ID
+                LEFT JOIN sdlcphas sp ON ip.SDLCPhase = sp.ID
                 LEFT JOIN parentproject pr ON ip.ParentProjectID = pr.ParentProjectID
                 LEFT JOIN internal_platforms parent ON ip.MainAppID = parent.ID -- <--- අලුතෙන් එකතු කළ කොටස
                 WHERE ip.ID = @Id";
@@ -134,8 +134,8 @@ namespace PROHUB.Data
                 solution.ProjectComments = new List<InternalProjectComment>();
                 const string commentQuery = @"
                     SELECT c.ID, c.Comment, c.Updated_Time, e.Emp_Name AS UpdatedByName
-                    FROM Internal_Project_Comments c
-                    LEFT JOIN Employee e ON c.Updated_By = e.Emp_ID
+                    FROM internal_project_comments c
+                    LEFT JOIN employee e ON c.Updated_By = e.Emp_ID
                     WHERE c.Solution_ID = @SolutionId
                     ORDER BY c.Updated_Time DESC";
 
@@ -229,7 +229,7 @@ namespace PROHUB.Data
                 if (!string.IsNullOrWhiteSpace(platform.Comment))
                 {
                     const string commentQuery = @"
-                        INSERT INTO Internal_Project_Comments 
+                        INSERT INTO internal_project_comments 
                         (Solution_ID, Comment, Updated_By, Updated_Time) 
                         VALUES 
                         (@SolutionId, @Comment, @UpdatedBy, NOW())";
@@ -271,7 +271,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                INSERT INTO Internal_Project_Comments (Solution_ID, Comment, Updated_By, Updated_Time) 
+                INSERT INTO internal_project_comments (Solution_ID, Comment, Updated_By, Updated_Time) 
                 VALUES (@SolutionId, @Comment, @UpdatedBy, NOW())";
 
             using var command = new MySqlCommand(query, connection);

@@ -52,12 +52,12 @@ namespace PROHUB.Data
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName
-                FROM Internal_Platforms isol
-                LEFT JOIN Employee emp ON isol.Developed_By = emp.Emp_ID
-                LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
-                LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
-                LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
-                LEFT JOIN ParentProject pp ON isol.ParentProjectID = pp.ParentProjectID;";
+                FROM internal_platforms isol
+                LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
+                LEFT JOIN sdlcphas sp ON isol.SDLCPhase = sp.ID
+                LEFT JOIN targetenduser te ON isol.EndUserType = te.ID
+                LEFT JOIN internal_platforms parent ON isol.MainAppID = parent.ID
+                LEFT JOIN parentproject pp ON isol.ParentProjectID = pp.ParentProjectID;";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
@@ -74,12 +74,12 @@ namespace PROHUB.Data
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName
-                FROM Internal_Platforms isol
-                LEFT JOIN Employee emp ON isol.Developed_By = emp.Emp_ID
-                LEFT JOIN SDLCPhas sp ON isol.SDLCPhase = sp.ID
-                LEFT JOIN Targetenduser te ON isol.EndUserType = te.ID
-                LEFT JOIN Internal_Platforms parent ON isol.MainAppID = parent.ID
-                LEFT JOIN ParentProject pp ON isol.ParentProjectID = pp.ParentProjectID
+                FROM internal_platforms isol
+                LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
+                LEFT JOIN sdlcphas sp ON isol.SDLCPhase = sp.ID
+                LEFT JOIN targetenduser te ON isol.EndUserType = te.ID
+                LEFT JOIN internal_platforms parent ON isol.MainAppID = parent.ID
+                LEFT JOIN parentproject pp ON isol.ParentProjectID = pp.ParentProjectID
                 WHERE isol.ID = @ID;";
 
             using var command = new MySqlCommand(query, connection);
@@ -94,7 +94,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                INSERT INTO Internal_Platforms (
+                INSERT INTO internal_platforms (
                     App_Name, Developed_By, Developed_Team, StartDate, TargetDate,
                     Bit_bucket_repo, SDLCPhase, PercentageDone, Status, StatusDate,
                     Bus_Owner, App_Category, Scope, App_IP, App_URL, App_Users,
@@ -136,7 +136,7 @@ namespace PROHUB.Data
             {
                 // 1. Update the Main Solution Table
                 const string updateQuery = @"
-                    UPDATE Internal_Platforms SET
+                    UPDATE internal_platforms SET
                         App_Name = @App_Name, Developed_By = @Developed_By, Developed_Team = @Developed_Team,
                         StartDate = @StartDate, TargetDate = @TargetDate, Bit_bucket_repo = @Bit_bucket_repo,
                         SDLCPhase = @SDLCPhase, PercentageDone = @PercentageDone, Status = @Status,
@@ -211,7 +211,7 @@ namespace PROHUB.Data
         {
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
-            const string query = "DELETE FROM Internal_Platforms WHERE ID = @ID;";
+            const string query = "DELETE FROM internal_platforms WHERE ID = @ID;";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@ID", id);
             return await command.ExecuteNonQueryAsync() > 0;
@@ -221,7 +221,7 @@ namespace PROHUB.Data
         {
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
-            const string query = "SELECT COUNT(1) FROM Internal_Platforms WHERE ID = @ID;";
+            const string query = "SELECT COUNT(1) FROM internal_platforms WHERE ID = @ID;";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@ID", id);
             return Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
@@ -234,7 +234,7 @@ namespace PROHUB.Data
             var list = new List<Employee>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT Emp_ID, Emp_Name FROM Employee ORDER BY Emp_Name", conn);
+            using var cmd = new MySqlCommand("SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {
@@ -248,7 +248,7 @@ namespace PROHUB.Data
             var list = new List<SDLCPhase>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, Phase FROM SDLCPhas ORDER BY OrderSeq, Phase", conn);
+            using var cmd = new MySqlCommand("SELECT ID, Phase FROM sdlcphas ORDER BY OrderSeq, Phase", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {
@@ -262,7 +262,7 @@ namespace PROHUB.Data
             var list = new List<TargetEndUser>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, EndUserType FROM Targetenduser ORDER BY EndUserType", conn);
+            using var cmd = new MySqlCommand("SELECT ID, EndUserType FROM targetenduser ORDER BY EndUserType", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {
@@ -276,7 +276,7 @@ namespace PROHUB.Data
             var list = new List<InternalPlatform>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, App_Name FROM Internal_Platforms ORDER BY App_Name", conn);
+            using var cmd = new MySqlCommand("SELECT ID, App_Name FROM internal_platforms ORDER BY App_Name", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {
@@ -290,7 +290,7 @@ namespace PROHUB.Data
             var list = new List<ParentProject>();
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ParentProjectID, ParentProjectGroup FROM ParentProject ORDER BY ParentProjectGroup", conn);
+            using var cmd = new MySqlCommand("SELECT ParentProjectID, ParentProjectGroup FROM parentproject ORDER BY ParentProjectGroup", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {

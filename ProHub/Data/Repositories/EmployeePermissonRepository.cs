@@ -20,7 +20,7 @@ namespace ProHub.Data.Repositories
             using var conn = new MySqlConnection(_connectionString);
             conn.Open();
 
-            string query = "SELECT * FROM Employee WHERE Emp_Email = @Email LIMIT 1";
+            string query = "SELECT * FROM employee WHERE Emp_Email = @Email LIMIT 1";
 
             using var cmd = new MySqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@Email", email);

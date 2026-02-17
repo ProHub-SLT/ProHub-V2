@@ -55,9 +55,9 @@ namespace ProHub.Data
                     c.Company_Name,
                     cc.Platform_ID,
                     ep.Platform_Name
-                FROM CustomerContacts cc
+                FROM customercontacts cc
                 LEFT JOIN Company c ON cc.Contact_Company = c.Id
-                LEFT JOIN External_Platforms ep ON cc.Platform_ID = ep.Id
+                LEFT JOIN external_platforms ep ON cc.Platform_ID = ep.Id
                 WHERE 1=1";
 
             if (!string.IsNullOrEmpty(search))
@@ -115,9 +115,9 @@ namespace ProHub.Data
                     cc.Contact_Designation,
                     cc.Contact_Company,
                     c.Company_Name
-                FROM CustomerContacts cc
+                FROM customercontacts cc
                 LEFT JOIN Company c ON cc.Contact_Company = c.Id
-                LEFT JOIN External_Platforms ep ON cc.Platform_ID = ep.Id
+                LEFT JOIN external_platforms ep ON cc.Platform_ID = ep.Id
                 WHERE cc.Id = @id";
 
             using var cmd = new MySqlCommand(query, conn);

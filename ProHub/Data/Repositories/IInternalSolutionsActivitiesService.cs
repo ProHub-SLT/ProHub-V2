@@ -63,14 +63,14 @@ namespace PROHUB.Data
                        e1.Emp_Name AS CreatedByName, 
                        e2.Emp_Name AS AssignedToName, 
                        e3.Emp_Name AS UpdatedByName,
-                       (SELECT Comment FROM Project_Comments pc WHERE pc.Activity_ID = pa.ID ORDER BY pc.ID DESC LIMIT 1) AS LatestComment
-                FROM Project_Activities pa
-                LEFT JOIN Main_Platforms mp ON pa.Platform_ID = mp.ID
-                LEFT JOIN Internal_Platforms ip ON pa.Platform_ID = ip.ID
-                LEFT JOIN Internal_Platforms isol ON pa.Solution_ID = isol.ID
-                LEFT JOIN Employee e1 ON pa.Created_By = e1.Emp_ID
-                LEFT JOIN Employee e2 ON pa.Assigned_To = e2.Emp_ID
-                LEFT JOIN Employee e3 ON pa.Updated_By = e3.Emp_ID
+                       (SELECT Comment FROM project_comments pc WHERE pc.Activity_ID = pa.ID ORDER BY pc.ID DESC LIMIT 1) AS LatestComment
+                FROM project_activities pa
+                LEFT JOIN main_platforms mp ON pa.Platform_ID = mp.ID
+                LEFT JOIN internal_platforms ip ON pa.Platform_ID = ip.ID
+                LEFT JOIN internal_platforms isol ON pa.Solution_ID = isol.ID
+                LEFT JOIN employee e1 ON pa.Created_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON pa.Assigned_To = e2.Emp_ID
+                LEFT JOIN employee e3 ON pa.Updated_By = e3.Emp_ID
                 WHERE 1=1";
 
             if (filterPlatformId.HasValue)
@@ -150,14 +150,14 @@ namespace PROHUB.Data
                        e1.Emp_Name AS CreatedByName, 
                        e2.Emp_Name AS AssignedToName, 
                        e3.Emp_Name AS UpdatedByName,
-                       (SELECT Comment FROM Project_Comments pc WHERE pc.Activity_ID = pa.ID ORDER BY pc.ID DESC LIMIT 1) AS LatestComment
-                FROM Project_Activities pa
-                LEFT JOIN Main_Platforms mp ON pa.Platform_ID = mp.ID
-                LEFT JOIN Internal_Platforms ip ON pa.Platform_ID = ip.ID
-                LEFT JOIN Internal_Platforms isol ON pa.Solution_ID = isol.ID
-                LEFT JOIN Employee e1 ON pa.Created_By = e1.Emp_ID
-                LEFT JOIN Employee e2 ON pa.Assigned_To = e2.Emp_ID
-                LEFT JOIN Employee e3 ON pa.Updated_By = e3.Emp_ID
+                       (SELECT Comment FROM project_comments pc WHERE pc.Activity_ID = pa.ID ORDER BY pc.ID DESC LIMIT 1) AS LatestComment
+                FROM project_activities pa
+                LEFT JOIN main_platforms mp ON pa.Platform_ID = mp.ID
+                LEFT JOIN internal_platforms ip ON pa.Platform_ID = ip.ID
+                LEFT JOIN internal_platforms isol ON pa.Solution_ID = isol.ID
+                LEFT JOIN employee e1 ON pa.Created_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON pa.Assigned_To = e2.Emp_ID
+                LEFT JOIN employee e3 ON pa.Updated_By = e3.Emp_ID
                 WHERE pa.ID = @Id";
 
             using var command = new MySqlCommand(query, connection);
@@ -171,7 +171,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
             const string query = @"
-                INSERT INTO Project_Activities (
+                INSERT INTO project_activities (
                     Platform_ID, Solution_ID, Description, Created_By, Created_Time,
                     Assigned_To, Target_Date, Status, Updated_By, Updated_Date
                 ) VALUES (
@@ -191,7 +191,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
             const string query = @"
-                UPDATE Project_Activities SET
+                UPDATE project_activities SET
                     Platform_ID = @PlatformId, Solution_ID = @SolutionId, Description = @Description,
                     Created_By = @CreatedBy, Created_Time = @CreatedTime, Assigned_To = @AssignedTo,
                     Target_Date = @TargetDate, Status = @Status, Updated_By = @UpdatedBy, UPDATED_Date = @UpdatedDate
@@ -209,7 +209,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                INSERT INTO Project_Comments (Activity_ID, Comment, Updated_By, Updated_Time) 
+                INSERT INTO project_comments (Activity_ID, Comment, Updated_By, Updated_Time) 
                 VALUES (@ActivityId, @Comment, @UpdatedBy, NOW())";
 
             using var command = new MySqlCommand(query, connection);
@@ -224,7 +224,7 @@ namespace PROHUB.Data
         {
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "DELETE FROM Project_Activities WHERE ID = @Id";
+            const string query = "DELETE FROM project_activities WHERE ID = @Id";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
             return await command.ExecuteNonQueryAsync() > 0;
@@ -234,7 +234,7 @@ namespace PROHUB.Data
         {
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT COUNT(1) FROM Project_Activities WHERE ID = @Id";
+            const string query = "SELECT COUNT(1) FROM project_activities WHERE ID = @Id";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
             return Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
@@ -247,7 +247,7 @@ namespace PROHUB.Data
             var list = new List<Employee>();
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT Emp_ID, Emp_Name FROM Employee ORDER BY Emp_Name";
+            const string query = "SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name";
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -266,7 +266,7 @@ namespace PROHUB.Data
             var list = new List<MainPlatform>();
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT ID, Platforms AS PlatformName FROM Main_Platforms ORDER BY Platforms";
+            const string query = "SELECT ID, Platforms AS PlatformName FROM main_platforms ORDER BY Platforms";
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -285,7 +285,7 @@ namespace PROHUB.Data
             var list = new List<InternalPlatform>();
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT ID, App_Name FROM Internal_Platforms ORDER BY App_Name";
+            const string query = "SELECT ID, App_Name FROM internal_platforms ORDER BY App_Name";
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -305,7 +305,7 @@ namespace PROHUB.Data
 
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT * FROM Employee WHERE Emp_Email = @Email LIMIT 1";
+            const string query = "SELECT * FROM employee WHERE Emp_Email = @Email LIMIT 1";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Email", email);
 

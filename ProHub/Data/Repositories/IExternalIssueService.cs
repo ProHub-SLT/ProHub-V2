@@ -51,12 +51,12 @@ namespace PROHUB.Data
                     emp_entered.Emp_Name AS EnteredByName,
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
-                FROM External_Issues ei
-                LEFT JOIN External_Platforms ep ON ei.Platform_ID = ep.ID
-                LEFT JOIN CustomerContacts cc ON ei.Reported_By = cc.ID
-                LEFT JOIN Employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
+                FROM external_issues ei
+                LEFT JOIN external_platforms ep ON ei.Platform_ID = ep.ID
+                LEFT JOIN customercontacts cc ON ei.Reported_By = cc.ID
+                LEFT JOIN employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
                 ORDER BY ei.Issue_Start_Time DESC";
 
             using var command = new MySqlCommand(query, connection);
@@ -83,12 +83,12 @@ namespace PROHUB.Data
                     emp_entered.Emp_Name AS EnteredByName,
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
-                FROM External_Issues ei
-                LEFT JOIN External_Platforms ep ON ei.Platform_ID = ep.ID
-                LEFT JOIN CustomerContacts cc ON ei.Reported_By = cc.ID
-                LEFT JOIN Employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
+                FROM external_issues ei
+                LEFT JOIN external_platforms ep ON ei.Platform_ID = ep.ID
+                LEFT JOIN customercontacts cc ON ei.Reported_By = cc.ID
+                LEFT JOIN employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
                 WHERE ei.Description LIKE @SearchTerm
                    OR ep.Platform_Name LIKE @SearchTerm
                    OR emp_assigned_to.Emp_Name LIKE @SearchTerm
@@ -122,12 +122,12 @@ namespace PROHUB.Data
                     emp_entered.Emp_Name AS EnteredByName,
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
-                FROM External_Issues ei
-                LEFT JOIN External_Platforms ep ON ei.Platform_ID = ep.ID
-                LEFT JOIN CustomerContacts cc ON ei.Reported_By = cc.ID
-                LEFT JOIN Employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
-                LEFT JOIN Employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
-                LEFT JOIN Employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
+                FROM external_issues ei
+                LEFT JOIN external_platforms ep ON ei.Platform_ID = ep.ID
+                LEFT JOIN customercontacts cc ON ei.Reported_By = cc.ID
+                LEFT JOIN employee emp_entered ON ei.Entered_By = emp_entered.Emp_ID
+                LEFT JOIN employee emp_assigned_to ON ei.Assigned_To = emp_assigned_to.Emp_ID
+                LEFT JOIN employee emp_assigned_by ON ei.Assigned_By = emp_assigned_by.Emp_ID
                 WHERE ei.ID = @Id";
 
             using var command = new MySqlCommand(query, connection);
@@ -147,7 +147,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                INSERT INTO External_Issues (
+                INSERT INTO external_issues (
                     Issue_Start_Time, Platform_ID, Reported_By, Description, Criticality,
                     Entered_By, Assigned_To, Assigned_By, Assigned_Time, Status,
                     Issue_Closed_Time, Action_Taken, Entered_Time
@@ -170,7 +170,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                UPDATE External_Issues SET
+                UPDATE external_issues SET
                     Issue_Start_Time = @IssueStartTime,
                     Platform_ID = @PlatformId,
                     Reported_By = @ReportedBy,
@@ -198,7 +198,7 @@ namespace PROHUB.Data
         {
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "DELETE FROM External_Issues WHERE ID = @Id";
+            const string query = "SELECT * FROM employee WHERE Emp_Email = @Email LIMIT 1";
 
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
@@ -211,7 +211,7 @@ namespace PROHUB.Data
         {
             using var connection = GetConnection();
             await connection.OpenAsync();
-            const string query = "SELECT COUNT(1) FROM External_Issues WHERE ID = @Id";
+            const string query = "SELECT COUNT(1) FROM external_issues WHERE ID = @Id";
 
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
@@ -227,7 +227,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            const string query = "SELECT Emp_ID, Emp_Name FROM Employee ORDER BY Emp_Name";
+            const string query = "SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name";
             using var command = new MySqlCommand(query, connection);
 
             using var reader = await command.ExecuteReaderAsync();
@@ -248,7 +248,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            const string query = "SELECT ID, Platform_Name FROM External_Platforms ORDER BY Platform_Name";
+            const string query = "SELECT ID, Platform_Name FROM external_platforms ORDER BY Platform_Name";
             using var command = new MySqlCommand(query, connection);
 
             using var reader = await command.ExecuteReaderAsync();
@@ -269,7 +269,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            const string query = "SELECT ID, Contact_Name FROM CustomerContacts ORDER BY Contact_Name";
+            const string query = "SELECT ID, Contact_Name FROM customercontacts ORDER BY Contact_Name";
             using var command = new MySqlCommand(query, connection);
 
             using var reader = await command.ExecuteReaderAsync();

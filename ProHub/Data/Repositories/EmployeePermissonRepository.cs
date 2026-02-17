@@ -20,7 +20,13 @@ namespace ProHub.Data.Repositories
             using var conn = new MySqlConnection(_connectionString);
             conn.Open();
 
-            string query = "SELECT * FROM employee WHERE Emp_Email = @Email LIMIT 1";
+            // Join with EmpGroup to get the group/roles
+            string query = @"
+                SELECT e.*, g.GroupID, g.GroupName
+                FROM employee e
+                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
+                WHERE e.Emp_Email = @Email
+                LIMIT 1";
 
             using var cmd = new MySqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@Email", email);

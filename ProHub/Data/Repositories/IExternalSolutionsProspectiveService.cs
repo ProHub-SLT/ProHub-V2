@@ -67,7 +67,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-            INSERT INTO External_Project_Comments 
+            INSERT INTO external_project_comments 
             (Solution_ID, Comment, Updated_By, Updated_Time) 
             VALUES 
             (@SolutionId, @Comment, @UpdatedBy, NOW());";
@@ -112,11 +112,11 @@ namespace PROHUB.Data
         c.ID AS CompanyId, c.Company_Name AS CompanyName,
         
         
-        (SELECT COUNT(*) FROM External_Project_Comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
+        (SELECT COUNT(*) FROM external_project_comments WHERE Solution_ID = ep.ID) > 0 AS HasComments
 
     FROM external_platforms ep
     LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
-    LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
+    LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
     LEFT JOIN company c ON ep.Company_ID = c.ID
     WHERE {filterClause}";
 
@@ -162,7 +162,7 @@ namespace PROHUB.Data
             c.Comment, 
             c.Updated_Time, 
             e.Emp_Name 
-        FROM External_Project_Comments c
+        FROM xxternal_project_comments c
         LEFT JOIN employee e ON c.Updated_By = e.Emp_ID
         WHERE c.Solution_ID = @SolutionId 
         ORDER BY c.Updated_Time DESC";
@@ -210,7 +210,7 @@ namespace PROHUB.Data
                 LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
                 LEFT JOIN employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
                 LEFT JOIN employee e3 ON ep.BackupOfficer_2 = e3.Emp_ID
-                LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
                 LEFT JOIN company c ON ep.Company_ID = c.ID
                 WHERE ep.ID = @Id";
 
@@ -337,12 +337,12 @@ namespace PROHUB.Data
             string query = @"
         SELECT 
             ep.*, 
-            sp.Phase as SDLC_Phase, 
+            sp.Phase as sdlc_phase, 
             c.Company_Name, 
             e.Emp_Name as Developed_By_Name,   
             st.Sales_Team_Name                 
         FROM external_platforms ep
-        LEFT JOIN SDLCPhas sp ON ep.SDLCStage = sp.ID
+        LEFT JOIN sdlcphase sp ON ep.SDLCStage = sp.ID
         LEFT JOIN company c ON ep.Company_ID = c.ID
         LEFT JOIN employee e ON ep.Developed_By = e.Emp_ID        
         LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID       

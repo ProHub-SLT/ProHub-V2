@@ -85,7 +85,7 @@ namespace PROHUB.Data
                 LEFT JOIN employee emp ON ex.Developed_By = emp.Emp_ID      
                 LEFT JOIN company c ON ex.Company_ID = c.ID              
                 LEFT JOIN sales_team st ON ex.Sales_Team_ID = st.ID    
-                LEFT JOIN SDLCPhas sdlc ON ex.SDLCstage = sdlc.ID
+                LEFT JOIN sdlcphas sdlc ON ex.SDLCstage = sdlc.ID
                 WHERE sdlc.Phase LIKE '%Maintenance%'
                 ORDER BY ex.ID DESC";
 
@@ -116,7 +116,7 @@ namespace PROHUB.Data
                 LEFT JOIN employee emp ON ex.Developed_By = emp.Emp_ID    
                 LEFT JOIN company c ON ex.Company_ID = c.ID             
                 LEFT JOIN sales_team st ON ex.Sales_Team_ID = st.ID    
-                LEFT JOIN SDLCPhas sdlc ON ex.SDLCstage = sdlc.ID        
+                LEFT JOIN sdlcphas sdlc ON ex.SDLCstage = sdlc.ID        
                 WHERE ex.ID = @Id";
 
             using var command = new MySqlCommand(query, connection);
@@ -302,7 +302,7 @@ namespace PROHUB.Data
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "SELECT ID, Phase FROM SDLCPhas ORDER BY OrderSeq, Phase";
+            const string query = "SELECT ID, Phase FROM sdlcphas ORDER BY OrderSeq, Phase";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();

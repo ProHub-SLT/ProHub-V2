@@ -31,7 +31,7 @@ namespace ProHub.Controllers
                 conn.Open();
 
                 string query = @"SELECT ParentProjectID, ParentProjectGroup, OperationScope 
-                                 FROM ParentProject
+                                 FROM parentproject
                                  WHERE (@search = '' OR ParentProjectGroup LIKE CONCAT('%', @search, '%') 
                                         OR OperationScope LIKE CONCAT('%', @search, '%'))";
 
@@ -104,7 +104,7 @@ namespace ProHub.Controllers
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = @"INSERT INTO ParentProject (ParentProjectGroup, OperationScope)
+                string query = @"INSERT INTO parentproject (ParentProjectGroup, OperationScope)
                          VALUES (@group, @scope)";
                 using (var cmd = new MySqlCommand(query, conn))
                 {
@@ -134,7 +134,7 @@ namespace ProHub.Controllers
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT * FROM ParentProject WHERE ParentProjectID = @id";
+                string query = "SELECT * FROM parentproject WHERE ParentProjectID = @id";
                 using (var cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
@@ -170,7 +170,7 @@ namespace ProHub.Controllers
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = @"UPDATE ParentProject 
+                string query = @"UPDATE parentproject 
                                  SET ParentProjectGroup=@group, OperationScope=@scope 
                                  WHERE ParentProjectID=@id";
                 using (var cmd = new MySqlCommand(query, conn))

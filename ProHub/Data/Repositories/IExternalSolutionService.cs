@@ -241,13 +241,7 @@ namespace PROHUB.Data
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = @"
-                SELECT e.Emp_ID, e.Emp_Name
-                FROM employee e
-                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
-                WHERE g.GroupName IS NULL
-                   OR g.GroupName <> 'Inactive'
-                ORDER BY e.Emp_Name";
+            const string query = "SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();

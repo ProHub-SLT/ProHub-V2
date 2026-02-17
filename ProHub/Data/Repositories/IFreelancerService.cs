@@ -38,11 +38,11 @@ namespace PROHUB.Services
             await connection.OpenAsync();
 
             const string query = @"
-                SELECT f.*, t.taskid, t.id, t.taskname, t.specification, t.payment, 
-                       t.deliveryduedate, t.status, t.paid, t.freelancerid
+                SELECT f.*, t.TaskId, t.ID, t.TaskName, t.Specification, t.Payment, 
+                       t.DeliveryDueDate, t.Status, t.Paid, t.FreelancerId
                 FROM freelancers f
-                LEFT JOIN tasks t ON f.freelancerid = t.freelancerid
-                ORDER BY f.freelancerid, t.taskid";
+                LEFT JOIN tasks t ON f.FreelancerId = t.FreelancerId
+                ORDER BY f.FreelancerId, t.TaskId";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = (MySqlDataReader)await command.ExecuteReaderAsync();
@@ -105,12 +105,12 @@ namespace PROHUB.Services
             await connection.OpenAsync();
 
             const string query = @"
-                SELECT f.*, t.taskid, t.id, t.taskname, t.specification, t.payment, 
-                       t.deliveryduedate, t.status, t.paid, t.freelancerid
+                SELECT f.*, t.TaskId, t.ID, t.TaskName, t.Specification, t.Payment, 
+                       t.DeliveryDueDate, t.Status, t.Paid, t.FreelancerId
                 FROM freelancers f
-                LEFT JOIN tasks t ON f.freelancerid = t.freelancerid
-                WHERE f.freelancerid = @FreelancerId
-                ORDER BY t.taskid";
+                LEFT JOIN tasks t ON f.FreelancerId = t.FreelancerId
+                WHERE f.FreelancerId = @FreelancerId
+                ORDER BY t.TaskId";
 
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@FreelancerId", freelancerId);
@@ -172,7 +172,7 @@ namespace PROHUB.Services
             try
             {
                 const string freelancerQuery = @"
-                    INSERT INTO freelancers (name, nic, projectname, projectscope, amount, budgetavailable, startdate, enddate, duration)
+                    INSERT INTO freelancers (Name, NIC, ProjectName, ProjectScope, Amount, BudgetAvailable, StartDate, EndDate, Duration)
                     VALUES (@Name, @NIC, @ProjectName, @ProjectScope, @Amount, @BudgetAvailable, @StartDate, @EndDate, @Duration);
                     SELECT LAST_INSERT_ID();";
 
@@ -184,7 +184,7 @@ namespace PROHUB.Services
                 foreach (var task in freelancer.Tasks)
                 {
                     const string taskQuery = @"
-                        INSERT INTO tasks (id, taskname, specification, payment, deliveryduedate, status, paid, freelancerid)
+                        INSERT INTO tasks (ID, TaskName, Specification, Payment, DeliveryDueDate, Status, Paid, FreelancerId)
                         VALUES (@ID, @TaskName, @Specification, @Payment, @DeliveryDueDate, @Status, @Paid, @FreelancerId)";
 
                     using var taskCommand = new MySqlCommand(taskQuery, connection, transaction);
@@ -216,10 +216,10 @@ namespace PROHUB.Services
             {
                 const string freelancerQuery = @"
                     UPDATE freelancers 
-                    SET name=@Name, nic=@NIC, projectname=@ProjectName, projectscope=@ProjectScope,
-                        amount=@Amount, budgetavailable=@BudgetAvailable, startdate=@StartDate, 
-                        enddate=@EndDate, duration=@Duration
-                    WHERE freelancerid=@FreelancerId";
+                    SET Name=@Name, NIC=@NIC, ProjectName=@ProjectName, ProjectScope=@ProjectScope,
+                        Amount=@Amount, BudgetAvailable=@BudgetAvailable, StartDate=@StartDate, 
+                        EndDate=@EndDate, Duration=@Duration
+                    WHERE FreelancerId=@FreelancerId";
 
                 using var freelancerCommand = new MySqlCommand(freelancerQuery, connection, transaction);
                 freelancerCommand.Parameters.AddWithValue("@FreelancerId", freelancer.FreelancerId);
@@ -228,7 +228,7 @@ namespace PROHUB.Services
                 await freelancerCommand.ExecuteNonQueryAsync();
 
                 // Refresh tasks
-                const string deleteTasks = "DELETE FROM tasks WHERE freelancerid = @FreelancerId";
+                const string deleteTasks = "DELETE FROM tasks WHERE FreelancerId = @FreelancerId";
                 using var deleteCommand = new MySqlCommand(deleteTasks, connection, transaction);
                 deleteCommand.Parameters.AddWithValue("@FreelancerId", freelancer.FreelancerId);
                 await deleteCommand.ExecuteNonQueryAsync();
@@ -236,7 +236,7 @@ namespace PROHUB.Services
                 foreach (var task in freelancer.Tasks)
                 {
                     const string insertTask = @"
-                        INSERT INTO tasks (id, taskname, specification, payment, deliveryduedate, status, paid, freelancerid)
+                        INSERT INTO tasks (ID, TaskName, Specification, Payment, DeliveryDueDate, Status, Paid, FreelancerId)
                         VALUES (@ID, @TaskName, @Specification, @Payment, @DeliveryDueDate, @Status, @Paid, @FreelancerId)";
 
                     using var taskCommand = new MySqlCommand(insertTask, connection, transaction);
@@ -263,7 +263,7 @@ namespace PROHUB.Services
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "DELETE FROM freelancers WHERE freelancerid = @FreelancerId";
+            const string query = "DELETE FROM freelancers WHERE FreelancerId = @FreelancerId";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@FreelancerId", freelancerId);
 
@@ -280,7 +280,7 @@ namespace PROHUB.Services
             using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "SELECT taskid, id, taskname, specification, payment, deliveryduedate, status, paid, freelancerid FROM tasks WHERE freelancerid = @FreelancerId";
+            const string query = "SELECT * FROM tasks WHERE FreelancerId = @FreelancerId";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@FreelancerId", freelancerId);
 

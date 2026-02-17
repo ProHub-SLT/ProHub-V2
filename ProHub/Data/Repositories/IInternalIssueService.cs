@@ -57,7 +57,7 @@ namespace PROHUB.Data
                     emp_entered.Emp_Name AS EnteredByName,
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
-                FROM Internal_Issues ii
+                FROM internal_issues ii
                 LEFT JOIN internal_platforms ip ON ii.Internal_APP = ip.ID
                 LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
                 LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
@@ -88,7 +88,7 @@ namespace PROHUB.Data
                     emp_entered.Emp_Name AS EnteredByName,
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
-                FROM Internal_Issues ii
+                FROM internal_issues ii
                 LEFT JOIN internal_platforms ip ON ii.Internal_APP = ip.ID
                 LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
                 LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
@@ -126,7 +126,7 @@ namespace PROHUB.Data
                     emp_entered.Emp_Name AS EnteredByName,
                     emp_assigned_to.Emp_Name AS AssignedToName,
                     emp_assigned_by.Emp_Name AS AssignedByName
-                FROM Internal_Issues ii
+                FROM internal_issues ii
                 LEFT JOIN internal_platforms ip ON ii.Internal_APP = ip.ID
                 LEFT JOIN employee emp_entered ON ii.Entered_By = emp_entered.Emp_ID
                 LEFT JOIN employee emp_assigned_to ON ii.Assigned_To = emp_assigned_to.Emp_ID
@@ -151,7 +151,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                INSERT INTO Internal_Issues (
+                INSERT INTO internal_issues (
                     Issue_Start_Time, Internal_APP, Reported_By, Description, Criticality,
                     Entered_By, Assigned_To, Assigned_By, Assigned_Time, Status,
                     Issue_Closed_Time, Action_Taken, Entered_Time, Reporting_Person_ContactNo
@@ -175,7 +175,7 @@ namespace PROHUB.Data
             await connection.OpenAsync();
 
             const string query = @"
-                UPDATE Internal_Issues SET
+                UPDATE internal_issues SET
                     Issue_Start_Time = @IssueStartTime,
                     Internal_APP = @InternalAppId,
                     Reported_By = @ReportedBy,
@@ -207,7 +207,7 @@ namespace PROHUB.Data
                 using var connection = GetConnection();
                 await connection.OpenAsync();
 
-                const string query = "DELETE FROM Internal_Issues WHERE ID = @Id;";
+                const string query = "DELETE FROM internal_issues WHERE ID = @Id;";
                 using var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@Id", id);
                 var rowsAffected = await command.ExecuteNonQueryAsync();
@@ -236,7 +236,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            const string query = "SELECT COUNT(1) FROM Internal_Issues WHERE ID = @Id;";
+            const string query = "SELECT COUNT(1) FROM internal_issues WHERE ID = @Id;";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
             var result = await command.ExecuteScalarAsync();
@@ -251,15 +251,7 @@ namespace PROHUB.Data
             using var connection = GetConnection();
             await connection.OpenAsync();
 
-            const string query = @"
-                SELECT e.Emp_ID, e.Emp_Name
-                FROM employee e
-                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
-                WHERE g.GroupName IS NULL
-                   OR g.GroupName <> 'Inactive'
-                ORDER BY e.Emp_Name;
-            ";
-
+            const string query = "SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name;";
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
 

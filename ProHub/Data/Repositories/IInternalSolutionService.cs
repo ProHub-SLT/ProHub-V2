@@ -234,16 +234,7 @@ namespace PROHUB.Data
 
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-
-            using var cmd = new MySqlCommand(@"
-                SELECT e.Emp_ID, e.Emp_Name
-                FROM employee e
-                LEFT JOIN empgroup g ON e.GroupID = g.GroupID
-                WHERE g.GroupName IS NULL
-                   OR g.GroupName <> 'Inactive'
-                ORDER BY e.Emp_Name;
-            ", conn);
-
+            using var cmd = new MySqlCommand("SELECT Emp_ID, Emp_Name FROM employee ORDER BY Emp_Name", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {

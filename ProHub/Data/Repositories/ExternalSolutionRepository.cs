@@ -467,7 +467,7 @@ namespace ProHub.Data
 
                 FROM external_platforms ep
                 LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
                 LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID
                 WHERE (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')";
 
@@ -516,7 +516,7 @@ namespace ProHub.Data
                        sp.Phase AS SDLCPhaseName
                 FROM external_platforms ep
                 LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
-                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
                 WHERE ep.ID = @id AND (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')";
             using var cmd = new MySqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@id", id);
@@ -584,8 +584,11 @@ namespace ProHub.Data
                     c.Company_Name AS CompanyName
                 FROM external_platforms ep
                 LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
+                LEFT JOIN employee e2 ON ep.BackupOfficer_1 = e2.Emp_ID
+                LEFT JOIN employee e3 ON ep.BackupOfficer_2 = e3.Emp_ID
                 LEFT JOIN company c ON ep.Company_ID = c.ID
-                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
+                LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID
                 WHERE ep.ID = @id AND (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')";
             using var cmd = new MySqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@id", id);
@@ -678,7 +681,7 @@ namespace ProHub.Data
                 FROM external_platforms ep
                 LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
                 LEFT JOIN company c ON ep.Company_ID = c.ID
-                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
                 WHERE (LOWER(TRIM(sp.Phase)) = 'retired' OR LOWER(TRIM(ep.Status)) = 'retired')
                 ORDER BY ep.Platform_Name";
             using var cmd = new MySqlCommand(query, conn);
@@ -776,7 +779,7 @@ namespace ProHub.Data
                 FROM external_platforms ep
                 LEFT JOIN employee e1 ON ep.Developed_By = e1.Emp_ID
                 LEFT JOIN company c ON ep.Company_ID = c.ID
-                LEFT JOIN sdlcphas sp ON ep.SDLCstage = sp.ID
+                LEFT JOIN sdlcphas sp ON ep.SDLCStage = sp.ID
                 LEFT JOIN sales_team st ON ep.Sales_Team_ID = st.ID
                 WHERE ep.ID = @id";
             using var cmd = new MySqlCommand(query, conn);

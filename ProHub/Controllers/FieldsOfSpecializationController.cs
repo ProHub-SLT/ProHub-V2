@@ -31,7 +31,7 @@ namespace ProHub.Controllers
                 conn.Open();
 
                 string query = @"SELECT field_of_spec_id, field_of_spec_name, `desc`
-                                 FROM Fields_of_Specialization
+                                 FROM fields_of_specialization
                                  WHERE (@search = '' OR field_of_spec_name LIKE CONCAT('%', @search, '%')
                                         OR `desc` LIKE CONCAT('%', @search, '%'))";
 
@@ -104,7 +104,7 @@ namespace ProHub.Controllers
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "INSERT INTO Fields_of_Specialization (field_of_spec_name, `desc`) VALUES (@name, @desc)";
+                string query = "INSERT INTO fields_of_specialization (field_of_spec_name, `desc`) VALUES (@name, @desc)";
                 using (var cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", field.FieldOfSpecName);
@@ -129,7 +129,7 @@ namespace ProHub.Controllers
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT * FROM Fields_of_Specialization WHERE field_of_spec_id = @id";
+                string query = "SELECT * FROM fields_of_specialization WHERE field_of_spec_id = @id";
                 using (var cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
@@ -166,7 +166,7 @@ namespace ProHub.Controllers
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = @"UPDATE Fields_of_Specialization 
+                string query = @"UPDATE fields_of_specialization 
                                  SET field_of_spec_name=@name, `desc`=@desc 
                                  WHERE field_of_spec_id=@id";
                 using (var cmd = new MySqlCommand(query, conn))
@@ -192,7 +192,7 @@ namespace ProHub.Controllers
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "DELETE FROM Fields_of_Specialization WHERE field_of_spec_id=@id";
+                string query = "DELETE FROM fields_of_specialization WHERE field_of_spec_id=@id";
                 using (var cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);

@@ -55,7 +55,7 @@ namespace ProHub.Data
 
             string sql = @"
         SELECT d.*, ip.App_Name AS SolutionName, e.Emp_Name AS CreatedByName
-        FROM Document d
+        FROM document d
         LEFT JOIN internal_platforms ip ON d.Solution_ID = ip.ID
         LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
@@ -112,7 +112,7 @@ namespace ProHub.Data
 
             string sql = @"
         SELECT COUNT(*) 
-        FROM Document d
+        FROM document d
         LEFT JOIN internal_platforms ip ON d.Solution_ID = ip.ID
         LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
@@ -145,7 +145,7 @@ namespace ProHub.Data
             // SQL Query  solutionId check 
             string sql = @"
         SELECT d.*, ep.Platform_Name AS SolutionName, e.Emp_Name AS CreatedByName
-        FROM Document d
+        FROM document d
         LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
         LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
@@ -198,7 +198,7 @@ namespace ProHub.Data
 
             string sql = @"
         SELECT COUNT(*) 
-        FROM Document d
+        FROM document d
         LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
         LEFT JOIN employee e ON d.Created_By = e.Emp_ID
         WHERE d.Platform_ID = @platformId 
@@ -222,7 +222,7 @@ namespace ProHub.Data
 
             string sql = @"
                 SELECT COUNT(*) 
-                FROM Document d
+                FROM document d
                 LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
                 LEFT JOIN employee e ON d.Created_By = e.Emp_ID
                 WHERE d.Platform_ID = @platformId 
@@ -241,7 +241,7 @@ namespace ProHub.Data
 
             string sql = @"
                 SELECT d.*, ip.App_Name AS SolutionName, e.Emp_Name AS CreatedByName
-                FROM Document d
+                FROM document d
                 LEFT JOIN internal_platforms ip ON d.Solution_ID = ip.ID
                 LEFT JOIN external_platforms ep ON d.Solution_ID = ep.ID
                 LEFT JOIN employee e ON d.Created_By = e.Emp_ID
@@ -281,7 +281,7 @@ namespace ProHub.Data
             conn.Open();
 
             string sql = @"
-                INSERT INTO Document 
+                INSERT INTO document 
                 (Platform_ID, Solution_ID, Doc_Name, Created_Time, Created_By, 
                  Doc_Classification, Tags, Confidential, Doc_URL)
                 VALUES 
@@ -308,7 +308,7 @@ namespace ProHub.Data
             conn.Open();
 
             string sql = @"
-                UPDATE Document SET 
+                UPDATE document SET 
                     Solution_ID = @Solution_ID,
                     Doc_Name = @Doc_Name,
                     Doc_Classification = @Doc_Classification,
@@ -334,7 +334,7 @@ namespace ProHub.Data
             using var conn = GetConnection();
             conn.Open();
 
-            using var cmd = new MySqlCommand("DELETE FROM Document WHERE ID = @id", conn);
+            using var cmd = new MySqlCommand("DELETE FROM document WHERE ID = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();
         }

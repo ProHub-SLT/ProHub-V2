@@ -30,7 +30,7 @@ namespace ProHub.Data
                        c.Emp_Name AS CreatedByName,
                        a.Emp_Name AS ApprovalForName,
                        ap.Emp_Name AS ApprovedByName
-                FROM overtime_data o
+                FROM OverTime_Data o
                 LEFT JOIN employee c ON o.Created_By = c.Emp_ID
                 LEFT JOIN employee a ON o.Approval_For = a.Emp_ID
                 LEFT JOIN employee ap ON o.Approved_By = ap.Emp_ID
@@ -70,7 +70,7 @@ namespace ProHub.Data
         {
             using var conn = GetConnection();
             conn.Open();
-            string sql = "SELECT COUNT(*) FROM overtime_data o " +
+            string sql = "SELECT COUNT(*) FROM OverTime_Data o " +
                          "LEFT JOIN employee c ON o.Created_By = c.Emp_ID " +
                          "WHERE o.Date LIKE @search OR c.Emp_Name LIKE @search";
             using var cmd = new MySqlCommand(sql, conn);
@@ -83,7 +83,7 @@ namespace ProHub.Data
             using var conn = GetConnection();
             conn.Open();
             string sql = @"
-                INSERT INTO overtime_data 
+                INSERT INTO OverTime_Data 
                 (Created_Date, Created_By, Date, No_Of_Hours, Work_Description, Approval_For)
                 VALUES (NOW(), @Created_By, @Date, @No_Of_Hours, @Work_Description, @Approval_For)";
 
@@ -106,7 +106,7 @@ namespace ProHub.Data
                        c.Emp_Name AS CreatedByName,
                        a.Emp_Name AS ApprovalForName,
                        ap.Emp_Name AS ApprovedByName
-                FROM overtime_data o
+                FROM OverTime_Data o
                 LEFT JOIN employee c ON o.Created_By = c.Emp_ID
                 LEFT JOIN employee a ON o.Approval_For = a.Emp_ID
                 LEFT JOIN employee ap ON o.Approved_By = ap.Emp_ID
@@ -145,7 +145,7 @@ namespace ProHub.Data
             conn.Open();
 
             string sql = @"
-                UPDATE overtime_data 
+                UPDATE OverTime_Data 
                 SET Date = @Date, 
                     No_Of_Hours = @No_Of_Hours, 
                     Work_Description = @Work_Description, 
@@ -168,7 +168,7 @@ namespace ProHub.Data
             using var conn = GetConnection();
             conn.Open();
 
-            string sql = "DELETE FROM overtime_data WHERE ID = @id";
+            string sql = "DELETE FROM OverTime_Data WHERE ID = @id";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();

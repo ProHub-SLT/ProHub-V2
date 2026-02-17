@@ -109,9 +109,9 @@ namespace PROHUB.Data
                 // FIX: Changed requested_payment_amount to requested_payment_date
                 string query = @"
                     INSERT INTO trainee
-                    (Trainee_Name, Trainee_Phone, Trainee_NIC, Trainee_Email,
-                     Training_StartDate, Training_EndDate, Institute, Languages_Known,
-                     Supervisor, Target_Date, Trainee_HomeAddress, AssignedWork_Desc,
+                    (trainee_name, trainee_phone, trainee_nic, trainee_email,
+                     training_startdate, training_enddate, institute, languages_known,
+                     supervisor, target_date, trainee_homeaddress, assignedwork_desc,
                      field_of_spec_id, payment_start_date, payment_end_date,
                      requested_payment_date, absent_count, terminated_date, terminated_reason)
                     VALUES
@@ -140,18 +140,18 @@ namespace PROHUB.Data
                 // FIX: Changed requested_payment_amount to requested_payment_date in the SET clause
                 string query = @"
                     UPDATE trainee SET
-                        Trainee_Name = @Trainee_Name,
-                        Trainee_Phone = @Trainee_Phone,
-                        Trainee_NIC = @Trainee_NIC,
-                        Trainee_Email = @Trainee_Email,
-                        Trainee_HomeAddress = @Trainee_HomeAddress,
-                        Training_StartDate = @Training_StartDate,
-                        Training_EndDate = @Training_EndDate,
-                        Institute = @Institute,
-                        Languages_Known = @Languages_Known,
-                        Supervisor = @Supervisor,
-                        Target_Date = @Target_Date,
-                        AssignedWork_Desc = @AssignedWork_Desc,
+                        trainee_name = @Trainee_Name,
+                        trainee_phone = @Trainee_Phone,
+                        trainee_nic = @Trainee_NIC,
+                        trainee_email = @Trainee_Email,
+                        trainee_homeaddress = @Trainee_HomeAddress,
+                        training_startdate = @Training_StartDate,
+                        training_enddate = @Training_EndDate,
+                        institute = @Institute,
+                        languages_known = @Languages_Known,
+                        supervisor = @Supervisor,
+                        target_date = @Target_Date,
+                        assignedwork_desc = @AssignedWork_Desc,
                         field_of_spec_id = @field_of_spec_id,
                         payment_start_date = @payment_start_date,
                         payment_end_date = @payment_end_date,
@@ -178,7 +178,7 @@ namespace PROHUB.Data
             {
                 await connection.OpenAsync();
 
-                string query = "DELETE FROM trainee WHERE Trainee_ID = @ID";
+                string query = "DELETE FROM trainee WHERE trainee_id = @ID";
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@ID", id);

@@ -162,7 +162,7 @@ namespace PROHUB.Data
             c.Comment, 
             c.Updated_Time, 
             e.Emp_Name 
-        FROM xxternal_project_comments c
+        FROM external_project_comments c
         LEFT JOIN employee e ON c.Updated_By = e.Emp_ID
         WHERE c.Solution_ID = @SolutionId 
         ORDER BY c.Updated_Time DESC";
@@ -425,7 +425,7 @@ namespace PROHUB.Data
             var list = new List<SDLCPhase>();
             using var connection = GetConnection();
             await connection.OpenAsync();
-            using var cmd = new MySqlCommand("SELECT ID, Phase FROM SDLCPhas ORDER BY OrderSeq, Phase", connection);
+            using var cmd = new MySqlCommand("SELECT ID, Phase FROM sdlcphas ORDER BY OrderSeq, Phase", connection);
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {

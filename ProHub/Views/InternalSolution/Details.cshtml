@@ -276,6 +276,59 @@
         text-align: left !important;
     }
 
+    .team-member {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+        .team-member:last-child {
+            margin-bottom: 0;
+        }
+
+    .team-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .fw-bold {
+        font-weight: 600 !important;
+    }
+
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+
+    .small {
+        font-size: 0.875rem !important;
+    }
+
+    .py-3 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    .fs-4 {
+        font-size: 1.5rem !important;
+    }
+
+    .me-1 {
+        margin-right: 0.25rem !important;
+    }
+
     /* FIX: Doubled the @@ symbol here as well */
     @@media (max-width: 768px) {
         .details-container {
@@ -503,6 +556,40 @@
                 <p>Service Level Agreement</p>
             </div>
         </div>
+    </div>
+
+    <!-- Backup Officers -->
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-person-badge-fill"></i> Backup Officers</div>
+        @if (!string.IsNullOrEmpty(Model.BackupOfficer1Name) || !string.IsNullOrEmpty(Model.BackupOfficer2Name))
+        {
+            @if (!string.IsNullOrEmpty(Model.BackupOfficer1Name))
+            {
+                <div class="team-member">
+                    <div class="team-avatar">1</div>
+                    <div>
+                        <div class="fw-bold">@Model.BackupOfficer1Name</div>
+                        <div class="text-muted small">Primary Backup</div>
+                    </div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.BackupOfficer2Name))
+            {
+                <div class="team-member">
+                    <div class="team-avatar">2</div>
+                    <div>
+                        <div class="fw-bold">@Model.BackupOfficer2Name</div>
+                        <div class="text-muted small">Secondary Backup</div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center text-muted py-3">
+                <i class="bi bi-person-x fs-4 me-1"></i> No backup officers assigned
+            </p>
+        }
     </div>
 
     <div class="text-start mt-4 d-flex gap-3">

@@ -24,6 +24,7 @@ namespace PROHUB.Data
         Task<List<InternalPlatform>> GetMainApplicationsAsync();
         Task<List<ParentProject>> GetParentProjectsAsync();
         Task AddCommentAsync(int solutionId, string comment, int? updatedBy);
+        Task<List<InternalProjectComment>> GetCommentsBySolutionIdAsync(int solutionId);
     }
 
 
@@ -93,7 +94,17 @@ namespace PROHUB.Data
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@ID", id);
             using var reader = await command.ExecuteReaderAsync();
-            return await reader.ReadAsync() ? MapReaderToSolution(reader) : null;
+            
+            InternalPlatform? solution = await reader.ReadAsync() ? MapReaderToSolution(reader) : null;
+            
+            // Load comments if solution exists
+            if (solution != null)
+            {
+                reader.Close(); // Close the first reader
+                solution.ProjectComments = await GetCommentsBySolutionIdAsync(id);
+            }
+            
+            return solution;
         }
 
         public async Task<int> CreateAsync(InternalPlatform solution)
@@ -193,6 +204,45 @@ namespace PROHUB.Data
             await connection.OpenAsync();
             // Pass null for transaction since this is a standalone operation
             await AddCommentToDbAsync(connection, null, solutionId, comment, updatedBy);
+        }
+
+        public async Task<List<InternalProjectComment>> GetCommentsBySolutionIdAsync(int solutionId)
+        {
+            var comments = new List<InternalProjectComment>();
+
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string query = @"
+                SELECT c.ID, c.Solution_ID, c.Comment, c.Updated_By, c.Updated_Time, 
+                       e.Emp_Name AS UpdatedByName, e.Emp_Email AS UpdatedByEmail
+                FROM internal_project_comments c
+                LEFT JOIN employee e ON c.Updated_By = e.Emp_ID
+                WHERE c.Solution_ID = @SolutionId
+                ORDER BY c.Updated_Time DESC";
+
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@SolutionId", solutionId);
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                comments.Add(new InternalProjectComment
+                {
+                    ID = reader.GetInt32("ID"),
+                    Solution_ID = reader.GetInt32("Solution_ID"),
+                    Comment = reader.GetString("Comment"),
+                    Updated_By = reader.IsDBNull("Updated_By") ? null : reader.GetInt32("Updated_By"),
+                    Updated_Time = reader.IsDBNull("Updated_Time") ? null : reader.GetDateTime("Updated_Time"),
+                    UpdatedByEmployee = new Employee
+                    {
+                        EmpName = reader.IsDBNull("UpdatedByName") ? null : reader.GetString("UpdatedByName"),
+                        EmpEmail = reader.IsDBNull("UpdatedByEmail") ? null : reader.GetString("UpdatedByEmail")
+                    }
+                });
+            }
+
+            return comments;
         }
 
         // ---------------------------------------------------------

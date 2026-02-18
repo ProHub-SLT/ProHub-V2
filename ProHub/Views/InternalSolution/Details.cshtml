@@ -276,34 +276,6 @@
         text-align: left !important;
     }
 
-    .team-member {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: var(--card-bg);
-        padding: 0.75rem;
-        border-radius: 8px;
-        margin-bottom: 0.75rem;
-        transition: var(--transition);
-    }
-
-        .team-member:hover {
-            background: #f1f1f1; /* Light hover */
-        }
-
-    .team-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
     /* FIX: Doubled the @@ symbol here as well */
     @@media (max-width: 768px) {
         .details-container {
@@ -517,47 +489,6 @@
                 <p>Launched Date</p>
             </div>
         </div>
-    </div>
-
-    <div class="section-card">
-        <div class="section-header"><i class="bi bi-person-badge-fill"></i> Backup Officers</div>
-        @if (!string.IsNullOrEmpty(Model.BackupOfficer1Name) || !string.IsNullOrEmpty(Model.BackupOfficer2Name))
-        {
-            @if (!string.IsNullOrEmpty(Model.BackupOfficer1Name))
-            {
-                <div class="team-member">
-                    <div class="team-avatar">1</div>
-                    <div>
-                        <div class="fw-bold">
-                            @(string.IsNullOrEmpty(Model.BackupOfficer1Name) ? "N/A" : Model.BackupOfficer1Name)
-                        </div>
-                        <div class="text-muted small">
-                            Primary Backup Officer - @(string.IsNullOrEmpty(Model.BackupOfficer1Email) ? "No email" : Model.BackupOfficer1Email)
-                        </div>
-                    </div>
-                </div>
-            }
-            @if (!string.IsNullOrEmpty(Model.BackupOfficer2Name))
-            {
-                <div class="team-member">
-                    <div class="team-avatar">2</div>
-                    <div>
-                        <div class="fw-bold">
-                            @(string.IsNullOrEmpty(Model.BackupOfficer2Name) ? "N/A" : Model.BackupOfficer2Name)
-                        </div>
-                        <div class="text-muted small">
-                            Secondary Backup Officer - @(string.IsNullOrEmpty(Model.BackupOfficer2Email) ? "No email" : Model.BackupOfficer2Email)
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <p class="text-center text-muted py-3">
-                <i class="bi bi-person-x fs-4 me-1"></i> No backup officers assigned
-            </p>
-        }
     </div>
 
     <div class="section-card">

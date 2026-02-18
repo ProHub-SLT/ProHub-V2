@@ -335,6 +335,60 @@
         padding-left: 2.75rem;
     }
 
+    /* Horizontal Comments Layout */
+    .comments-horizontal-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .comment-horizontal-item {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 1rem;
+        background: var(--card-bg);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        padding: 1rem;
+        transition: var(--transition);
+    }
+
+        .comment-horizontal-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .comment-content-cell,
+    .comment-author-cell,
+    .comment-date-cell {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .comment-label-h {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+
+    .comment-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    /* Mobile responsiveness */
+    @@media (max-width: 768px) {
+        .comment-horizontal-item {
+            grid-template-columns: 1fr;
+        }
+    }
+
+
     /* Scrollbar styling for comments */
     .comments-container::-webkit-scrollbar {
         width: 6px;
@@ -622,31 +676,25 @@
         </div>
     </div>
 
-    <!-- Comments Section -->
     <div class="section-card">
         <div class="section-header"><i class="bi bi-chat-dots-fill"></i> Comments</div>
         @if (Model.ProjectComments != null && Model.ProjectComments.Any())
         {
-            <div class="comments-container">
+            <div class="comments-horizontal-container">
                 @foreach (var comment in Model.ProjectComments)
                 {
-                    <div class="comment-item">
-                        <div class="comment-header">
-                            <div class="comment-author">
-                                <div class="team-avatar">
-                                    @((comment.UpdatedByEmployee?.EmpName?.FirstOrDefault() ?? 'U').ToString().ToUpper())
-                                </div>
-                                <div>
-                                    <div class="fw-bold">@comment.UpdatedByEmployee?.EmpName</div>
-                                </div>
-                            </div>
-                            <div class="comment-date text-muted small">
-                                <i class="bi bi-clock me-1"></i>
-                                @(comment.Updated_Time?.ToString("MMM dd, yyyy hh:mm tt") ?? "Unknown date")
-                            </div>
+                    <div class="comment-horizontal-item">
+                        <div class="comment-content-cell">
+                            <div class="comment-label-h">COMMENT</div>
+                            <div class="comment-value">@comment.Comment</div>
                         </div>
-                        <div class="comment-content">
-                            @comment.Comment
+                        <div class="comment-author-cell">
+                            <div class="comment-label-h">BY</div>
+                            <div class="comment-value">@comment.UpdatedByEmployee?.EmpName</div>
+                        </div>
+                        <div class="comment-date-cell">
+                            <div class="comment-label-h">DATE & TIME</div>
+                            <div class="comment-value">@(comment.Updated_Time?.ToString("MMM dd, yyyy hh:mm tt") ?? "—")</div>
                         </div>
                     </div>
                 }

@@ -51,13 +51,16 @@ namespace PROHUB.Data
             const string query = @"
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
-                       pp.ParentProjectGroup AS ParentProjectGroupName
+                       pp.ParentProjectGroup AS ParentProjectGroupName,
+                       bo1.Emp_Name AS BackupOfficer1Name, bo2.Emp_Name AS BackupOfficer2Name
                 FROM internal_platforms isol
                 LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
                 LEFT JOIN sdlcphas sp ON isol.SDLCPhase = sp.ID
                 LEFT JOIN targetenduser te ON isol.EndUserType = te.ID
                 LEFT JOIN internal_platforms parent ON isol.MainAppID = parent.ID
-                LEFT JOIN parentproject pp ON isol.ParentProjectID = pp.ParentProjectID;";
+                LEFT JOIN parentproject pp ON isol.ParentProjectID = pp.ParentProjectID
+                LEFT JOIN employee bo1 ON isol.BackupOfficer_1 = bo1.Emp_ID
+                LEFT JOIN employee bo2 ON isol.BackupOfficer_2 = bo2.Emp_ID;";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync();
@@ -403,7 +406,9 @@ namespace PROHUB.Data
                 SDLCPhaseName = SafeGetString("SDLCPhaseName"),
                 EndUserTypeName = SafeGetString("EndUserTypeName"),
                 MainAppName = SafeGetString("MainAppName"),
-                ParentProjectGroupName = SafeGetString("ParentProjectGroupName")
+                ParentProjectGroupName = SafeGetString("ParentProjectGroupName"),
+                BackupOfficer1Name = SafeGetString("BackupOfficer1Name"),
+                BackupOfficer2Name = SafeGetString("BackupOfficer2Name")
             };
         }
     }

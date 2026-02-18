@@ -52,7 +52,8 @@ namespace PROHUB.Data
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName,
-                       bo1.Emp_Name AS BackupOfficer1Name, bo2.Emp_Name AS BackupOfficer2Name
+                       bo1.Emp_Name AS BackupOfficer1Name, bo1.Emp_Email AS BackupOfficer1Email,
+                       bo2.Emp_Name AS BackupOfficer2Name, bo2.Emp_Email AS BackupOfficer2Email
                 FROM internal_platforms isol
                 LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
                 LEFT JOIN sdlcphas sp ON isol.SDLCPhase = sp.ID
@@ -77,7 +78,8 @@ namespace PROHUB.Data
                 SELECT isol.*, emp.Emp_Name AS DevelopedByName, sp.Phase AS SDLCPhaseName,
                        te.EndUserType AS EndUserTypeName, parent.App_Name AS MainAppName,
                        pp.ParentProjectGroup AS ParentProjectGroupName,
-                       bo1.Emp_Name AS BackupOfficer1Name, bo2.Emp_Name AS BackupOfficer2Name
+                       bo1.Emp_Name AS BackupOfficer1Name, bo1.Emp_Email AS BackupOfficer1Email,
+                       bo2.Emp_Name AS BackupOfficer2Name, bo2.Emp_Email AS BackupOfficer2Email
                 FROM internal_platforms isol
                 LEFT JOIN employee emp ON isol.Developed_By = emp.Emp_ID
                 LEFT JOIN sdlcphas sp ON isol.SDLCPhase = sp.ID
@@ -408,7 +410,9 @@ namespace PROHUB.Data
                 MainAppName = SafeGetString("MainAppName"),
                 ParentProjectGroupName = SafeGetString("ParentProjectGroupName"),
                 BackupOfficer1Name = SafeGetString("BackupOfficer1Name"),
-                BackupOfficer2Name = SafeGetString("BackupOfficer2Name")
+                BackupOfficer1Email = SafeGetString("BackupOfficer1Email"),
+                BackupOfficer2Name = SafeGetString("BackupOfficer2Name"),
+                BackupOfficer2Email = SafeGetString("BackupOfficer2Email")
             };
         }
     }

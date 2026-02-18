@@ -569,7 +569,7 @@
                     <div class="team-avatar">1</div>
                     <div>
                         <div class="fw-bold">@Model.BackupOfficer1Name</div>
-                        <div class="text-muted small">Primary Backup</div>
+                        <div class="text-muted small">Primary Backup Officer - @(string.IsNullOrEmpty(Model.BackupOfficer1Email) ? "No email" : Model.BackupOfficer1Email)</div>
                     </div>
                 </div>
             }
@@ -579,7 +579,7 @@
                     <div class="team-avatar">2</div>
                     <div>
                         <div class="fw-bold">@Model.BackupOfficer2Name</div>
-                        <div class="text-muted small">Secondary Backup</div>
+                        <div class="text-muted small">Secondary Backup Officer - @(string.IsNullOrEmpty(Model.BackupOfficer2Email) ? "No email" : Model.BackupOfficer2Email)</div>
                     </div>
                 </div>
             }

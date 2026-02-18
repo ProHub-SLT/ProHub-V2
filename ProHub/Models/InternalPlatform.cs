@@ -98,7 +98,9 @@ namespace ProHub.Models
         public string? ParentProjectName { get; set; }
         public string? EndUserTypeName { get; set; }
         public string? BackupOfficer1Name { get; set; }
+        public string? BackupOfficer1Email { get; set; }
         public string? BackupOfficer2Name { get; set; }
+        public string? BackupOfficer2Email { get; set; }
         public string? MainAppName { get; set; }
 
         public string? ParentProjectGroupName { get; set; }

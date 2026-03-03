@@ -236,7 +236,7 @@ namespace ProHub.Controllers
                             conn.Open();
 
                             var insertSql = @"
-                    INSERT INTO Log (Log_Time, Log_By, Log_Text, Log_Type)
+                    INSERT INTO log (Log_Time, Log_By, Log_Text, Log_Type)
                     VALUES (UTC_TIMESTAMP(), @EmpId, 'User logged in', 'Login')";
 
                             using var cmd = new MySqlCommand(insertSql, conn);
@@ -244,7 +244,7 @@ namespace ProHub.Controllers
                             cmd.ExecuteNonQuery();
 
                             var cleanupSql = @"
-                    DELETE FROM Log
+                    DELETE FROM log
                     WHERE Log_By = @EmpId
                     AND Log_ID NOT IN (
                         SELECT Log_ID FROM (
@@ -277,7 +277,7 @@ namespace ProHub.Controllers
                         conn.Open();
 
                         var sql = @"
-                SELECT Log_Time
+                SELECT log_Time
                 FROM Log
                 WHERE Log_By = @EmpId
                 ORDER BY Log_Time DESC

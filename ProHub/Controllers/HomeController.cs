@@ -249,7 +249,7 @@ namespace ProHub.Controllers
                     AND Log_ID NOT IN (
                         SELECT Log_ID FROM (
                             SELECT Log_ID
-                            FROM Log
+                            FROM log
                             WHERE Log_By = @EmpId
                             ORDER BY Log_Time DESC
                             LIMIT 2
@@ -278,7 +278,7 @@ namespace ProHub.Controllers
 
                         var sql = @"
                 SELECT log_Time
-                FROM Log
+                FROM log
                 WHERE Log_By = @EmpId
                 ORDER BY Log_Time DESC
                 LIMIT 1 OFFSET 1";

@@ -87,7 +87,7 @@ namespace ProHub.Controllers
             if (ModelState.IsValid)
             {
                 _docRepo.Insert(model);
-                TempData["Success"] = "Internal document created successfully!";
+                TempData["SuccessMessage"] = "Internal document created successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -143,7 +143,7 @@ namespace ProHub.Controllers
             }
 
             _docRepo.Update(model);
-            TempData["Success"] = "Document updated successfully!";
+            TempData["SuccessMessage"] = "Internal document updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 

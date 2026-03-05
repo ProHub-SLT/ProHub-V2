@@ -189,11 +189,6 @@
             <h2 class="bi bi-file-earmark-plus me-2">@ViewData["Title"]</h2>
         </div>
 
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">@TempData["Success"]</div>
-        }
-
         @if (TempData["Error"] != null)
         {
             <div class="alert alert-danger">@TempData["Error"]</div>
@@ -366,11 +361,39 @@
                     });
                 });
 
-                // Prevent close on click
+            // Prevent close on click
                 searchInput.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
             }
+
+            // Manual Validation for Hidden Input on Submit
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function (e) {
+                const validationSpan = document.querySelector('span[data-valmsg-for="Solution_ID"]');
+                
+                if (!hiddenInput.value) {
+                    e.preventDefault(); // Stop submission
+                    
+                    if (validationSpan) {
+                        validationSpan.textContent = "Solution is required";
+                        validationSpan.classList.remove("field-validation-valid");
+                        validationSpan.classList.add("field-validation-error");
+                    }
+                    
+                    // Highlight the dropdown button
+                    dropdownText.parentElement.style.borderColor = '#dc3545';
+                    dropdownText.parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    // Reset if valid
+                    if (validationSpan) {
+                        validationSpan.textContent = "";
+                        validationSpan.classList.add("field-validation-valid");
+                        validationSpan.classList.remove("field-validation-error");
+                    }
+                    dropdownText.parentElement.style.borderColor = '#e2e8f0';
+                }
+            });
         });
     </script>
 }

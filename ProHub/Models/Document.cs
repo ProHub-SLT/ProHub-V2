@@ -1,5 +1,6 @@
 // File: Models/Document.cs
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProHub.Models
 {
@@ -7,6 +8,8 @@ namespace ProHub.Models
     {
         public int ID { get; set; }
         public int Platform_ID { get; set; } = 1;
+        
+        [Required(ErrorMessage = "Solution is required")]
         public int? Solution_ID { get; set; }
         public string Doc_Name { get; set; } = "";
         public DateTime? Created_Time { get; set; }

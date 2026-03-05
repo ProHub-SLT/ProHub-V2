@@ -110,7 +110,7 @@ namespace ProHub.Controllers
             if (ModelState.IsValid)
             {
                 _docRepo.Insert(model);
-                TempData["Success"] = "External document created successfully!";
+                TempData["SuccessMessage"] = "External document created successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -165,7 +165,7 @@ namespace ProHub.Controllers
             }
 
             _docRepo.Update(model);
-            TempData["Success"] = "Document updated successfully!";
+            TempData["SuccessMessage"] = "External document updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 

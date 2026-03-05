@@ -12,18 +12,18 @@
         position: relative;
     }
 
-    /* Blur overlay */
-    body::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        min-height: 100%;
-        background: inherit;
-        filter: blur(1px);
-        z-index: -1;
-    }
+        /* Blur overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            background: inherit;
+            filter: blur(1px);
+            z-index: -1;
+        }
 
     .form-container {
         background: white;
@@ -40,18 +40,18 @@
         color: white;
     }
 
-    .form-header h2 {
-        margin: 0;
-        font-size: 1.75rem;
-        font-weight: 600;
-        letter-spacing: 0.3px;
-    }
+        .form-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
 
-    .form-header p {
-        margin: 0.5rem 0 0 0;
-        opacity: 0.9;
-        font-size: 0.95rem;
-    }
+        .form-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
 
     .form-body {
         padding: 2.5rem;
@@ -69,10 +69,10 @@
         font-size: 0.95rem;
     }
 
-    .form-label-modern .required {
-        color: #dc3545;
-        margin-left: 0.25rem;
-    }
+        .form-label-modern .required {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
 
     .form-control-modern {
         width: 100%;
@@ -84,12 +84,12 @@
         background-color: #f8f9fa;
     }
 
-    .form-control-modern:focus {
-        outline: none;
-        border-color: #28A745;
-        background-color: #fff;
-        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
-    }
+        .form-control-modern:focus {
+            outline: none;
+            border-color: #28A745;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
 
     select.form-control-modern {
         cursor: pointer;
@@ -104,18 +104,18 @@
         position: relative;
     }
 
-    .input-icon-wrapper i {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #718096;
-        font-size: 1rem;
-    }
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-size: 1rem;
+        }
 
-    .input-icon-wrapper .form-control-modern {
-        padding-left: 2.75rem;
-    }
+        .input-icon-wrapper .form-control-modern {
+            padding-left: 2.75rem;
+        }
 
     .form-footer {
         background-color: #f8f9fa;
@@ -145,11 +145,11 @@
         cursor: pointer;
     }
 
-    .btn-modern-primary:hover {
-        background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
-    }
+        .btn-modern-primary:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+        }
 
     .btn-modern-secondary {
         display: inline-flex;
@@ -168,12 +168,12 @@
         cursor: pointer;
     }
 
-    .btn-modern-secondary:hover {
-        background: #f8f9fa;
-        border-color: #adb5bd;
-        color: #212529;
-        transform: translateY(-1px);
-    }
+        .btn-modern-secondary:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+            transform: translateY(-1px);
+        }
 
     .form-row {
         display: grid;
@@ -214,10 +214,10 @@
         padding: 1rem;
     }
 
-    .success-popup.hidden {
-        opacity: 0;
-        visibility: hidden;
-    }
+        .success-popup.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
 
     .success-popup-content {
         background: white;
@@ -231,44 +231,45 @@
         border-top: 6px solid #28a745;
     }
 
-    .success-popup-content i {
-        font-size: 3rem;
-        color: #28a745;
-        margin-bottom: 1rem;
-    }
+        .success-popup-content i {
+            font-size: 3rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
 
-    .success-popup-content h4 {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-    }
+        .success-popup-content h4 {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
 
-    .success-popup-content p {
-        font-size: 0.95rem;
-        color: #718096;
-        margin-bottom: 1.5rem;
-    }
+        .success-popup-content p {
+            font-size: 0.95rem;
+            color: #718096;
+            margin-bottom: 1.5rem;
+        }
 
-    .success-popup-content button {
-        padding: 0.6rem 1.5rem;
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        border: none;
-        border-radius: 8px;
-        color: #fff;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+        .success-popup-content button {
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-    .success-popup-content button:hover {
-        background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
-    }
+            .success-popup-content button:hover {
+                background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
+            }
 
     @@keyframes popupFadeIn {
         from {
             opacity: 0;
             transform: translateY(-20px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -290,17 +291,17 @@
             padding: 1.5rem 1.25rem;
         }
 
-        .form-header h2 {
-            font-size: 1.5rem;
-        }
+            .form-header h2 {
+                font-size: 1.5rem;
+            }
 
-        .form-header h2 i {
-            font-size: 1.25rem;
-        }
+                .form-header h2 i {
+                    font-size: 1.25rem;
+                }
 
-        .form-header p {
-            font-size: 0.875rem;
-        }
+            .form-header p {
+                font-size: 0.875rem;
+            }
 
         .form-body {
             padding: 1.5rem 1.25rem;
@@ -356,22 +357,22 @@
             padding: 2rem 1.5rem;
         }
 
-        .success-popup-content i {
-            font-size: 2.5rem;
-        }
+            .success-popup-content i {
+                font-size: 2.5rem;
+            }
 
-        .success-popup-content h4 {
-            font-size: 1.25rem;
-        }
+            .success-popup-content h4 {
+                font-size: 1.25rem;
+            }
 
-        .success-popup-content p {
-            font-size: 0.875rem;
-        }
+            .success-popup-content p {
+                font-size: 0.875rem;
+            }
 
-        .success-popup-content button {
-            width: 100%;
-            padding: 0.75rem 1.25rem;
-        }
+            .success-popup-content button {
+                width: 100%;
+                padding: 0.75rem 1.25rem;
+            }
     }
 
     @@media (max-width: 576px) {
@@ -379,13 +380,13 @@
             padding: 1.25rem 1rem;
         }
 
-        .form-header h2 {
-            font-size: 1.35rem;
-        }
+            .form-header h2 {
+                font-size: 1.35rem;
+            }
 
-        .form-header p {
-            font-size: 0.8rem;
-        }
+            .form-header p {
+                font-size: 0.8rem;
+            }
 
         .form-body {
             padding: 1.25rem 1rem;
@@ -399,9 +400,9 @@
             font-size: 0.85rem;
         }
 
-        .form-label-modern i {
-            font-size: 0.85rem;
-        }
+            .form-label-modern i {
+                font-size: 0.85rem;
+            }
 
         .form-control-modern {
             font-size: 0.875rem;
@@ -442,17 +443,17 @@
             padding: 1.5rem 1.25rem;
         }
 
-        .success-popup-content i {
-            font-size: 2.25rem;
-        }
+            .success-popup-content i {
+                font-size: 2.25rem;
+            }
 
-        .success-popup-content h4 {
-            font-size: 1.15rem;
-        }
+            .success-popup-content h4 {
+                font-size: 1.15rem;
+            }
 
-        .success-popup-content p {
-            font-size: 0.825rem;
-        }
+            .success-popup-content p {
+                font-size: 0.825rem;
+            }
     }
 
     /* Tablet landscape adjustments */
@@ -486,6 +487,7 @@
                         <i class="bi bi-building-fill"></i>
                         <input asp-for="Partner_Organization" class="form-control-modern" placeholder="Enter organization name" required />
                     </div>
+                    <span asp-validation-for="Partner_Organization" class="text-danger helper-text"></span>
                 </div>
 
                 <div class="form-row">
@@ -500,6 +502,7 @@
                                 <option value="">Please select a title</option>
                             </select>
                         </div>
+                        <span asp-validation-for="Partner_Title" class="text-danger helper-text"></span>
                     </div>
 
                     <!-- Name -->
@@ -511,6 +514,7 @@
                             <i class="bi bi-person-badge"></i>
                             <input asp-for="Partner_Name" class="form-control-modern" placeholder="Enter full name" required />
                         </div>
+                        <span asp-validation-for="Partner_Name" class="text-danger helper-text"></span>
                     </div>
                 </div>
 
@@ -524,6 +528,7 @@
                             <i class="bi bi-telephone-fill"></i>
                             <input asp-for="Partner_Phone1" class="form-control-modern" placeholder="Enter primary phone" required />
                         </div>
+                        <span asp-validation-for="Partner_Phone1" class="text-danger helper-text"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -534,6 +539,7 @@
                             <i class="bi bi-phone-fill"></i>
                             <input asp-for="Partner_Phone2" class="form-control-modern" placeholder="Enter secondary phone" />
                         </div>
+                        <span asp-validation-for="Partner_Phone2" class="text-danger helper-text"></span>
                     </div>
                 </div>
 
@@ -547,6 +553,7 @@
                             <i class="bi bi-envelope-at"></i>
                             <input asp-for="Partner_Email" type="email" class="form-control-modern" placeholder="example@company.com" required />
                         </div>
+                        <span asp-validation-for="Partner_Email" class="text-danger helper-text"></span>
                     </div>
 
                     <!-- Designation -->
@@ -558,6 +565,7 @@
                             <i class="bi bi-person-workspace"></i>
                             <input asp-for="Partner_Designation" class="form-control-modern" placeholder="e.g., Managing Director" />
                         </div>
+                        <span asp-validation-for="Partner_Designation" class="text-danger helper-text"></span>
                     </div>
                 </div>
             </div>
@@ -585,41 +593,25 @@
 </div>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
-        // Validation
-        document.querySelector('form').addEventListener('submit', function (e) {
-            const requiredFields = this.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value) {
-                    isValid = false;
-                    field.style.borderColor = '#dc3545';
-                } else {
-                    field.style.borderColor = '#e2e8f0';
-                }
-            });
-
-            if (!isValid) {
-                e.preventDefault();
-                alert('Please fill in all required fields marked with *');
-            }
-        });
+        // Model validation will be handled by jquery.validate.unobtrusive scripts
+        // Custom DOM submit block removed to display model errors properly
 
         // Show popup if TempData message exists
         @if (TempData["SuccessMessage"] != null)
         {
             <text>
-            window.addEventListener('DOMContentLoaded', () => {
-                document.getElementById('successPopup').classList.remove('hidden');
-            });
+                window.addEventListener('DOMContentLoaded', () => {
+                    document.getElementById('successPopup').classList.remove('hidden');
+                });
             </text>
         }
 
-        // Close popup
-        document.getElementById('popupCloseBtn').addEventListener('click', function () {
-            document.getElementById('successPopup').classList.add('hidden');
-            window.location.href = '@Url.Action("Index")';
-        });
+            // Close popup
+            document.getElementById('popupCloseBtn').addEventListener('click', function () {
+                document.getElementById('successPopup').classList.add('hidden');
+                window.location.href = '@Url.Action("Index")';
+            });
     </script>
 }

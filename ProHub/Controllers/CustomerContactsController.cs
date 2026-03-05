@@ -111,7 +111,7 @@ namespace ProHub.Controllers
                 }
 
                 TempData["SuccessMessage"] = "Contact Added Successfully!";
-                return RedirectToAction("Create");
+                return RedirectToAction(nameof(Index));
             }
 
             LoadDropdownData();
@@ -179,8 +179,7 @@ namespace ProHub.Controllers
                 }
 
                 TempData["SuccessMessage"] = "Contact updated successfully!";
-
-                return RedirectToAction("Edit", new { id = contact.Platform_ID });
+                return RedirectToAction(nameof(Index));
             }
 
             LoadDropdownData();

@@ -184,81 +184,6 @@
         font-size: 0.9rem;
         color: #2d3748;
     }
-
-    .success-popup {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.45);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        transition: all 0.3s ease;
-    }
-
-        .success-popup.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-    .success-popup-content {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem 3rem;
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        animation: popupFadeIn 0.4s ease forwards;
-        max-width: 420px;
-        border-top: 6px solid #28a745;
-    }
-
-        .success-popup-content i {
-            font-size: 3rem;
-            color: #28a745;
-            margin-bottom: 1rem;
-        }
-
-        .success-popup-content h4 {
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-
-        .success-popup-content p {
-            font-size: 0.95rem;
-            color: #718096;
-            margin-bottom: 1.5rem;
-        }
-
-        .success-popup-content button {
-            padding: 0.6rem 1.5rem;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-            .success-popup-content button:hover {
-                background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
-            }
-
-    @@keyframes popupFadeIn {
-        from {
-            opacity: 0;
-            transform: scale(0.8);
-        }
-
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -288,9 +213,10 @@
                         <div class="input-icon-wrapper">
                             <i class="bi bi-building-fill"></i>
                             <select asp-for="Contact_Company" class="form-control-modern"
-                                    asp-items="@(new SelectList(ViewBag.Companies, "Id", "CompanyName", Model.Contact_Company))" required>
+                                    asp-items="@(new SelectList(ViewBag.Companies, "Id", "CompanyName", Model.Contact_Company))">
                             </select>
                         </div>
+                        <span asp-validation-for="Contact_Company" class="text-danger small mt-1 d-block"></span>
                     </div>
 
                     <!-- Platform -->
@@ -301,9 +227,10 @@
                         <div class="input-icon-wrapper">
                             <i class="bi bi-pc-display-horizontal"></i>
                             <select asp-for="Platform_ID" class="form-control-modern"
-                                    asp-items="@(new SelectList(ViewBag.Platforms, "Id", "PlatformName", Model.Platform_ID))" required>
+                                    asp-items="@(new SelectList(ViewBag.Platforms, "Id", "PlatformName", Model.Platform_ID))">
                             </select>
                         </div>
+                        <span asp-validation-for="Platform_ID" class="text-danger small mt-1 d-block"></span>
                     </div>
 
                 </div>
@@ -315,18 +242,20 @@
                         <label asp-for="Customer_Title" class="form-label-modern"><i class="bi bi-award me-1"></i> Title <span class="required">*</span></label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-award-fill"></i>
-                            <select asp-for="Customer_Title" class="form-control-modern" asp-items="@(new SelectList(ViewBag.Titles))" required>
+                            <select asp-for="Customer_Title" class="form-control-modern" asp-items="@(new SelectList(ViewBag.Titles))">
                                 <option value="">Select Title</option>
                             </select>
                         </div>
+                        <span asp-validation-for="Customer_Title" class="text-danger small mt-1 d-block"></span>
                     </div>
 
                     <div class="form-group-modern">
                         <label asp-for="Contact_Name" class="form-label-modern"><i class="bi bi-person me-1"></i> Contact Name <span class="required">*</span></label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-person-fill"></i>
-                            <input asp-for="Contact_Name" class="form-control-modern" placeholder="Enter contact name" required />
+                            <input asp-for="Contact_Name" class="form-control-modern" placeholder="Enter contact name" />
                         </div>
+                        <span asp-validation-for="Contact_Name" class="text-danger small mt-1 d-block"></span>
                     </div>
                 </div>
 
@@ -336,8 +265,9 @@
                         <label asp-for="Contact_Phone1" class="form-label-modern"><i class="bi bi-telephone me-1"></i> Phone 1 <span class="required">*</span></label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-telephone-fill"></i>
-                            <input asp-for="Contact_Phone1" class="form-control-modern" placeholder="Enter primary phone" required />
+                            <input asp-for="Contact_Phone1" class="form-control-modern" placeholder="Enter primary phone" />
                         </div>
+                        <span asp-validation-for="Contact_Phone1" class="text-danger small mt-1 d-block"></span>
                     </div>
 
                     <div class="form-group-modern">
@@ -346,6 +276,7 @@
                             <i class="bi bi-phone-fill"></i>
                             <input asp-for="Contact_Phone2" class="form-control-modern" placeholder="Enter secondary phone" />
                         </div>
+                        <span asp-validation-for="Contact_Phone2" class="text-danger small mt-1 d-block"></span>
                     </div>
                 </div>
 
@@ -356,8 +287,9 @@
                         <label asp-for="Contact_Email" class="form-label-modern"><i class="bi bi-envelope me-1"></i> Email <span class="required">*</span></label>
                         <div class="input-icon-wrapper">
                             <i class="bi bi-envelope-fill"></i>
-                            <input asp-for="Contact_Email" type="email" class="form-control-modern" placeholder="Enter email address" required />
+                            <input asp-for="Contact_Email" type="email" class="form-control-modern" placeholder="Enter email address" />
                         </div>
+                        <span asp-validation-for="Contact_Email" class="text-danger small mt-1 d-block"></span>
                     </div>
 
                     <!-- Designation -->
@@ -367,6 +299,7 @@
                             <i class="bi bi-briefcase-fill"></i>
                             <input asp-for="Contact_Designation" class="form-control-modern" placeholder="Enter designation" />
                         </div>
+                        <span asp-validation-for="Contact_Designation" class="text-danger small mt-1 d-block"></span>
                     </div>
                 </div>
               
@@ -386,53 +319,6 @@
     </div>
 </div>
 
-<!-- Success Popup -->
-<div id="successPopup" class="success-popup hidden">
-    <div class="success-popup-content">
-        <i class="bi bi-check-circle-fill"></i>
-        <h4>Contact Updated Successfully!</h4>
-        <p>The contact information has been saved to the system.</p>
-        <button id="popupCloseBtn">OK</button>
-    </div>
-</div>
-
 @section Scripts {
-    <script>
-        // Validation
-        document.querySelector('form').addEventListener('submit', function (e) {
-            const requiredFields = this.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value) {
-                    isValid = false;
-                    field.style.borderColor = '#dc3545';
-                } else {
-                    field.style.borderColor = '#e2e8f0';
-                }
-            });
-
-            if (!isValid) {
-                e.preventDefault();
-                alert('Please fill in all required fields marked with *');
-            }
-        });
-
-        // ✅ Fast popup trigger
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <text>
-                setTimeout(() => {
-                    const popup = document.getElementById('successPopup');
-                    if (popup) popup.classList.remove('hidden');
-                }, 100);
-            </text>
-        }
-
-            // Close popup
-            document.getElementById('popupCloseBtn').addEventListener('click', function () {
-                document.getElementById('successPopup').classList.add('hidden');
-                window.location.href = '@Url.Action("Index")';
-            });
-    </script>
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

@@ -501,78 +501,8 @@
     }
     <script>
         // --- FORM VALIDATION ---
-        document.getElementById('editActivityForm').addEventListener('submit', function (e) {
-            let isValid = true;
-            let firstInvalidField = null;
-
-            // Clear previous error states
-            document.querySelectorAll('.form-control-modern').forEach(field => {
-                field.style.borderColor = '#e2e8f0';
-            });
-            document.querySelectorAll('.helper-text').forEach(span => {
-                span.textContent = '';
-            });
-
-            // Get required fields
-            const platformId = document.querySelector('select[name="PlatformId"]');
-            const solutionId = document.querySelector('select[name="SolutionId"]');
-            const targetDate = document.querySelector('input[name="TargetDate"]');
-            const status = document.querySelector('select[name="Status"]');
-            const updatedBy = document.querySelector('select[name="UpdatedBy"]');
-
-            // Validate Platform
-            if (!platformId.value) {
-                isValid = false;
-                platformId.style.borderColor = '#dc3545';
-                const errorSpan = platformId.closest('.form-group-modern').querySelector('.helper-text');
-                if (errorSpan) errorSpan.textContent = 'Platform is required.';
-                if (!firstInvalidField) firstInvalidField = platformId;
-            }
-
-            // Validate Solution
-            if (!solutionId.value) {
-                isValid = false;
-                solutionId.style.borderColor = '#dc3545';
-                const errorSpan = solutionId.closest('.form-group-modern').querySelector('.helper-text');
-                if (errorSpan) errorSpan.textContent = 'Solution is required.';
-                if (!firstInvalidField) firstInvalidField = solutionId;
-            }
-
-            // Validate Target Date
-            if (!targetDate.value) {
-                isValid = false;
-                targetDate.style.borderColor = '#dc3545';
-                const errorSpan = targetDate.closest('.form-group-modern').querySelector('.helper-text');
-                if (errorSpan) errorSpan.textContent = 'Target Date is required.';
-                if (!firstInvalidField) firstInvalidField = targetDate;
-            }
-
-            // Validate Status
-            if (!status.value) {
-                isValid = false;
-                status.style.borderColor = '#dc3545';
-                const errorSpan = status.closest('.form-group-modern').querySelector('.helper-text');
-                if (errorSpan) errorSpan.textContent = 'Status is required.';
-                if (!firstInvalidField) firstInvalidField = status;
-            }
-
-             // Validate Updated By
-            if (updatedBy && !updatedBy.value) {
-                isValid = false;
-                updatedBy.style.borderColor = '#dc3545';
-                const errorSpan = updatedBy.closest('.form-group-modern').querySelector('.helper-text');
-                if (errorSpan) errorSpan.textContent = 'Updated By is required.';
-                if (!firstInvalidField) firstInvalidField = updatedBy;
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-                if (firstInvalidField) {
-                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstInvalidField.focus();
-                }
-            }
-        });
+        // --- FORM VALIDATION ---
+        // Custom DOM submit block removed to display model errors properly
 
         // --- POPUP LOGIC ---
         @if (TempData["SuccessMessage"] != null)

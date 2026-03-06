@@ -177,12 +177,12 @@ public class EmployeeController : Controller
     // SHARED METHOD TO LOAD EMPLOYEE LIST
     // -------------------------------------------------------
     private IActionResult LoadEmployees(
-        string search,
-        string groupFilter,
-        string sortColumn = "EmpName",
-        string sortOrder = "asc",
-        int page = 1,
-        int pageSize = 10)
+     string search,
+     string groupFilter,
+     string sortColumn = "EmpName",
+     string sortOrder = "asc",
+     int page = 1,
+     int pageSize = 10)
     {
         List<Employee> employees = new List<Employee>();
 
@@ -191,19 +191,28 @@ public class EmployeeController : Controller
             con.Open();
 
             string sql = @"
-                SELECT e.Emp_Id, e.Emp_Name, e.Emp_Email, e.Emp_Phone, g.GroupName
+                SELECT
+                    e.Emp_Id,
+                    e.Emp_Name,
+                    e.Emp_Email,
+                    e.Emp_Phone,
+                    g.GroupName
                 FROM employee e
                 INNER JOIN empgroup g ON e.GroupID = g.GroupID
-                WHERE (@search IS NULL
-                       OR e.Emp_Name LIKE CONCAT('%', @search, '%')
-                       OR e.Emp_Email LIKE CONCAT('%', @search, '%')
-                       OR e.Emp_Phone LIKE CONCAT('%', @search, '%'))
-                  AND (@filter IS NULL 
-                       OR (@filter IS NOT NULL AND FIND_IN_SET(g.GroupName, @filter)))";
+                WHERE
+                (@search IS NULL OR
+                    e.Emp_Name COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%') OR
+                    e.Emp_Email COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%') OR
+                    e.Emp_Phone COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%'))
+                AND
+                (@filter IS NULL OR
+                    (@filter IS NOT NULL AND
+                    FIND_IN_SET(g.GroupName COLLATE utf8mb4_general_ci,
+                    @filter COLLATE utf8mb4_general_ci)))";
 
             using (var cmd = new MySqlCommand(sql, con))
             {
-                // FIXED: search NULL handling
+                // Handle NULL search parameters
                 cmd.Parameters.AddWithValue("@search",
                     string.IsNullOrWhiteSpace(search) ? null : search);
 
@@ -216,17 +225,19 @@ public class EmployeeController : Controller
                     {
                         employees.Add(new Employee
                         {
-                            EmpId = dr.GetInt32("Emp_Id"),
-                            EmpName = dr.GetString("Emp_Name"),
-                            EmpEmail = dr.GetString("Emp_Email"),
-                            EmpPhone = dr.GetString("Emp_Phone")
+                            EmpId = dr.IsDBNull(dr.GetOrdinal("Emp_Id")) ? 0 : dr.GetInt32("Emp_Id"),
+                            EmpName = dr.IsDBNull(dr.GetOrdinal("Emp_Name")) ? "" : dr.GetString("Emp_Name"),
+                            EmpEmail = dr.IsDBNull(dr.GetOrdinal("Emp_Email")) ? "" : dr.GetString("Emp_Email"),
+                            EmpPhone = dr.IsDBNull(dr.GetOrdinal("Emp_Phone")) ? "" : dr.GetString("Emp_Phone")
                         });
                     }
                 }
             }
         }
 
-        // Sorting
+        // -------------------------------------------------------
+        // SORTING
+        // -------------------------------------------------------
         employees = sortColumn switch
         {
             "EmpName" => sortOrder == "asc"
@@ -244,14 +255,19 @@ public class EmployeeController : Controller
             _ => employees.OrderBy(x => x.EmpName).ToList()
         };
 
-        // Pagination
+        // -------------------------------------------------------
+        // PAGINATION
+        // -------------------------------------------------------
         int totalRecords = employees.Count;
+
         var paginatedList = employees
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToList();
 
-        // ViewBag
+        // -------------------------------------------------------
+        // VIEWBAG DATA FOR UI
+        // -------------------------------------------------------
         ViewBag.Search = search;
         ViewBag.GroupFilter = groupFilter;
         ViewBag.CurrentPage = page;
@@ -262,6 +278,7 @@ public class EmployeeController : Controller
 
         return View("Index", paginatedList);
     }
+
 
     // -------------------------------------------------------
     // EDIT: GET

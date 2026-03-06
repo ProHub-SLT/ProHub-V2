@@ -177,12 +177,12 @@ public class EmployeeController : Controller
     // SHARED METHOD TO LOAD EMPLOYEE LIST
     // -------------------------------------------------------
     private IActionResult LoadEmployees(
-        string search,
-        string groupFilter,
-        string sortColumn = "EmpName",
-        string sortOrder = "asc",
-        int page = 1,
-        int pageSize = 10)
+     string search,
+     string groupFilter,
+     string sortColumn = "EmpName",
+     string sortOrder = "asc",
+     int page = 1,
+     int pageSize = 10)
     {
         List<Employee> employees = new List<Employee>();
 
@@ -191,19 +191,18 @@ public class EmployeeController : Controller
             con.Open();
 
             string sql = @"
-                SELECT e.Emp_Id, e.Emp_Name, e.Emp_Email, e.Emp_Phone, g.GroupName
-                FROM employee e
-                INNER JOIN empgroup g ON e.GroupID = g.GroupID
-                WHERE (@search IS NULL
-                       OR e.Emp_Name COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%')
-                       OR e.Emp_Email COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%')
-                       OR e.Emp_Phone COLLATE utf8mb4_general_ci LIKE CONCAT('%', @search, '%'))
-                  AND (@filter IS NULL 
-                       OR (@filter IS NOT NULL AND FIND_IN_SET(g.GroupName COLLATE utf8mb4_general_ci, @filter COLLATE utf8mb4_general_ci)))";
+            SELECT e.Emp_Id, e.Emp_Name, e.Emp_Email, e.Emp_Phone, g.GroupName
+            FROM employee e
+            INNER JOIN empgroup g ON e.GroupID = g.GroupID
+            WHERE (@search IS NULL
+                   OR e.Emp_Name LIKE CONCAT('%', @search, '%')
+                   OR e.Emp_Email LIKE CONCAT('%', @search, '%')
+                   OR e.Emp_Phone LIKE CONCAT('%', @search, '%'))
+              AND (@filter IS NULL 
+                   OR (@filter IS NOT NULL AND FIND_IN_SET(g.GroupName, @filter)))";
 
             using (var cmd = new MySqlCommand(sql, con))
             {
-                // FIXED: search NULL handling
                 cmd.Parameters.AddWithValue("@search",
                     string.IsNullOrWhiteSpace(search) ? null : search);
 
@@ -246,6 +245,7 @@ public class EmployeeController : Controller
 
         // Pagination
         int totalRecords = employees.Count;
+
         var paginatedList = employees
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -338,6 +338,39 @@ public class EmployeeController : Controller
         using (var con = new MySqlConnection(_connectionString))
         {
             con.Open();
+
+            // Check duplicate service number
+            string checkSql = "SELECT COUNT(*) FROM employee WHERE Emp_Id = @EmpId";
+
+            using (var checkCmd = new MySqlCommand(checkSql, con))
+            {
+                checkCmd.Parameters.AddWithValue("@EmpId", emp.EmpId);
+
+                int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                // Note: In Edit, count will be at least 1 for the current record. 
+                // However, since EmpId is normally readonly and the PK, we check if it's taken by ANOTHER record if changed.
+                // But since EmpId is the PK, changing it isn't standard Edit. 
+                // For now, let's just focus on the Email duplicate which is the main concern.
+            }
+
+            // Check duplicate email (excluding current employee)
+            string emailCheckSql = "SELECT COUNT(*) FROM employee WHERE Emp_Email = @Email AND Emp_Id != @EmpId";
+
+            using (var emailCmd = new MySqlCommand(emailCheckSql, con))
+            {
+                emailCmd.Parameters.AddWithValue("@Email", emp.EmpEmail);
+                emailCmd.Parameters.AddWithValue("@EmpId", emp.EmpId);
+
+                int emailCount = Convert.ToInt32(emailCmd.ExecuteScalar());
+
+                if (emailCount > 0)
+                {
+                    ModelState.AddModelError("EmpEmail", "This email is already registered.");
+                    ViewBag.Groups = GetGroups();
+                    return View(emp);
+                }
+            }
 
             string sql = @"
                 UPDATE employee SET

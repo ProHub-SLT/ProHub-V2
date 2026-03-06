@@ -1,6 +1,7 @@
 ﻿@model ProHub.Models.Employee
 @{
     ViewData["Title"] = "Edit Employee";
+    <partial name="_ValidationScriptsPartial" />
 }
 <style>
     body {
@@ -260,6 +261,14 @@
             .success-popup-content button:hover {
                 background: linear-gradient(135deg, #218838 0%, #1ba87d 100%);
             }
+
+    /* Validation Messages */
+    .text-danger {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: block;
+        font-weight: 500;
+    }
 </style>
 <div class="container-fluid mt-4">
     <div class="form-container">
@@ -284,6 +293,7 @@
                             <i class="bi bi-id-badge"></i>
                             <input asp-for="EmpId" class="form-control-modern" placeholder="Enter service number" readonly required />
                         </div>
+                        <span asp-validation-for="EmpId" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="form-row">
@@ -312,6 +322,7 @@
                             <i class="bi bi-envelope-at"></i>
                             <input asp-for="EmpEmail" type="email" class="form-control-modern" placeholder="example@slt.lk" required />
                         </div>
+                        <span asp-validation-for="EmpEmail" class="text-danger"></span>
                     </div>
                     <!-- Contact Number -->
                     <div class="form-group-modern">

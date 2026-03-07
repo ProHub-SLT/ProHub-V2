@@ -9,25 +9,30 @@ namespace PROHUB.Models
         [Display(Name = "Issue ID")]
         public string FormattedId => $"I{Id:D6}";
 
+        [Required(ErrorMessage = "Issue Start Time is required")]
         [Display(Name = "Issue Start Time")]
         public DateTime? IssueStartTime { get; set; }
 
         [Required(ErrorMessage = "Internal Application is required")]
         [Display(Name = "Internal Application")]
-        public int InternalAppId { get; set; }
+        public int? InternalAppId { get; set; }
 
+        [Required(ErrorMessage = "Reported By is required")]
         [Display(Name = "Reported By")]
         public string? ReportedBy { get; set; }
 
         [Display(Name = "Contact No")]
         public string? ReportingPersonContactNo { get; set; }
 
+        [Required(ErrorMessage = "Description is required")]
         [Display(Name = "Description")]
         public string? Description { get; set; }
 
+        [Required(ErrorMessage = "Criticality is required")]
         [Display(Name = "Criticality")]
         public string? Criticality { get; set; }
 
+        [Required(ErrorMessage = "Entered By is required")]
         [Display(Name = "Entered By")]
         public int? EnteredBy { get; set; }
 
@@ -40,6 +45,7 @@ namespace PROHUB.Models
         [Display(Name = "Assigned Time")]
         public DateTime? AssignedTime { get; set; }
 
+        [Required(ErrorMessage = "Status is required")]
         [Display(Name = "Status")]
         public string? Status { get; set; }
 
